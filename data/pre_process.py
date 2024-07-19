@@ -24,7 +24,7 @@ def create_dataset(df:np.ndarray, look_back:int)->tuple[np.ndarray, np.ndarray]:
     y = y[look_back:]
     return X, y
 
-def get_data(look_back:int, data_dir:str=RAW_DATA_DIR) -> dict[str, dict[str, np.ndarray]]:
+def get_data(look_back:int, test_size:float=0.8, data_dir:str=RAW_DATA_DIR) -> dict[str, dict[str, np.ndarray]]:
     cid = 0
     data_dict:dict[str, dict[str, pd.DataFrame]] = {}
     for file_name in os.listdir(data_dir):
@@ -39,7 +39,7 @@ def get_data(look_back:int, data_dir:str=RAW_DATA_DIR) -> dict[str, dict[str, np
             X, y = create_dataset(transformed_df, look_back)
 
             tmp_dict = {}
-            tmp_dict['support_X'], tmp_dict['query_X'], tmp_dict['support_y'], tmp_dict['query_y'] = train_test_split(X, y, test_size=0.8, shuffle=False)
+            tmp_dict['support_X'], tmp_dict['query_X'], tmp_dict['support_y'], tmp_dict['query_y'] = train_test_split(X, y, test_size=test_size, shuffle=False)
             data_dict[cid] = tmp_dict
             cid += 1
 
