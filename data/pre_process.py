@@ -5,11 +5,14 @@ import numpy as np
 
 from common.constants import *
 
-def create_label(df:np.ndarray) -> np.ndarray:
-    label = df[1:,-1] - df[:-1,-1]
-    label[label > 0] = 1
-    label[label <= 0] = 0
-    label = np.append([-1], label) # the first value is assigned to -1, it's removed anyway
+def create_label(df:np.ndarray, mode:str=CLF) -> np.ndarray:
+    if mode == CLF:
+        label = df[1:,-1] - df[:-1,-1]
+        label[label > 0] = 1
+        label[label <= 0] = 0
+        label = np.append([-1], label) # the first value is assigned to -1, it's removed anyway
+    elif mode == REG:
+        pass # if it is regression problem, we don't have to do anything
     return label
 
 def normalize_data(df:np.ndarray) -> np.ndarray:
@@ -22,14 +25,14 @@ def create_dataset(df:np.ndarray, look_back:int)->tuple[np.ndarray, np.ndarray]:
     X = np.array([df[i : i + look_back] for i in range(size)])
     y = create_label(df)
     y = y[look_back:]
-    return X, y
+    return X, y.reshape(-1,1)
 
-def get_data(look_back:int, test_size:float=0.8, data_dir:str=RAW_DATA_DIR) -> dict[str, dict[str, np.ndarray]]:
+def get_data(look_back:int, test_size:float=0.8, batch_size:int=32, data_dir:str=RAW_DATA_DIR) -> dict[str, dict[str, list[np.ndarray]]]:
     cid = 0
     data_dict:dict[str, dict[str, pd.DataFrame]] = {}
     for file_name in os.listdir(data_dir):
         if file_name.endswith('.csv'):
-            # read dataset, drop the datetime column
+            # read dataset, drop the datetime/index column
             df = pd.read_csv(os.path.join(data_dir, file_name)).to_numpy()[:,1:]
 
             # normalize data
@@ -40,6 +43,9 @@ def get_data(look_back:int, test_size:float=0.8, data_dir:str=RAW_DATA_DIR) -> d
 
             tmp_dict = {}
             tmp_dict['support_X'], tmp_dict['query_X'], tmp_dict['support_y'], tmp_dict['query_y'] = train_test_split(X, y, test_size=test_size, shuffle=False)
+            for key in tmp_dict.keys():
+                num_batch = int(np.ceil(tmp_dict[key].shape[0]/batch_size))
+                tmp_dict[key] = np.array_split(tmp_dict[key], num_batch)
             data_dict[cid] = tmp_dict
             cid += 1
 
