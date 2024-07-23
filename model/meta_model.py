@@ -1,10 +1,10 @@
 import tensorflow as tf
 from keras import optimizers, models, metrics
 import numpy as np
+from copy import deepcopy
 
 from .based_model import get_model
 from common.constants import *
-from data.pre_process import get_data
 
 class MAML:
     def __init__(
@@ -25,73 +25,116 @@ class MAML:
             self.loss_fn = metrics.binary_crossentropy
             self.acc_fn = metrics.Accuracy()
 
-    #Training step of each batch.
-    def train_on_batch(self, epoch:int, list_id_train:list[int], list_id_val:list[int]=None):
-        print(f'\n========= Epoch {epoch}: Meta-train on {list_id_train} =========\n')
+    def inner_training_step(self, model:models.Model, X:list[np.ndarray], y:list[np.ndarray], num_epochs:int):
+        """fast adapt on support set (inner step)
+
+        Args:
+            weights: weights of meta model
+            X, y: data, divided into batches
+
+        Returns:
+            weights of new model
+        """
+
+        for _ in range(num_epochs):
+            for batch_X, batch_y in zip(X, y):
+                with tf.GradientTape() as tape:
+                    pred = model(batch_X)
+                    loss = self.loss_fn(batch_y, pred)
+
+                # Calculate the gradients for the variables
+                gradients = tape.gradient(loss, model.trainable_variables)
+                # Apply the gradients and update the optimizer
+                self.inner_opt.apply_gradients(zip(gradients, model.trainable_variables))
+
+        return model.get_weights()
+
+    def outer_compute(self, batch_id_train:list[int], task_weights:dict[list[np.ndarray]]):
+        """outer compute on query set (outer step)
+
+        Args:
+            batch_id_train: sample a batch of task
+            task_weights: list of weights, which have adapted to support sets
+
+        Returns:
+            list of accuracy and loss
+        """
         batch_acc = []
         batch_loss = []
-        task_weights = []
+
+        for task_id in batch_id_train:
+            print(f'Outer optimize on task {task_id}')
+            #Get each saved optimized weight.
+            self.meta_model.set_weights(task_weights[task_id])
+
+            X = self.data_dict[task_id]['query_X']
+            y = self.data_dict[task_id]['query_y']
+            for batch_X, batch_y in zip(X, y):
+                pred = self.meta_model(batch_X)
+                loss = self.loss_fn(batch_y, pred)
+
+                try:
+                    tmp_pred = pred.numpy()
+                    tmp_pred[tmp_pred >= 0.5] = 1
+                    tmp_pred[tmp_pred < 0.5] = 0
+                    self.acc_fn.update_state(batch_y, tmp_pred)
+                    batch_acc.append(tf.get_static_value(self.acc_fn.result()))
+                except:
+                    pass
+
+                batch_loss.append(loss)
+
+        # Calculate sum loss
+        # Calculate mean loss only for visualizing.
+        sum_loss = tf.reduce_sum([tf.reduce_sum(l) for l in batch_loss])
+        mean_loss = tf.get_static_value(tf.reduce_mean([tf.reduce_mean(l) for l in batch_loss]))
+        mean_acc = tf.get_static_value(tf.reduce_mean([tf.reduce_mean(a) for a in batch_acc]))
+
+        print(f'\tMean loss:\t{mean_loss:.5f}')
+        if len(batch_acc) != 0:
+            print(f'\tMean acc:\t{mean_acc:.5f}')
+        print('================================')
+
+        return (sum_loss, mean_loss, mean_acc) if len(batch_acc)!= 0 else (sum_loss, mean_loss, -1)
+
+    def train(self, round:int, num_epochs:int, batch_id_train:list[int], list_id_val:list[int]=None):
+        """train a batch of task
+
+        Args:
+            round: current round
+            num_epochs: number of epochs for inner opt
+            batch_id_train: sample a batch of task
+            list_id_val: list task for validation
+
+        Returns:
+            accuracy (if mode=classification) and loss
+        """
+        # print(f'\n========= Epoch {epoch}: Meta-train on {list_id_train} =========\n')
+        task_weights = {}
 
         # Get current model's weight to make sure that model's weight is reset in beginning
-        # of each inner loop.    
+        # of each inner loop.
         meta_weights = self.meta_model.get_weights()
 
         # Inner loops.
         # Loop through all support dataset and update model weight.
-        for key in list_id_train:
-            print(f'Inner optimize on task {key}')
+        for task_id in batch_id_train:
+            print(f'Inner optimize on task {task_id}')
+
+            X = self.data_dict[task_id]['support_X']
+            y = self.data_dict[task_id]['support_y']
+
             # Get starting initialized weight.
             self.meta_model.set_weights(meta_weights)
 
-            X = self.data_dict[key]['support_X']
-            y = self.data_dict[key]['support_y']
-            for batch_X, batch_y in zip(X, y):
-                with tf.GradientTape() as tape:
-                    pred = self.meta_model(batch_X)
-                    loss = self.loss_fn(batch_y, pred)
-
-                # Calculate the gradients for the variables
-                gradients = tape.gradient(loss, self.meta_model.trainable_variables)
-                # Apply the gradients and update the optimizer
-                self.inner_opt.apply_gradients(zip(gradients, self.meta_model.trainable_variables))
-
-            # Save optimized weight of each support task. 
-            task_weights.append(self.meta_model.get_weights())
+            # Save optimized weight of each support task.
+            task_weights[task_id] = self.inner_training_step(self.meta_model, X, y, num_epochs)
 
         print()
+
         # Calculate loss of each optimized weight on query training dataset set.
         with tf.GradientTape() as tape:
-            for key in list_id_train:
-                print(f'Outer optimize on task {key}')
-                #Get each saved optimized weight.
-                self.meta_model.set_weights(task_weights[key])
-
-                X = self.data_dict[key]['query_X']
-                y = self.data_dict[key]['query_y']
-                for batch_X, batch_y in zip(X, y):
-                    pred = self.meta_model(batch_X)
-                    loss = self.loss_fn(batch_y, pred)
-
-                    try:
-                        tmp_pred = pred.numpy()
-                        tmp_pred[tmp_pred >= 0.5] = 1
-                        tmp_pred[tmp_pred < 0.5] = 0
-                        self.acc_fn.update_state(batch_y, tmp_pred)
-                        batch_acc.append(tf.get_static_value(self.acc_fn.result()))
-                    except:
-                        pass
-
-                    batch_loss.append(loss)
-
-            # Calculate sum loss
-            # Calculate mean loss only for visualizing.
-            sum_loss = tf.reduce_sum([tf.reduce_sum(l) for l in batch_loss])
-            mean_loss = tf.get_static_value(tf.reduce_mean([tf.reduce_mean(l) for l in batch_loss]))
-            mean_acc = tf.get_static_value(tf.reduce_mean([tf.reduce_mean(a) for a in batch_acc]))
-
-            print(f'\tOuter loss of epoch {epoch}:\t{mean_loss:.5f}')
-            if len(batch_acc) != 0:
-                print(f'\tAccuracy on query:\t{mean_acc:.5f}')
+            sum_loss, mean_loss, mean_acc = self.outer_compute(batch_id_train, task_weights)
 
         # Get starting initialized weight. 
         self.meta_model.set_weights(meta_weights)
@@ -100,67 +143,31 @@ class MAML:
         grads = tape.gradient(sum_loss, self.meta_model.trainable_variables)
         self.outer_opt.apply_gradients(zip(grads, self.meta_model.trainable_variables))
 
-        return (mean_loss, mean_acc) if len(batch_acc) != 0 else (mean_loss, 0)
+        if (round+1)%5 == 0:
+            self.valid(list_id_val, num_epochs)
 
-        # # Calculate loss of each optimized weight on query training dataset set.
-        # with tf.GradientTape() as tape:
-        #     for key in list_id_train:
-        #         #Get each saved optimized weight.
-        #         self.meta_model.set_weights(task_weights[key])
+        return mean_loss, mean_acc
 
-        #         X = self.data_dict[key]['query_X']
-        #         y = self.data_dict[key]['query_y']
+    def valid(self, list_id_val:list[int], num_epochs:int):
+        print('\nValidation\n')
+        model:models.Model = deepcopy(self.meta_model)
+        meta_weights = model.get_weights()
 
-        #         for batch_X, batch_y in zip(X, y):
-        #             pred = self.meta_model(batch_X)
-        #             loss = self.loss_fn(batch_y, pred)
+        task_weights = []
 
-        #         try:
-        #             self.acc_fn.update_state(y, pred)
-        #             batch_acc.append(tf.get_static_value(self.acc_fn.result()))
-        #         except:
-        #             pass
+        for task_id in list_id_val:
+            print(f'Adapt on task {task_id}')
 
-        #         batch_loss.append(loss)
+            X = self.data_dict[task_id]['support_X']
+            y = self.data_dict[task_id]['support_y']
 
-        #     # Calculate sum loss
-        #     # Calculate mean loss only for visualizing.
-        #     sum_loss = tf.reduce_sum(batch_loss)
-        #     mean_loss = tf.get_static_value(tf.reduce_mean(batch_loss))
-        #     mean_acc = tf.get_static_value(tf.reduce_mean(batch_acc))
+            # Get starting initialized weight.
+            model.set_weights(meta_weights)
+            task_weights.append(self.inner_training_step(model, X, y, num_epochs))
 
-        # # Get starting initialized weight. 
-        # self.meta_model.set_weights(meta_weights)
-
-        # # Back-propagation of outer loop.
-        # grads = tape.gradient(sum_loss, self.meta_model.trainable_variables)
-        # self.outer_opt.apply_gradients(zip(grads, self.meta_model.trainable_variables))
-
-        # return (mean_loss, mean_acc) if len(batch_acc) != 0 else (mean_loss, 0)
-
-
-
-from keras import optimizers
-
-from model.meta_model import MAML
-from common.constants import *
-from data.pre_process import get_data
-
-data_dict = get_data(look_back=20)
-list_id = list(data_dict.keys())
-num_id = len(list_id)
-
-# config list_id_train --> batch
-maml = MAML(
-    data_dict=data_dict,
-    based_model=LSTM,
-    inner_opt=optimizers.Adam(learning_rate=0.001),
-    outer_opt=optimizers.Adam(learning_rate=0.001),
-    mode=CLF
-)
-
-for i in range(10):
-    print(f'Epoch {i+1}/10')
-    loss, acc = maml.train_on_batch(i, list_id[:2])
-    print(loss, acc)
-    print('================\n')
+        _, mean_loss, mean_acc = self.outer_compute(list_id_val, task_weights)
+        print(f'\tMean loss:\t{mean_loss:.5f}')
+        if mean_acc != -1:
+            print(f'\tMean acc:\t{mean_acc:.5f}')
+        print('================================')
+        return mean_loss, mean_acc
