@@ -74,10 +74,14 @@ class MAML:
         Returns:
             list of accuracy and loss
         """
-        batch_acc = []
-        batch_loss = []
+        task_accs = []
+        task_losses = []
+        sum_task_losses = 0.
 
         for task_id in batch_id_train:
+            task_acc = []
+            task_loss = []
+
             #Get each saved optimized weight.
             self.meta_model.set_weights(task_weights[task_id])
 
@@ -87,35 +91,41 @@ class MAML:
                 pred = self.meta_model(batch_X)
                 loss = self.loss_fn(batch_y, pred)
 
+                # compute loss and acc of current data batch (batch_loss)
+                task_loss.append(loss)
                 try:
                     tmp_pred = pred.numpy()
                     tmp_pred[tmp_pred >= 0.5] = 1
                     tmp_pred[tmp_pred < 0.5] = 0
                     self.acc_fn.update_state(batch_y, tmp_pred)
-                    batch_acc.append(tf.get_static_value(self.acc_fn.result()))
+                    task_acc.append(tf.get_static_value(self.acc_fn.result()))
                 except:
                     pass
 
-                batch_loss.append(loss)
+            # compute sum loss for back-propagation
+            sum_task_losses += tf.reduce_sum([tf.reduce_sum(batch_loss) for batch_loss in task_loss])
 
-            with tf.GradientTape(persistent=False, watch_accessed_variables=False) as tape:
-                if len(batch_acc) != 0:
-                    print(f'Outer compute on task {task_id}: loss={np.mean(batch_loss[-1]).item():.5f}\t acc={np.mean(batch_acc[-1]).item():.5f}')
-                else:
-                    print(f'Outer compute on task {task_id}: loss={np.mean(batch_loss[-1]).item():.5f}')
+            # mean loss of task for visualizing
+            task_loss = np.mean([np.mean(batch_loss) for batch_loss in task_loss]).item()
+            if len(task_acc) != 0:
+                task_acc = np.mean(task_acc).item()
+                print(f'Outer compute on task {task_id}: loss={task_loss:.5f}\t acc={task_acc:.5f}')
+            else:
+                print(f'Outer compute on task {task_id}: loss={task_loss:.5f}')
 
-        # Calculate sum loss
+            task_losses.append(task_loss)
+            task_accs.append(task_acc)
+
         # Calculate mean loss only for visualizing.
-        sum_loss = tf.reduce_sum([tf.reduce_sum(l) for l in batch_loss])
-        mean_loss = tf.get_static_value(tf.reduce_mean([tf.reduce_mean(l) for l in batch_loss]))
-        mean_acc = tf.get_static_value(tf.reduce_mean([tf.reduce_mean(a) for a in batch_acc]))
+        mean_task_losses = np.mean(task_losses).item()
+        mean_task_accs = np.mean(task_accs).item()
 
-        print(f'\n\tMean loss:\t{mean_loss:.5f}')
-        if len(batch_acc) != 0:
-            print(f'\tMean acc:\t{mean_acc:.5f}')
+        print(f'\n\tMean loss:\t{mean_task_losses:.5f}')
+        if len(task_accs) != 0:
+            print(f'\tMean acc:\t{mean_task_accs:.5f}')
         print('================================')
 
-        return (sum_loss, mean_loss.item(), mean_acc.item()) if len(batch_acc)!= 0 else (sum_loss, mean_loss.item(), -1)
+        return (sum_task_losses, mean_task_losses, mean_task_accs) if len(task_accs)!= 0 else (sum_task_losses, mean_task_losses, -1)
 
     def train(self, round:int, num_epochs:int, batch_id_train:list[int], list_id_val:list[int]=None):
         """train a batch of task
@@ -196,6 +206,8 @@ class MAML:
 
     def save_model(self, model_name:str='model'):
         print('\nSave model\n')
-        with open(f'./pretrained/{model_name}.json', 'w') as fo:
+        json_file_path = os.path.join(PRETRAINED_DIR, f'{model_name}.json')
+        model_file_path = os.path.join(PRETRAINED_DIR, f'{model_name}.keras')
+        with open(json_file_path, 'w') as fo:
             json.dump(self.info, fo)
-        self.meta_model.save(os.path.join(PRETRAINED_DIR, f'{model_name}.keras'))
+        self.meta_model.save(model_file_path)
