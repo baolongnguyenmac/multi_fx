@@ -1,3 +1,6 @@
+pretrained
+.vscode
+tmp*
 *.ipynb
 *.csv
 
