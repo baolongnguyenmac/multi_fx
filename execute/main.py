@@ -49,7 +49,7 @@ def main():
         # maml.meta_model = tf.keras.models.load_model(os.path.join(PRETRAINED_DIR, 'backup', 'lstm_10_0.001_0.005.keras'))
         # maml.valid(list_id_val, num_epochs=input_dict['num_epochs'])
         maml.meta_model = tf.keras.models.load_model(os.path.join(PRETRAINED_DIR, 'backup', f'{input_dict["test"]}.keras'))
-        maml.valid(list_id_val, num_epochs=input_dict['num_epochs'])
+        maml.valid(list_id_test, num_epochs=input_dict['num_epochs'])
     else:
         for round in range(input_dict['num_rounds']):
             batch_task = random.sample(list_id_train, input_dict['batch_task_size'])

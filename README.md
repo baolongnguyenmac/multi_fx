@@ -4,7 +4,7 @@
 
 - For back-propagation, I use sum_loss, which is the total loss of model on all query-sets
 - For evaluate as well as visualize, there are 2 ways to compute these metrics:
-    - `macro-metrics`: compute loss of each task, then, compute the average mean of tasks. The pseudo-code is as follows:
+    [v] `macro-metrics` (implemented): compute loss of each task, then, compute the average mean of tasks. The pseudo-code is as follows:
 
         ```python
         task_accs = []
@@ -32,7 +32,7 @@
         batch_task_loss = mean(task_losses)
         ```
 
-    - `micro-metrics`: compute loss of all batches (from all tasks) at once. **The outer_loss in the log file of `micro-metrics` is wrong**. The pseudo-code is as follows:
+    [v] `micro-metrics` (implemented): compute loss of all batches (from all tasks) at once. **The outer_loss in the log file of `micro-metrics` is wrong**. The pseudo-code is as follows:
 
         ```python
         batch_acc = []
@@ -54,7 +54,8 @@
         mean_acc = mean(batch_acc)
         ```
 
-- I'm experimenting on both ways. `micro-metrics` is done and stored in `./pretrained_micro`. `macro-metrics` is just implemented. I will store in `./pretrained_macro`
+[-] I'm experimenting on both ways. `micro-metrics` is done and stored in `./pretrained_micro`. `macro-metrics` is just implemented. I will store in `./pretrained_macro`
+    - I just experimented 20 models in macro-way, it's not bad. I will experiment more on this
 
 ## [-] Analyze
 
@@ -79,15 +80,18 @@
 
 - **What about LSTM+CNN?**
 
-### - Try old method
+### - Try old method: `AutoKeras`
 
 - Create a big data file that contains all data from pairs of currency
 - Pre-process and use old models to run on it
-- Check the result. If it goes well, I would like to fuck myself
+- Check the result by employing the `*.log` files
+    - Extract these kind of information from `*.log` files (`./img/metric_log.png`)
+    - Then draw a learning line chart, which should show that the learning process is meaningless (the accuracies do not increase)
+    - Conclusion: Reject `AutoKeras`
 
 ## [-] Problem of `based_model` & `meta_model`
 
-- For now, `LSTM+CNN` is not working, `Attention` has not been implemented yet
+- For now, `LSTM+CNN` is not working, `Attention` has not been implemented yet. **I think that I should implement the version of `LSTM+CNN` for classification first**
 [v] In `meta_model`, `inner_opt` is initialized only once, I fix it
 
 ## [v] Init data
