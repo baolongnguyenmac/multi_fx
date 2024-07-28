@@ -1,4 +1,6 @@
-pretrained
+*job.*
+*.keras
+*.json
 .vscode
 tmp*
 *.ipynb
