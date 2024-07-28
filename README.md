@@ -1,5 +1,25 @@
 # Multi FX
 
+## - Adaptability of model
+
+- Use the model obtained from real multi_fx, fine-tune it on USD/JPY data for 3 epochs and test it
+- Create a model that's normally trained on training set, then allow it to be fine-tuned for 3 epochs on 20% of test set before the real test
+
+## [v] Problem of data
+
+- In the old version
+    - 60% of data is used for training, 20% for validating, and 20% for testing
+    - Specifically, I have 60 files of data. Each of them contains about 2600 samples
+    - Thus, there are $2600*60*60\% = 93.600$ training samples, $2600*60*20\% = 31.200$ samples for validating, and the same amount for testing
+
+[v] In my version, I use 42 data for meta-training, 9 for validating, and 9 for testing
+    - According to the old version of data splitting, I have to use 30 users for training, 15 for validating and 15 for testing
+    - Specifically, data for training (adapt, and optimize) includes
+        - $2600*30$: Meta-train
+        - $2600*15*20\%*2$: Adapt on valid and test set
+        - Sum up these samples leads to the number of $93.600$
+    - The rest is used for valid and test
+
 ## [-] 2 ways to compute loss and accuracy
 
 - For back-propagation, I use sum_loss, which is the total loss of model on all query-sets
@@ -54,7 +74,7 @@
         mean_acc = mean(batch_acc)
         ```
 
-[-] I'm experimenting on both ways. `micro-metrics` is done and stored in `./pretrained_micro`. `macro-metrics` is just implemented. I will store in `./pretrained_macro`
+[v] I'm experimenting on both ways. `micro-metrics` is done and stored in `./pretrained_micro`. `macro-metrics` is just implemented. I will store in `./pretrained_macro`
     - I just experimented 20 models in macro-way, it's not bad. I will experiment more on this
 
 ## [-] Analyze
@@ -65,22 +85,24 @@
 
 [v] What if the label distribution of data are not uniform? $\to$ I will try other metrics such as `recall, precision, F1` $\to$ Don't have to use other metrics since their distributions are quite uniform (see `./img/dist_task.png`)
 
+- Even that the labels are uniformly distributed, I think that we should still compute `F1, recall, precision` for comparing with other methods
+
 - What if data from `51-59` are easier than other? I think that there are 2 ways to check this hypothesis
     - Randomly choose dataset for training, validating, and testing (try with many random seed)
     - Run pre-trained models on data from `51-59`, if they all go well, then data from `51-59` are easy
-    - In bad case, I can swap `val-set` and `test-set`, so I can obtain accuracy on test set smaller than train and val set
+    [x] In bad case, I can swap `val-set` and `test-set`, so I can obtain accuracy on test set smaller than train and val set
 
-- Create an Excel file, I have to analyze these stuff. After all, it should obtain something like:
-    - What is the best hyper-param?
-    - What is the best batch-size of task?
-    - What is the best batch-size of data?
-    - What is the best number of rounds?
-    - What is the potential model?
+[v] Create an Excel file, I have to analyze these stuff. After all, it should obtain something like:
+    [v] What is the best hyper-param?
+    [x] What is the best batch-size of task?
+    [x] What is the best batch-size of data?
+    [x] What is the best number of rounds?
+    [v] What is the potential model?
     - ... (fine-tune stuff)
 
 - **What about LSTM+CNN?**
 
-### - Try old method: `AutoKeras`
+### [v] Try old method: `AutoKeras`
 
 - Create a big data file that contains all data from pairs of currency
 - Pre-process and use old models to run on it
@@ -88,6 +110,13 @@
     - Extract these kind of information from `*.log` files (`./img/metric_log.png`)
     - Then draw a learning line chart, which should show that the learning process is meaningless (the accuracies do not increase)
     - Conclusion: Reject `AutoKeras`
+
+- I've finished running on `AutoKeras`
+    - The result's suck that I have a section taking about it in `./pretrained_micro/analyze.ipynb`
+    - I worry that my method doesn't work on the old dataset
+        - So I config the old one to multi-task (`../fx/fxdata/multi_USDJPY`)
+        - And fit these tasks using my method, the results is ok (`./pretrained/pretrained_macro_jp`)
+    - I can now send a reported email to sensei about this
 
 ## [-] Problem of `based_model` & `meta_model`
 
