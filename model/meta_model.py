@@ -204,10 +204,10 @@ class MAML:
 
         return mean_loss, mean_acc
 
-    def save_model(self, model_name:str='model'):
+    def save_model(self, dir_path:str, model_name:str):
         print('\nSave model\n')
-        json_file_path = os.path.join(PRETRAINED_DIR, f'{model_name}.json')
-        model_file_path = os.path.join(PRETRAINED_DIR, f'{model_name}.keras')
+        json_file_path = os.path.join(dir_path, f'{model_name}.json')
+        model_file_path = os.path.join(dir_path, f'{model_name}.keras')
         with open(json_file_path, 'w') as fo:
             json.dump(self.info, fo)
         self.meta_model.save(model_file_path)

@@ -53,7 +53,8 @@ def generate_script(device:str, name_job:str, look_back:int, model_name:str, mod
         fout.write("\n".join(tmp_file) + "\n")
 
 def submit_based_model():
-    # prev_count = 20
+    current_count = None
+    prev_count = 96
     count = 0
     for window in [10, 20, 30]:
         for model in [LSTM, CNN]:
@@ -68,7 +69,7 @@ def submit_based_model():
                     time.sleep(1)
                     count += 1
 
-                    if count == 40:
+                    if count == current_count:
                         return
 
     # for project_name in [LSTM, CNN]:
@@ -80,5 +81,17 @@ def submit_based_model():
     # generate_script('gpu', WEAK_LEARNERS[0], 'boosting')
     # subprocess.run(["qsub", os.path.join(EXE_DIR, 'tmp.sh')])
 
+def submit_tunned_model():
+    count = 0
+    for window in [20, 30]:
+        for model in [LSTM]:
+            for inner_lr in [0.005]:
+                for outer_lr in [0.0055, 0.005]:
+                    generate_script('cpu', f'{model}_{count}', window, model, CLF, inner_lr, outer_lr, 5, 100, 3)
+                    subprocess.run(["qsub", os.path.join(EXE_DIR, 'tmp.sh')])
+                    time.sleep(1)
+                    count += 1
+
 if __name__ == '__main__':
-    submit_based_model()
+    # submit_based_model()
+    submit_tunned_model()
