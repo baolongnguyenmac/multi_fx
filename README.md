@@ -1,9 +1,18 @@
 # Multi FX
 
-## - Adaptability of model
+## Problem of metrics
 
-- Use the model obtained from real multi_fx, fine-tune it on USD/JPY data for 3 epochs and test it
-- Create a model that's normally trained on training set, then allow it to be fine-tuned for 3 epochs on 20% of test set before the real test
+[-] I notice that the
+    - Accuracy and other classified metrics should have been calculated exactly for each task (not take the average as I did before)
+    - Metrics for regression are in the same case
+    - After that, we take the average value of all task (`mean_acc ± std, mean_loss ± std`) and visualize these values
+
+- Note that we have to compute our metrics like that regardless what kind of loss we use to optimize the model (mean loss, sum loss,...). Therefore, these changes only affect on `valid` function
+
+## [-] Adaptability of model
+
+[v] Use the model obtained from real multi_fx, fine-tune it on USD/JPY data for 3 epochs and test it. Since the data is too big for a one-LSTM-layer model, The performance was quite poor.
+[-] Create a model that's normally trained on training set, then allow it to be fine-tuned for 3 epochs on 20% of test set before the real test. I was so lazy for doing this, it seems necessary but I will delay this task
 
 ## [v] Problem of data
 
@@ -20,7 +29,7 @@
         - Sum up these samples leads to the number of $93.600$
     - The rest is used for valid and test
 
-## [-] 2 ways to compute loss and accuracy
+## [v] 2 ways to compute loss and accuracy
 
 - For back-propagation, I use sum_loss, which is the total loss of model on all query-sets
 - For evaluate as well as visualize, there are 2 ways to compute these metrics:
@@ -85,10 +94,11 @@
 
 [v] What if the label distribution of data are not uniform? $\to$ I will try other metrics such as `recall, precision, F1` $\to$ Don't have to use other metrics since their distributions are quite uniform (see `./img/dist_task.png`)
 
-- Even that the labels are uniformly distributed, I think that we should still compute `F1, recall, precision` for comparing with other methods
+[-] Even that the labels are uniformly distributed, I think that we should still compute `F1, recall, precision` for comparing with other methods
 
 - What if data from `51-59` are easier than other? I think that there are 2 ways to check this hypothesis
-    - Randomly choose dataset for training, validating, and testing (try with many random seed)
+    [-] Randomly choose dataset for training, validating, and testing (try with many random seed)
+        - I am running this task, pre-trained models are saved at `./pretrained/pretrained_macro_random`
     - Run pre-trained models on data from `51-59`, if they all go well, then data from `51-59` are easy
     [x] In bad case, I can swap `val-set` and `test-set`, so I can obtain accuracy on test set smaller than train and val set
 
@@ -100,7 +110,8 @@
     [v] What is the potential model?
     - ... (fine-tune stuff)
 
-- **What about LSTM+CNN?**
+[-] **What about LSTM+CNN?**
+    - I have just done implementing this one. I will run it after re-implementing metrics
 
 ### [v] Try old method: `AutoKeras`
 
@@ -120,7 +131,8 @@
 
 ## [-] Problem of `based_model` & `meta_model`
 
-- For now, `LSTM+CNN` is not working, `Attention` has not been implemented yet. **I think that I should implement the version of `LSTM+CNN` for classification first**
+[v] For now, `LSTM+CNN` is working now
+- `Attention` has not been implemented yet
 [v] In `meta_model`, `inner_opt` is initialized only once, I fix it
 
 ## [v] Init data
@@ -149,7 +161,7 @@
     python3 -m pip install tensorflow[and-cuda]
     python3 -m pip install git+https://github.com/keras-team/keras-tuner.git
     python3 -m pip install autokeras
-    pip3 install torch torchvision torchaudio
+    python3 -m pip install torch torchvision torchaudio
 
     # install data-processed and visualization libraries
     python3 -m pip install pandas
