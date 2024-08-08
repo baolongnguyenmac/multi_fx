@@ -2,10 +2,10 @@
 
 ## Problem of metrics
 
-[-] I notice that the
-    - Accuracy and other classified metrics should have been calculated exactly for each task (not take the average as I did before)
-    - Metrics for regression are in the same case
-    - After that, we take the average value of all task (`mean_acc ± std, mean_loss ± std`) and visualize these values
+[v] I notice that the
+    [v] Accuracy and other classified metrics should have been calculated exactly for each task (not take the average as I did before)
+    [v] Metrics for regression are in the same case
+    [v] After that, we take the average value of all task (`mean_acc ± std, mean_loss ± std`) and visualize these values
 
 - Note that we have to compute our metrics like that regardless what kind of loss we use to optimize the model (mean loss, sum loss,...). Therefore, these changes only affect on `valid` function
 
