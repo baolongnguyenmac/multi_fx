@@ -1,6 +1,8 @@
 import tensorflow as tf
 from keras import optimizers, models, metrics
+from sklearn.metrics import precision_recall_fscore_support
 import numpy as np
+
 from copy import deepcopy
 import json
 import os
@@ -17,12 +19,15 @@ class MAML:
         outer_lr:float,
         mode:str=CLF
     ):
-        self.meta_model:models.Model = get_model(based_model, data_dict[0]['support_X'][0].shape[1:], mode)
+        # get data
         self.data_dict:dict[str, dict[str, np.ndarray]] = data_dict
-        # self.inner_opt:optimizers.Optimizer = inner_opt
+
+        # init model stuff
+        self.meta_model:models.Model = get_model(based_model, data_dict[0]['support_X'][0].shape[1:], mode)
         self.outer_opt:optimizers.Optimizer = optimizers.Adam(learning_rate=outer_lr)
         self.inner_lr:float = inner_lr
 
+        # init log
         self.info = {}
         self.info['look_back'] = data_dict[0]['support_X'][0].shape[1]
         self.info['based_model'] = based_model
@@ -32,7 +37,11 @@ class MAML:
         self.info['train_acc'] = []
         self.info['val_loss'] = []
         self.info['val_acc'] = []
+        self.info['val_std_loss'] = []
+        self.info['val_std_acc'] = []
 
+        # init metrics
+        self.mode = mode
         if mode == REG:
             self.loss_fn = metrics.mean_squared_error
         elif mode == CLF:
@@ -74,15 +83,22 @@ class MAML:
         Returns:
             list of accuracy and loss
         """
-        task_accs = []
-        task_losses = []
         sum_task_losses = 0.
 
-        for task_id in batch_id_train:
-            task_acc = []
-            task_loss = []
+        tasks_metrics = {
+            'acc':[],
+            'loss':[],
+            'precision':[],
+            'recall':[],
+            'f1':[]
+        }
 
-            #Get each saved optimized weight.
+        for task_id in batch_id_train:
+            pred_values = np.empty((0,1))
+            true_values = np.empty((0,1))
+            task_loss = 0.
+
+            # Get each saved optimized weight.
             self.meta_model.set_weights(task_weights[task_id])
 
             X = self.data_dict[task_id]['query_X']
@@ -90,42 +106,59 @@ class MAML:
             for batch_X, batch_y in zip(X, y):
                 pred = self.meta_model(batch_X)
                 loss = self.loss_fn(batch_y, pred)
+                task_loss += tf.reduce_sum(loss)
 
-                # compute loss and acc of current data batch (batch_loss)
-                task_loss.append(loss)
-                try:
-                    tmp_pred = pred.numpy()
-                    tmp_pred[tmp_pred >= 0.5] = 1
-                    tmp_pred[tmp_pred < 0.5] = 0
-                    self.acc_fn.update_state(batch_y, tmp_pred)
-                    task_acc.append(tf.get_static_value(self.acc_fn.result()))
-                except:
-                    pass
+                # store prediction and true label for computing acc
+                if self.mode == CLF:
+                    pred = pred.numpy()
+                    pred[pred >= 0.5] = 1
+                    pred[pred < 0.5] = 0
+                    pred_values = np.vstack((pred_values, pred))
+                    true_values = np.vstack((true_values, batch_y))
 
             # compute sum loss for back-propagation
-            sum_task_losses += tf.reduce_sum([tf.reduce_sum(batch_loss) for batch_loss in task_loss])
+            sum_task_losses += task_loss
 
-            # mean loss of task for visualizing
-            task_loss = np.mean([np.mean(batch_loss) for batch_loss in task_loss]).item()
-            if len(task_acc) != 0:
-                task_acc = np.mean(task_acc).item()
-                print(f'Outer compute on task {task_id}: loss={task_loss:.5f}\t acc={task_acc:.5f}')
-            else:
+            # compute acc + loss of a task
+            if self.mode == CLF:
+                acc_, precision_, recall_, f1_ = self.compute_metrics(pred_values, true_values)
+                tasks_metrics['acc'].append(acc_)
+                tasks_metrics['precision'].append(precision_)
+                tasks_metrics['recall'].append(recall_)
+                tasks_metrics['f1'].append(f1_)
+                task_loss /= len(true_values)
+                print(f'Outer compute on task {task_id}: loss={task_loss:.5f}\t acc={acc_:.5f}')
+            elif self.mode == REG:
+                task_loss /= len(X)
                 print(f'Outer compute on task {task_id}: loss={task_loss:.5f}')
 
-            task_losses.append(task_loss)
-            task_accs.append(task_acc)
+            tasks_metrics['loss'].append(task_loss)
 
-        # Calculate mean loss only for visualizing.
-        mean_task_losses = np.mean(task_losses).item()
-        mean_task_accs = np.mean(task_accs).item()
+        tasks_metrics['loss'], tasks_metrics['std_loss'] = self.compute_metrics(tasks_metrics['loss'])
+        print(f"\n\tMean loss:\t{tasks_metrics['loss']:.5f} ± {tasks_metrics['std_loss']:.5f}")
+        if self.mode == CLF:
+            tasks_metrics['acc'], tasks_metrics['std_acc'] = self.compute_metrics(tasks_metrics['acc'])
+            tasks_metrics['precision'], tasks_metrics['std_precision'] = self.compute_metrics(tasks_metrics['precision'])
+            tasks_metrics['recall'], tasks_metrics['std_recall'] = self.compute_metrics(tasks_metrics['recall'])
+            tasks_metrics['f1'], tasks_metrics['std_f1'] = self.compute_metrics(tasks_metrics['f1'])
 
-        print(f'\n\tMean loss:\t{mean_task_losses:.5f}')
-        if len(task_accs) != 0:
-            print(f'\tMean acc:\t{mean_task_accs:.5f}')
+            print(f"\tMean acc:\t{tasks_metrics['acc']:.5f} ± {tasks_metrics['std_acc']:.5f}")
+            print(f"\tMean precision:\t{tasks_metrics['precision']:.5f} ± {tasks_metrics['std_precision']:.5f}")
+            print(f"\tMean recall:\t{tasks_metrics['recall']:.5f} ± {tasks_metrics['std_recall']:.5f}")
+            print(f"\tMean f1:\t{tasks_metrics['f1']:.5f} ± {tasks_metrics['std_f1']:.5f}")
         print('================================')
 
-        return (sum_task_losses, mean_task_losses, mean_task_accs) if len(task_accs)!= 0 else (sum_task_losses, mean_task_losses, -1)
+        return sum_task_losses, tasks_metrics
+
+    def compute_metrics(self, pred_values:list[float], true_values=None):
+        if true_values is None:
+            # compute metrics across tasks or simply take the average of a list of metric
+            return float(np.mean(pred_values)), float(np.std(pred_values))
+        else:
+            # compute metrics in a task
+            self.acc_fn.update_state(true_values, pred_values)
+            precision, recall, f1, _ = precision_recall_fscore_support(true_values, pred_values, average='macro')
+            return float(self.acc_fn.result()), float(precision), float(recall), float(f1)
 
     def train(self, round:int, num_epochs:int, batch_id_train:list[int], list_id_val:list[int]=None):
         """train a batch of task
@@ -164,9 +197,9 @@ class MAML:
 
         # Calculate loss of each optimized weight on query training dataset set.
         with tf.GradientTape() as tape:
-            sum_loss, mean_loss, mean_acc = self.outer_compute(batch_id_train, task_weights)
-            self.info['train_loss'].append(mean_loss)
-            self.info['train_acc'].append(mean_acc)
+            sum_loss, tasks_metrics = self.outer_compute(batch_id_train, task_weights)
+            self.info['train_loss'].append(tasks_metrics['loss'])
+            self.info['train_acc'].append(tasks_metrics['acc'])
 
         # Get starting initialized weight. 
         self.meta_model.set_weights(meta_weights)
@@ -177,8 +210,6 @@ class MAML:
 
         if (round+1)%5 == 0 or round==0:
             self.valid(list_id_val, num_epochs)
-
-        return mean_loss, mean_acc
 
     def valid(self, list_id_val:list[int], num_epochs:int=2):
         print('\nValidation\n')
@@ -198,16 +229,20 @@ class MAML:
             task_weights[task_id] = self.inner_training_step(model, X, y, num_epochs)
 
         print()
-        _, mean_loss, mean_acc = self.outer_compute(list_id_val, task_weights)
-        self.info['val_loss'].append(mean_loss)
-        self.info['val_acc'].append(mean_acc)
+        _, tasks_metrics = self.outer_compute(list_id_val, task_weights)
+        self.info['val_loss'].append(tasks_metrics['loss'])
+        self.info['val_acc'].append(tasks_metrics['acc'])
+        self.info['val_std_loss'].append(tasks_metrics['std_loss'])
+        self.info['val_std_acc'].append(tasks_metrics['std_acc'])
 
-        return mean_loss, mean_acc
+        self.info['f1'] = f"{tasks_metrics['f1']:.5f} ± {tasks_metrics['std_f1']:.5f}"
+        self.info['precision'] = f"{tasks_metrics['precision']:.5f} ± {tasks_metrics['std_precision']:.5f}"
+        self.info['recall'] = f"{tasks_metrics['recall']:.5f} ± {tasks_metrics['std_recall']:.5f}"
 
-    def save_model(self, dir_path:str, model_name:str):
+    def save_model(self, dir_:str, model_name:str):
         print('\nSave model\n')
-        json_file_path = os.path.join(dir_path, f'{model_name}.json')
-        model_file_path = os.path.join(dir_path, f'{model_name}.keras')
+        json_file_path = os.path.join(dir_, f'{model_name}.json')
+        model_file_path = os.path.join(dir_, f'{model_name}.keras')
         with open(json_file_path, 'w') as fo:
             json.dump(self.info, fo)
         self.meta_model.save(model_file_path)
