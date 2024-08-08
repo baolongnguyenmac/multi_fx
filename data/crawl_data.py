@@ -15,8 +15,8 @@ def main():
         try:
             # get the API from here: https://www.alphavantage.co/support/#api-key
             # document for DataReader: https://pydata.github.io/pandas-datareader/readers/alphavantage.html?highlight=forex#module-pandas_datareader.av.forex
-            df = DataReader(name=pair, data_source='av-forex-daily', start='2014-01-01', end='2024-12-31', api_key='36J3MISX9Q47K7NN')
-            df.to_csv(f'./raw_data/{pair.replace('/', '_')}.csv')
+            df = DataReader(name=pair, data_source='av-forex-daily', start='2014-01-01', end='2024-12-31', api_key='394V3SBV9NSUFGZ0')
+            df.to_csv(f'./fx_data/{pair.replace('/', '_')}.csv')
         except:
             un_done.append(pair)
 
