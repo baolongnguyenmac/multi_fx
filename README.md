@@ -1,6 +1,26 @@
 # Multi FX
 
-## Problem of metrics
+## Report
+
+- Choose our best in `CNN, LSTM, LSTM+CNN`
+    - For `CNN`: They don't converge
+    - For `LSTM`: `lstm_20_0.005_0.0055`
+        - Acc: `61.23 ± 0.06 %`
+        - F1: `68.9 ± 10 %`,
+        - Precision: `70.52 ± 9.17 %`
+        - Recall: `69.51 ± 9.31 %`
+    - For `LSTM+CNN`:
+        - Acc: `62.39 ± 0.06 %`
+        - f1: `69.21 ± 11.07 %`
+        - precision: `71.11 ± 9.34 %`
+        - recall: `70.14 ± 9.6 %`
+    - img:
+        ![](./img/meta.png)
+
+- AutoKeras is suck:
+    ![alt text](./img/auto_keras.png)
+
+## [v] Problem of metrics
 
 [v] I notice that the
     [v] Accuracy and other classified metrics should have been calculated exactly for each task (not take the average as I did before)
