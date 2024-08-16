@@ -1,6 +1,13 @@
 # Multi FX
 
-## Report
+## [-] Baseline (`NHITS` in `NeuralForecast`)
+
+- Have to extract metrics from `NeuralForecast` (self-implement accuracy function)
+- What is the meaning of `unique_id`? Can we use it in multi-fx scenario? (I saw somewhere that we can find the best model for each `id`)
+- Timestamp problem: Out of bound when generate timestamp for 80% of dataset. If I can use `unique_id`, then I don't have to worry about this, since the timestamp can be set to true value
+- Cố lên, hết tháng 8, hãy kết thúc project này để còn học lý. Chỉ còn 2 tuần nữa thôi!
+
+## [v] Report
 
 - Choose our best in `CNN, LSTM, LSTM+CNN`
     - For `CNN`: They don't converge
@@ -9,7 +16,7 @@
         - F1: `68.9 ± 10 %`,
         - Precision: `70.52 ± 9.17 %`
         - Recall: `69.51 ± 9.31 %`
-    - For `LSTM+CNN`:
+    - For `LSTM+CNN`: `lstm_cnn_20_0.005_0.005.json`
         - Acc: `62.39 ± 0.06 %`
         - f1: `69.21 ± 11.07 %`
         - precision: `71.11 ± 9.34 %`
@@ -187,4 +194,8 @@
     python3 -m pip install pandas
     python3 -m pip install pandas-datareader
     python3 -m pip install matplotlib
+
+    # baseline
+    pip install -U ipywidgets
+    pip install neuralforecast
     ```
