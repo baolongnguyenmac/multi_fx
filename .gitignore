@@ -1,3 +1,20 @@
+# latex
+*.aux
+*.blg
+*.bbl
+*.fdb_latexmk
+*.lof
+*.lot
+*.out
+*.fls
+*.toc
+*.gz
+*.xml
+*.log
+*blx.bib
+*Notes.bib
+
+# code
 *job.*
 *.keras
 *.json
