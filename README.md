@@ -1,11 +1,29 @@
 # Multi FX
 
-## [-] Baseline (`NHITS` in `NeuralForecast`)
+## Some explanation about `pretrained`
 
-- Have to extract metrics from `NeuralForecast` (self-implement accuracy function)
-- What is the meaning of `unique_id`? Can we use it in multi-fx scenario? (I saw somewhere that we can find the best model for each `id`)
-- Timestamp problem: Out of bound when generate timestamp for 80% of dataset. If I can use `unique_id`, then I don't have to worry about this, since the timestamp can be set to true value
-- Cố lên, hết tháng 8, hãy kết thúc project này để còn học lý. Chỉ còn 2 tuần nữa thôi!
+- `baseline`: Contain log of fine-tuning baseline model
+- `pretrained_micro`: It's not really `micro`. The word `micro` or `macro` refer to the way we aggregate metrics. Please see `./model/meta_model.py` in the corresponding commit for detail
+- `prertained_macro*`: Well, it's `macro` :v
+    - `prertained_macro_jp`: ML on USD/JPY dataset
+    - `prertained_macro_random`: ML on multi-fx but the datasets are selected randomly (seed=84)
+    - `prertained_macro`: ML on multi-fx but the datasets be like: the first 30 datasets for training, the next 15 datasets for validating, the last 15 datasets for testing
+
+## More datasets
+
+- I need to experiment on many more datasets
+- I don't know if I should change the problem to long-horizon prediction or stay unchanged
+- The process for experiments:
+    - Re-deciding the problem
+    - Data implementation (check with model)
+    - Fine-tune model
+
+## [v] Baseline (`NHITS` in `NeuralForecast`)
+
+[x] What is the meaning of `unique_id`? Can we use it in multi-fx scenario? (I saw somewhere that we can find the best model for each `id`)
+[v] Timestamp problem: Out of bound when generate timestamp for 80% of dataset. If I can use `unique_id`, then I don't have to worry about this, since the timestamp can be set to true value
+[v] Have to extract metrics from `NeuralForecast` (self-implement accuracy function)
+[x] The problem with baseline model: It comes from AAAI2023 conference, which means that it's hard to beat since it's SOTA anyway. The result is about 100%. I think that we should move from 1day-prediction to many-day prediction using NHITS as based model. >> My implementation was wrong. the accuracy of NHITS running on aperiodic data is low
 
 ## [v] Report
 
