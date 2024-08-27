@@ -41,7 +41,7 @@ def get_model(model_name:str, input_shape:tuple, mode:str):
         x = _get_cnn(input_)
     elif model_name == LSTM_CNN:
         x = _get_lstm_cnn(input_)
-    elif model_name == ATT:
+    elif model_name == ATT: # I was planning to implement attention model
         pass
     else:
         raise ValueError('wrong model name')
@@ -52,5 +52,5 @@ def get_model(model_name:str, input_shape:tuple, mode:str):
         output_ = layers.Dense(units=1, activation='sigmoid')(x)
     return models.Model(inputs=input_, outputs=output_)
 
-# bla = get_model(CNN, (20,4), CLF)
+# bla = get_model(LSTM, (20,4), CLF)
 # bla.summary()
