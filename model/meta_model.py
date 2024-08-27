@@ -1,6 +1,6 @@
 import tensorflow as tf
 from keras import optimizers, models, metrics
-from sklearn.metrics import precision_recall_fscore_support
+# from sklearn.metrics import precision_recall_fscore_support
 import numpy as np
 
 from copy import deepcopy
@@ -9,6 +9,7 @@ import os
 
 from .based_model import get_model
 from common.constants import *
+from common.common import compute_metrics
 
 class MAML:
     def __init__(
@@ -46,7 +47,7 @@ class MAML:
             self.loss_fn = metrics.mean_squared_error
         elif mode == CLF:
             self.loss_fn = metrics.binary_crossentropy
-            self.acc_fn = metrics.Accuracy()
+            # self.acc_fn = metrics.Accuracy()
 
     def inner_training_step(self, model:models.Model, X:list[np.ndarray], y:list[np.ndarray], num_epochs:int=2):
         """fast adapt on support set (inner step)
@@ -110,9 +111,7 @@ class MAML:
 
                 # store prediction and true label for computing acc
                 if self.mode == CLF:
-                    pred = pred.numpy()
-                    pred[pred >= 0.5] = 1
-                    pred[pred < 0.5] = 0
+                    pred = (pred.numpy()>=0.5)*1.
                     pred_values = np.vstack((pred_values, pred))
                     true_values = np.vstack((true_values, batch_y))
 
@@ -121,7 +120,7 @@ class MAML:
 
             # compute acc + loss of a task
             if self.mode == CLF:
-                acc_, precision_, recall_, f1_ = self.compute_metrics(pred_values, true_values)
+                acc_, precision_, recall_, f1_ = compute_metrics(pred_values, true_values)
                 tasks_metrics['acc'].append(acc_)
                 tasks_metrics['precision'].append(precision_)
                 tasks_metrics['recall'].append(recall_)
@@ -134,13 +133,13 @@ class MAML:
 
             tasks_metrics['loss'].append(task_loss)
 
-        tasks_metrics['loss'], tasks_metrics['std_loss'] = self.compute_metrics(tasks_metrics['loss'])
+        tasks_metrics['loss'], tasks_metrics['std_loss'] = compute_metrics(tasks_metrics['loss'])
         print(f"\n\tMean loss:\t{tasks_metrics['loss']:.5f} ± {tasks_metrics['std_loss']:.5f}")
         if self.mode == CLF:
-            tasks_metrics['acc'], tasks_metrics['std_acc'] = self.compute_metrics(tasks_metrics['acc'])
-            tasks_metrics['precision'], tasks_metrics['std_precision'] = self.compute_metrics(tasks_metrics['precision'])
-            tasks_metrics['recall'], tasks_metrics['std_recall'] = self.compute_metrics(tasks_metrics['recall'])
-            tasks_metrics['f1'], tasks_metrics['std_f1'] = self.compute_metrics(tasks_metrics['f1'])
+            tasks_metrics['acc'], tasks_metrics['std_acc'] = compute_metrics(tasks_metrics['acc'])
+            tasks_metrics['precision'], tasks_metrics['std_precision'] = compute_metrics(tasks_metrics['precision'])
+            tasks_metrics['recall'], tasks_metrics['std_recall'] = compute_metrics(tasks_metrics['recall'])
+            tasks_metrics['f1'], tasks_metrics['std_f1'] = compute_metrics(tasks_metrics['f1'])
 
             print(f"\tMean acc:\t{tasks_metrics['acc']:.5f} ± {tasks_metrics['std_acc']:.5f}")
             print(f"\tMean precision:\t{tasks_metrics['precision']:.5f} ± {tasks_metrics['std_precision']:.5f}")
@@ -150,15 +149,15 @@ class MAML:
 
         return sum_task_losses, tasks_metrics
 
-    def compute_metrics(self, pred_values:list[float], true_values=None):
-        if true_values is None:
-            # compute metrics across tasks or simply take the average of a list of metric
-            return float(np.mean(pred_values)), float(np.std(pred_values))
-        else:
-            # compute metrics in a task
-            self.acc_fn.update_state(true_values, pred_values)
-            precision, recall, f1, _ = precision_recall_fscore_support(true_values, pred_values, average='macro')
-            return float(self.acc_fn.result()), float(precision), float(recall), float(f1)
+    # def compute_metrics(self, pred_values:list[float], true_values=None):
+    #     if true_values is None:
+    #         # compute metrics across tasks or simply take the average of a list of metric
+    #         return float(np.mean(pred_values)), float(np.std(pred_values))
+    #     else:
+    #         # compute metrics in a task
+    #         self.acc_fn.update_state(true_values, pred_values)
+    #         precision, recall, f1, _ = precision_recall_fscore_support(true_values, pred_values, average='macro')
+    #         return float(self.acc_fn.result()), float(precision), float(recall), float(f1)
 
     def train(self, round:int, num_epochs:int, batch_id_train:list[int], list_id_val:list[int]=None):
         """train a batch of task
@@ -211,7 +210,7 @@ class MAML:
         if (round+1)%5 == 0 or round==0:
             self.valid(list_id_val, num_epochs)
 
-    def valid(self, list_id_val:list[int], num_epochs:int=2):
+    def valid(self, list_id_val:list[int], num_epochs:int=2, mode:str=VAL):
         print('\nValidation\n')
         model:models.Model = deepcopy(self.meta_model)
         meta_weights = model.get_weights()
@@ -230,14 +229,17 @@ class MAML:
 
         print()
         _, tasks_metrics = self.outer_compute(list_id_val, task_weights)
-        self.info['val_loss'].append(tasks_metrics['loss'])
-        self.info['val_acc'].append(tasks_metrics['acc'])
-        self.info['val_std_loss'].append(tasks_metrics['std_loss'])
-        self.info['val_std_acc'].append(tasks_metrics['std_acc'])
 
-        self.info['f1'] = f"{tasks_metrics['f1']:.5f} ± {tasks_metrics['std_f1']:.5f}"
-        self.info['precision'] = f"{tasks_metrics['precision']:.5f} ± {tasks_metrics['std_precision']:.5f}"
-        self.info['recall'] = f"{tasks_metrics['recall']:.5f} ± {tasks_metrics['std_recall']:.5f}"
+        if mode == VAL:
+            self.info['val_loss'].append(tasks_metrics['loss'])
+            self.info['val_acc'].append(tasks_metrics['acc'])
+            self.info['val_std_loss'].append(tasks_metrics['std_loss'])
+            self.info['val_std_acc'].append(tasks_metrics['std_acc'])
+
+        self.info[f'{mode}_accuracy'] = f"{tasks_metrics['acc']:.5f} ± {tasks_metrics['std_acc']:.5f}"
+        self.info[f'{mode}_precision'] = f"{tasks_metrics['precision']:.5f} ± {tasks_metrics['std_precision']:.5f}"
+        self.info[f'{mode}_recall'] = f"{tasks_metrics['recall']:.5f} ± {tasks_metrics['std_recall']:.5f}"
+        self.info[f'{mode}_f1'] = f"{tasks_metrics['f1']:.5f} ± {tasks_metrics['std_f1']:.5f}"
 
     def save_model(self, dir_:str, model_name:str):
         print('\nSave model\n')

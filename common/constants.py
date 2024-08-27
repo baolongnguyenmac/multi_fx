@@ -13,3 +13,9 @@ LSTM = 'lstm'
 CNN = 'cnn'
 LSTM_CNN = 'lstm_cnn'
 ATT = 'attention'
+VAL = 'validation'
+TEST = 'test'
+
+# layer
+MAX_POOLING = 'max_pooling'
+AVERAGE_POOLING = 'average_pooling'
