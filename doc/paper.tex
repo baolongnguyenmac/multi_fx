@@ -10,6 +10,7 @@
 % \usepackage{here}
 % \usepackage{ulem}
 % \usepackage[caption=false]{subfig}
+\usepackage{float}
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage[usenames,dvipsnames]{color}
@@ -49,10 +50,6 @@
 \email{mwklng2309@icloud.com}
 \affiliation{School of Information Science, JAIST, Ishikawa, Japan}
 %
-\author{Tom Ichibha}
-\email{ichibha@icloud.com}
-\affiliation{School of Information Science, JAIST, Ishikawa, Japan}
-%
 \author{Kenta Hongo}
 \email{kenta_hongo@mac.com}
 \affiliation{Research Center for Advanced Computing Infrastructure, JAIST, Ishikawa, Japan}
@@ -61,11 +58,15 @@
 \email{rmaezono@mac.com}
 \affiliation{School of Information Science, JAIST, Ishikawa, Japan}
 %
+\author{Tom Ichibha}
+\email{ichibha@icloud.com}
+\affiliation{School of Information Science, JAIST, Ishikawa, Japan}
+%
 \date{\today}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
 
-    \textbf{Abstract}. Predicting aperiodic time-series data (e.g. stock price, foreign exchange, Bitcoin price,...) is a difficult task for machine learning models because this type of data has high variance and is not stationary; does not show clear cycles, making it difficult to extract features; depends not only on past values but also on external factors, which make them unstable and non-cyclical such as economic and political situations. To overcome the above challenges, we use Meta-learning to train a combined \verb|LSTM| and \verb|CNN| network, thereby effectively extracting and synthesizing hidden features of the data over time. Experiments on foreign exchange data of 60 currency pairs over 24 years (2000-2024) show that the proposed method performs well and has higher accuracy than the \verb|NHITS| - the state-of-the-art model in 2023 on time-series data, in the task of predicting the trend (upward or downward) of the next trading day.
+    \textbf{Abstract}. Predicting aperiodic time-series data (e.g. stock price, foreign exchange, Bitcoin price,...) is a difficult task for machine learning models because this type of data has high and not stationary variance; does not show clearly periodicity, making it difficult to extract features; depends not only on past values but also on external factors, which make them unstable and non-cyclical, such as economic and political situations. To overcome the above challenges, we use Meta-learning to train a combined \verb|LSTM| and \verb|CNN| network, thereby effectively extracting and synthesizing hidden features of the data over time. Experiments on foreign exchange data of 60 currency pairs over 24 years (2000-2024) show that the proposed method performs well and has 5\%-11\% higher accuracy compared to the \verb|NHITS| - the state-of-the-art model in 2023 on time-series data, in the task of predicting the trend (upward or downward) of the next trading day.
 
     % Dự đoán aperiodic time-series data (e.g. stock price, foreign exchange, Bitcoin price,...) là một tác vụ khó khăn đối với các mô hình học máy bởi vì loại dữ liệu này có phương sai cao và không cố định; không thể hiện chu kỳ rõ ràng nên khó rút trích đặc trưng; không chỉ phụ thuộc vào giá trị quá khứ mà còn phụ thuộc các yếu tố ngoại lai, điều khiến chúng bất ổn và không có chu kỳ như tình hình kinh tế, chính trị. Để khắc phục các thách thức nêu trên, chúng tôi sử dụng Meta-learning để huấn luyện kết hợp mạng \verb|LSTM| và \verb|CNN|, từ đó rút trích và tổng hợp hiệu quả các đặc trưng ẩn của dữ liệu theo thời gian. Thực nghiệm trên dữ liệu foreign exchange của 15 cặp tiền tệ trong vòng 24 năm (2000-2024) cho thấy phương pháp đề xuất hoạt động tốt và có độ chính xác cao hơn mô hình \verb|NHITS| - state-of-the-art model của năm 2023 trên dữ liệu time-series, trong bài toán dự đoán xu hướng (upward or downward) của ngày giao dịch tiếp theo.
 \end{abstract}
@@ -80,55 +81,51 @@
 
 % Aperiodic time-series prediction nói chung hay foreign exchange (FX) prediction nói riêng từ lâu đã là vấn đề đáng quan tâm của nhiều nghiên cứu \citep{li2019multi, islam2021foreign, heryadi2021foreign}. Hai kỹ thuật chính được sử dụng trong aperiodic time-series prediction là fundamental analysis and technical analysis \cite{ayitey2023forex}. Trong khi fundamental analysis thiên về phân tích các yếu tố tác động từ bên ngoài và khó có thể capture từ các biến thiên giá trị trong quá khứ như chính sách, chiến lược kinh tế của công ty, quốc gia để dự đoán tương lai; technical analysis dựa hoàn toàn vào lịch sử biến động giá trị để phân tích xu hướng tương lai.
 
-Aperiodic time-series prediction in general or foreign exchange (FX) prediction in particular has long been a matter of concern for many researchers \citep{li2019multi, islam2021foreign, heryadi2021foreign}. The two main techniques used in aperiodic time-series prediction are fundamental analysis and technical analysis \cite{ayitey2023forex}. While fundamental analysis focuses on analyzing external factors, which are difficult to be captured from past value fluctuations such as policies and economic strategies of companies and countries to predict the future; technical analysis relies entirely on historical value fluctuations to analyze future trends.
+Aperiodic time-series prediction in general or foreign exchange (FX) prediction in particular has been a matter of concern for many researchers \citep{li2019multi, islam2021foreign, heryadi2021foreign} for a long time. The two main techniques used in aperiodic time-series prediction are fundamental analysis and technical analysis \cite{ayitey2023forex}. Fundamental analysis focuses on analyzing external factors such as policies and economic strategies of companies and countries to predict the future. Meanwhile, technical analysis relies entirely on historical value fluctuations, which are difficult to capture external factors, to analyze future trends.
 
 \vspace{2mm}
 
 % Việc dự đoán trên aperiodic time-series data gặp một vài thách thức cố hữu. Trong đó có thể kể tới: (1) - Variance của loại dữ liệu này biến thiên mạnh qua các thời kỳ. Từ đó giả thuyết rằng chúng tuân theo một phân phối để có thể xấp xỉ lỗi là không thể sử dụng được, dẫn đến việc các mô hình học máy khó có thể dự đoán chính xác giá trị cũng như xu hướng trong tương lai; (2) - Aperiodic data không tuân theo bất kỳ quy luật rõ ràng nào nên việc học các đặc trưng ẩn của dữ liệu để tiến hành dự đoán gặp rất nhiều khó khăn; (3) - Aperiodic time-series data (e.g. giá cổ phiếu của một công ty) không hoàn toàn phụ thuộc vào dữ liệu quá khứ mà còn phụ thuộc nhiều yếu tố ngoại lai (e.g. tin tức, tình hình kinh tế, chính trị) \cite{li2019multi}.
 
-Predicting on aperiodic time-series data faces several inherent challenges: (1) - The variance of this type of data varies greatly over time. Therefore, the assumption that they follow a distribution to approximate the error cannot be used, leading to machine learning models having difficulty accurately predicting future values and trends; (2) - Aperiodic data does not follow any explicit rules, so learning the hidden features of the data to make predictions is very difficult; (3) - Aperiodic time-series data (e.g. a company's stock price) depends not only on past data but also on many external factors (e.g. news, economic situation, politics) \cite{li2019multi}.
+Aperiodic time-series data prediction faces several inherent challenges: (1) - The variance varies significantly over time, making it difficult to assume a specific distribution to approximate errors, which is a challenge for machine learning models in accurately predicting future values and trends. (2) - Aperiodic data does not follow explicit patterns, making it challenging to identify the latent features required for reliable predictions. (3) - Aperiodic time-series data is influenced not only by historical data but also by numerous external factors \cite{li2019multi}. For example, a company's stock price is affected by news, economic conditions, political events, and other external influences.
 
 \vspace{2mm}
 
-% Đối với thách thức đầu tiên, các mô hình ensemble [cite something here] thường được sử dụng để hạn chế ảnh hưởng của sự biến đổi variance. Ensemble model giúp cung cấp một cái nhìn tổng quát, tổng hợp từ nhiều khía cạnh dựa trên các sub-models, từ đó giúp mô hình tổng quát thích ứng được với sự thay đổi mạnh của variance. Chúng tôi tiếp cận bài toán theo hướng này nhưng ở mức cao hơn bằng cách sử dụng Meta-learning (ML) \cite{finn2017model}. Phương pháp này tổng hợp hiệu quả tham số của các mô hình cục bộ, giúp giảm thiểu đáng kể variance loss.
+% Đối với thách thức đầu tiên, các mô hình ensemble [cite something here] thường được sử dụng để hạn chế ảnh hưởng của sự biến đổi variance. Ensemble model giúp cung cấp một cái nhìn tổng quát, tổng hợp từ nhiều khía cạnh dựa trên các sub-models, từ đó giúp mô hình tổng quát thích ứng được với sự thay đổi mạnh của variance.
+% Tuy nhiên, dưới sự tổng hợp cứng nhắc của các mô hình ensemble truyền thống, kết quả thu được trên các bộ dữ liệu phi chi kỳ là rất thấp.
 
-For the first challenge, ensemble models [cite something here] are often used to mitigate the effects of variance variation. Ensemble models provide a holistic, multi-perspective view based on sub-models, thereby helping the overall model adapt to strong variance changes. We approach the problem in a similar but higher-level way using Meta-learning (ML) \cite{finn2017model}. This method effectively aggregates the parameters of local models, which helps to significantly reduce variance loss.
-
-\vspace{2mm}
-
-% Để khắc phục thách thức thứ hai, các nghiên cứu phần lớn sử dụng các đặc trưng rút trích được từ Long short-term memory neural network (\verb|LSTM|) \cite{hochreiter1997long}, Artificial neural network (\verb|ANN|), và Convolution neural network (\verb|CNN|) \cite{lecun1989handwritten}. Cụ thể, trong năm 2022, 20\% tổng số các bài báo liên quan đến dự đoán chỉ số tài chính sử dụng \verb|LSTM|, 20\% sử dụng \verb|ANN| và 6\% sử dụng \verb|CNN| \cite{ayitey2023forex}. Để tận dụng hết được các đặc trưng được rút trích bởi các mô hình nêu trên, chúng tôi đề xuất phương pháp kết hợp các đặc trưng này.
-
-To overcome the second challenge, most studies use features extracted from Long short-term memory neural network (\verb|LSTM|) \cite{hochreiter1997long}, Artificial neural network (\verb|ANN|), and Convolution neural network (\verb|CNN|) \cite{lecun1989handwritten}. Specifically, in 2022, 20\% of all publications related to financial index prediction used \verb|LSTM|, 20\% used \verb|ANN|, and 6\% used \verb|CNN| \cite{ayitey2023forex}. To make full use of the features extracted by the above models, we propose a method that combines these features.
+For the first challenge, ensemble models \citep{sadeghi2021combined, zafeiriou2020intraday, ali2020complete} are often used to mitigate the effects of variance variation. Ensemble models provide a holistic and multi-perspective view based on sub-models, thereby helping the overall model adapt to strong variance changes. However, under the rigid synthesis of traditional ensemble models, the results obtained on non-periodic datasets are very poor.
 
 \vspace{2mm}
 
-% Đối với thách thức thứ ba, nghiên cứu \cite{fama1970efficient} đưa ra giả thuyết rằng các time-series datasets khác nhau của cùng một lĩnh vực tại cùng thời điểm phản ánh sự tác động của các yếu tố ngoại lai. Ví dụ, các nghiên cứu \citep{overreactioncontrarian, mech1993portfolio} cũng chỉ ra sự phụ thuộc giữa chỉ số tài chính của một công ty nhất định và các chỉ số của các công ty khác. Điều này càng làm tăng tính đúng đắn của giả thuyết trong nghiên cứu \cite{fama1970efficient}. Ngoài ra, chúng tôi cho rằng, loại dữ liệu này còn có những phụ thuộc ngầm vào các thời điểm nhất định trong quá khứ (hidden long-term dependency). Đối với cách tiếp cận truyền thống, người ta sử dụng một lượng dữ liệu quá khứ cố định (lookback window) để huấn luyện mô hình. Điều này gây một trở ngại lớn cho quá trình học vì các đặc trưng dài hạn theo thời gian sẽ bị quên. Mặt khác, ML chia nhỏ tập dữ liệu thành nhiều phần để học và tổng hợp hiệu quả các tham số học được nên có thể xử lý tốt thách thức này.
+% Để khắc phục thách thức thứ hai, các nghiên cứu phần lớn sử dụng các đặc trưng rút trích được từ Long short-term memory neural network (\verb|LSTM|) \cite{hochreiter1997long}, Artificial neural network (\verb|ANN|), và Convolution neural network (\verb|CNN|) \cite{lecun1989handwritten}. Cụ thể, trong năm 2022, 20\% tổng số các bài báo liên quan đến dự đoán chỉ số tài chính sử dụng \verb|LSTM|, 20\% sử dụng \verb|ANN| và 6\% sử dụng \verb|CNN| \cite{ayitey2023forex}.
+% Điều này là hoàn toàn dễ hiểu vì \verb|LSTM| và \verb|CNN| đã chứng minh được khả năng của mình trong việc rút trích các đặc trưng không gian, thời gian một cách hiệu quả.
+% Mặc dù vậy, khi đối mặt với tính phi chu kỳ, sau khoảng 100 training steps, \verb|LSTM| vẫn bị underfitting, còn \verb|CNN| bị overfitting chỉ sau 5 training steps
 
-Regarding the third challenge, \cite{fama1970efficient} research hypothesizes that different time-series datasets of the same domain at the same time point reflect the impact of extraneous factors. For example, studies \citep{overreactioncontrarian, mech1993portfolio} show the dependence between the financial ratios of a given company and the ratios of other companies. This further strengthens the hypothesis in study \cite{fama1970efficient}. In addition, we argue that this type of data also has hidden long-term dependencies. For the traditional approach, people use a fixed amount of past data (lookback window) to train the model. This causes a big obstacle to the learning process because long-term features over time will be forgotten. On the other hand, ML divides the dataset into many parts to learn and synthesize the learned parameters effectively, so it can handle this challenge well.
+To overcome the second challenge, most studies use features extracted from Long Short-Term Memory neural network (\verb|LSTM|) \cite{hochreiter1997long}, Artificial Neural Network (\verb|ANN|), and Convolution Neural Network (\verb|CNN|)\cite{lecun1989handwritten}. Specifically, in 2022, 20\% of all publications related to financial index prediction used \verb|LSTM|, 20\% used \verb|ANN|, and 6\% used \verb|CNN|\cite{ayitey2023forex}. This is completely understandable because \verb|LSTM| and \verb|CNN| have proven their ability to extract spatial and temporal features effectively. However, when faced with aperiodic data with only 2600 samples, after 40 training steps, \verb|LSTM| is still underfitting, while \verb|CNN| is overfitting after only 5 training steps.
+
+\vspace{2mm}
+
+% Đối với thách thức thứ ba, nghiên cứu \cite{fama1970efficient} đưa ra giả thuyết rằng các time-series datasets khác nhau của cùng một lĩnh vực tại cùng thời điểm phản ánh sự tác động của các yếu tố ngoại lai. Ví dụ, các nghiên cứu \citep{overreactioncontrarian, mech1993portfolio} cũng chỉ ra sự phụ thuộc giữa chỉ số tài chính của một công ty nhất định và các chỉ số của các công ty khác. Điều này càng làm tăng tính đúng đắn của giả thuyết trong nghiên cứu \cite{fama1970efficient}.
+% Do đó, bằng việc khai thác các nguồn dữ liệu có cùng domain, chúng ta có thể capture được các thông tin phản ánh các external factors.
+
+Regarding the third challenge, \cite{fama1970efficient} hypothesizes that different time-series datasets of the same domain at the same time reflect the impact of external factors. For example, studies \citep{overreactioncontrarian, mech1993portfolio} show the dependence between the financial ratios of a given company and the ratios of other companies. This further strengthens the hypothesis in study \cite{fama1970efficient}. Therefore, by exploiting data sources with the same domain, we can capture information reflecting external factors.
+
+\vspace{2mm}
+
+% Chúng tôi tiếp cận các thách thức nêu trên thông qua việc kết hợp đặc trưng và tổng hợp mô hình. Cụ thể, bằng cách sử dụng Meta-learning (ML) \cite{finn2017model}, chúng tôi tổng hợp hiệu quả tham số của các mô hình cục bộ, giúp giảm thiểu đáng kể variance loss cũng như tăng khả năng thu thập các thông tin phản ánh external factors từ các tập dữ liệu có cùng domain. Để học được các laten patterns, chúng tôi đề xuất phương pháp kết hợp các đặc trưng từ \verb|CNN| và \verb|LSTM|. Ngoài ra, chúng tôi cho rằng, aperiodic time-series data còn có những phụ thuộc ngầm vào các thời điểm nhất định trong quá khứ (hidden long-term dependency). Đối với cách tiếp cận truyền thống, người ta sử dụng một lượng dữ liệu quá khứ cố định (lookback window) để huấn luyện mô hình. Điều này gây một trở ngại lớn cho quá trình học vì các đặc trưng dài hạn theo thời gian sẽ bị quên. Mặt khác, ML chia nhỏ tập dữ liệu thành nhiều phần để học và tổng hợp hiệu quả các tham số học được nên có thể xử lý tốt thách thức này.
+
+We approach the above challenges through combination of feature combination and model synthesis. Specifically, by using Meta-learning (ML) \cite{finn2017model}, we efficiently synthesize the parameters of local models, which significantly reduces variance loss and increases the ability to collect information reflecting external factors from datasets in the same domain. To effectively learn laten patterns, we propose a method that combines features from \verb|CNN| and \verb|LSTM|. In addition, we assume that aperiodic time-series data also has hidden long-term dependencies. Traditional approaches use a fixed amount of past data (lookback window) to train the model. This poses a major obstacle to the learning process because long-term features will be forgotten over time. On the other hand, ML divides the dataset into many parts to learn and synthesize the learned parameters effectively, so it can handle this challenge well.
 
 \vspace{2mm}
 
 % Cuối cùng, chúng tôi chứng minh tính ưu việt của thuật toán đề xuất bằng cách giải bài toán dự đoán xu hướng (tăng hoặc giảm) của tỉ giá ngoại hối và so sánh kết quả với mô hình SOTA hiện tại (\verb|NHITS| \cite{challu2023nhits}) trên hai loại dữ liệu: (1) - Dữ liệu tỉ giả của cặp tiền tệ USD/JPY; (2) - Dữ liệu tỷ giá của 60 cặp tiền tệ, cấu thành từ 18 quốc gia. Các tập dữ liệu này được công khai trên Internet và có thể tải về dễ dàng. Bản cài đặt chính thức có thể xem tại [bỏ cái link github vào đây].
 
-Finally, we demonstrate the superiority of the proposed algorithm by solving the problem of predicting the trend (up or down) of foreign exchange rates and comparing the results with the existing state-of-the-art (SOTA) model (\verb|NHITS| \cite{challu2023nhits}) on two types of data: (1) - USD/JPY exchange rate data; (2) - Exchange rate data of 60 currency pairs, comprising 18 countries. These data sets are publicly available on the Internet and can be easily downloaded. The official implementation can be found at [insert github link here].
+Finally, we demonstrate the superiority of the proposed algorithm by solving the problem of predicting the trend (upward or downward) of foreign exchange rates and comparing the results with the existing state-of-the-art (SOTA) model (\verb|NHITS| \cite{challu2023nhits}) on two types of data: (1) - USD/JPY exchange rate data; (2) - Exchange rate data of 60 currency pairs, comprising 18 countries. These data sets are publicly available on the Internet and can be easily downloaded. The official implementation can be found at \url{https://github.com/baolongnguyenmac/multi_fx}.
 
 \vspace{2mm}
 
-In summary, our main contributions are as follows:
-
-\begin{itemize}
-    % \item Kết hợp đặc trưng: Rút trích đặc trưng bằng cách kết hợp các đặc trưng của \verb|LSTM| và \verb|CNN|.
-    \item \textbf{Feature combination}: Extract feature using \verb|LSTM| and \verb|CNN| and combine them.
-
-    % \item Hidden long-term dependency: Chứng minh thực nghiệm rằng một aperiodic time-series data nhất định không chỉ phụ thuộc vào các yếu tố ngoại lai mà còn có các phụ thuộc ẩn với chính nó tại nhiều thời điểm khác nhau trong quá khứ.
-    \item \textbf{Hidden long-term dependency}: Experimentally demonstrate that a given aperiodic time-series data not only depends on external factors but also has hidden dependencies with itself at various points in the past.
-
-    % \item Tổng hợp hiệu quả tham số mô hình: Sử dụng ML thay cho các mô hình ensemble truyền thống trong việc tổng hợp kết quả từ các mô hình học máy.
-    \item \textbf{Efficient model parameter aggregation}: Use ML instead of traditional ensemble models to aggregate results from machine learning models.
-
-    % \item Experiment: Thực nghiệm trên các bộ dữ liệu về tỉ giá hối đoái và so sánh với mô hình SOTA \verb|NHITS| để chứng minh tính hiệu quả của phương pháp đề xuất.
-    \item \textbf{Experiment}: Experiment on exchange rate datasets and compare with \verb|NHITS| - the SOTA model to demonstrate the effectiveness of the proposed method.
-\end{itemize}
+In summary, our main contributions include the following: First, we present a novel \textbf{feature combination technique} that extracts and combines features using both \verb|LSTM| and \verb|CNN| models. Second, we uncover hidden long-term dependencies, demonstrating experimentally that aperiodic time-series data not only rely on external factors but also exhibit dependencies with past period, which we call \textbf{hidden long-term dependencies}. Third, we introduce an efficient model parameter aggregation approach by employing ML algorithm in place of traditional ensemble models for combining parameters from multiple machine learning models. Finally, we validate our method through experiments on exchange rate datasets and show its effectiveness in comparison to the SOTA model, \verb|NHITS|.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Related work}
@@ -171,8 +168,8 @@ A basic ML algorithm is trained on multiple tasks $t$ drawn from the same task d
 The algorithm then uses the optimal parameter sets $\theta_t^*$ to perform on the corresponding query set. The losses of the entire models are then aggregated to perform the outer optimization process as equation \ref{eq:outer_opt}.
 
 \begin{align*}
-    \phi^* &= \arg\min_{\phi}\sum_{t}{\mathcal{L}^{meta}_t\left[ \theta_t^*, \mathcal{D}_t^{query} \right]}\\
-    &= \arg\min_{\phi}\sum_{t}{\mathcal{L}^{meta}_t\left[ \theta_t(\phi), \mathcal{D}_t^{query} \right]} \numberthis
+    \phi^* &= \arg\min_{\phi}\sum_{t}{\mathcal{L}^{meta}_t\left( \theta_t^*, \mathcal{D}_t^{query} \right)}\\
+    &= \arg\min_{\phi}\sum_{t}{\mathcal{L}^{meta}_t\left( \theta_t(\phi), \mathcal{D}_t^{query} \right)} \numberthis
     \label{eq:outer_opt}
 \end{align*}
 
@@ -379,16 +376,16 @@ For \verb|NHITS| model, we split the data as usual according to the above predet
 
 \begin{table}
     \centering
-    \caption{Statistics on USD/JPY and multi-fx. \textbf{The data is not correct, have to be re-written}}
+    \caption{Statistics on USD/JPY and multi-fx.}
     \label{tab:stat_}
-    \begin{tabular}{ccccccc} 
+    \begin{tabular}{ccccccc}
     \toprule
-    \multirow{2}{*}{Dataset} & \multirow{2}{*}{\#task} & \multirow{2}{*}{\#samples} & \multicolumn{4}{c}{\#samples/task}  \\ 
+    \multirow{2}{*}{Dataset} & \multirow{2}{*}{\#task} & \multirow{2}{*}{\#samples} & \multicolumn{4}{c}{\#samples/task}  \\
     \cline{4-7}
-                             &                         &                            & min & mean  & std   & max             \\ 
+                             &                         &                            & min & mean  & std   & max             \\
     \hline
-    \Verb|USD/JPY|           & 60                      & 69,909                     & 135 & 1,398 & 1,424 & 5,201           \\
-    \Verb|multi-fx|          & 60                      & 52,497                     & 506 & 1,049 & 250   & 1,986           \\
+    \Verb|USD/JPY|           & 60                      & 150,175                     & 2,502 & 2,502.92 & 0.28 & 2,503           \\
+    \Verb|multi-fx|          & 60                      & 154,440                     & 2,467 & 2,575 & 58.61   & 2748           \\
     \bottomrule
     \end{tabular}
 \end{table}
@@ -412,13 +409,13 @@ Table \ref{tab:rs} compares the results between the proposed model and the \verb
     \centering
     \caption{Classification results (\%) of NHITS and our method using USD/JPY and multi-fx datasets. Best results per metrics are boldfaced.}
     \label{tab:rs}
-    \begin{tabular}{c|c|cccc} 
+    \begin{tabular}{c|c|cccc}
     \toprule
-    \multicolumn{1}{c}{}                          &                                    & $accuracy$            & $precision$           & $recall$              & $F1$                    \\ 
+    \multicolumn{1}{c}{}                          &                                    & $accuracy$            & $precision$           & $recall$              & $F1$                    \\
     \hline
     \multirow{3}{*}{\Verb|USD/JPY|}  & \Verb|NHITS|          & 53.29                 & 52.38                 & 52.23                 & 51.87                   \\
-                                                & Ours(\Verb|LSTM|)     & $not\_done$           & $59.57±2.53$          & $58.31±2.57$          & $56.6±3.74$             \\
-                                                & Ours(\Verb|LSTM+CNN|) & $\mathbf{58.05±0.01}$ & $\mathbf{59.57±2.53}$ & $\mathbf{58.31±2.57}$ & $\mathbf{56.6±3.74}$    \\ 
+                                                & Ours(\Verb|LSTM|)     & $57.12±0.08$ & $58.32±2.72$ & $57.44±2.62$ & $56.87±3.56$    \\
+                                                & Ours(\Verb|LSTM+CNN|) & $\mathbf{58.05±0.01}$ & $\mathbf{59.57±2.53}$ & $\mathbf{58.31±2.57}$ & $\mathbf{56.6±3.74}$    \\
     \hline
     \multirow{3}{*}{\Verb|multi-fx|} & \Verb|NHITS|          & 51.12                 & 51.22                 & 51.16                 & 50.54                   \\
                                                 & Ours(\Verb|LSTM|)     & $61.23±0.06$          & $70.52±9.17$          & $69.51±9.31$          & $68.9±10.0$             \\
@@ -481,7 +478,7 @@ When using \verb|MAML| to synthesize the features of the \verb|LSTM| and \verb|L
 
 When approaching the \verb|USD/JPY| data using ML, the model also shows high accuracy. By looking at the past time periods, \textbf{the proposed method has proven to be more effective in capturing hidden long-term dependencies through the efficient aggregation of features that the} \verb|LSTM| \textbf{easily forgets during training}. This proves the hypothesis of the existence of hidden long-term dependencies that we stated in section \ref{sec.intro}.
 
-% dis NHITS vì tổng hợp đặc trưng chỉ bằng phép cộng :v 
+% dis NHITS vì tổng hợp đặc trưng chỉ bằng phép cộng :v
 % Trong quá trình tổng hợp các đặc trưng để đưa ra dự đoán cuối, \verb|NHITS| chỉ sử dụng các phép cộng trừ đơn giản. Điều này đặt trong ngữ cảnh của việc tổng hợp thông tin dựa trên các hàm nội suy và phần dư của input là hợp lý. Tuy nhiên, đối diện với sự phức tạp trong dữ liệu đòi hỏi một cấu trúc phức tạp hơn để có thể tổng hợp các đặc trưng một cách hợp lý hơn. Việc sử dụng nội suy trên dữ liệu có thể coi là rất đơn giản so với quá trình meta-optimization của các thuật toán ML. Hơn nữa, việc phân tách và kết hợp các dải tần số dữ liệu của \verb|NHITS| chỉ có thể hoạt động tốt nếu dữ liệu thực sự tồn tại chu kỳ. Dữ liệu phi chi kỳ như FX hoặc stock price có thể là điểm yếu chí mạng cho hướng tiếp cận này.
 
 In the process of synthesizing features to make the final prediction, \verb|NHITS| only uses simple addition and subtraction. This is reasonable in the context of synthesizing information based on interpolation functions and input residuals and trying to simulate the synthesis of frequency bands. However, facing complexity in data requires a more complex structure to be able to synthesize features in a more reasonable way. Using interpolation on the data can be considered very simple compared to the meta-optimization process of ML algorithms. Furthermore, \verb|NHITS|'s separation and combination of data frequency bands can only work well if the data is truly periodic. Non-periodic data such as FX or stock prices can be a fatal weakness for this approach.
@@ -534,8 +531,8 @@ The datasets used and/or analyzed during the current study available from the co
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \clearpage
-% \bibliographystyle{elsarticle-harv} 
-\bibliographystyle{splncs04} 
+% \bibliographystyle{elsarticle-harv}
+\bibliographystyle{splncs04}
 \bibliography{references}
 \clearpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -556,14 +553,14 @@ The fine-tuning process of ML algorithms involves many hyper-parameters such as 
     \centering
     \caption{Search space for fine-tuning our method.}
     \label{tab:our_finetune}
-    \begin{tabular}{ll} 
+    \begin{tabular}{ll}
     \toprule
-    \multicolumn{1}{c}{Hyper-parameter} & \multicolumn{1}{c}{Seach space}                                            \\ 
+    \multicolumn{1}{c}{Hyper-parameter} & \multicolumn{1}{c}{Seach space}                                            \\
     \hline
     Inner batch size (samples/batch)    & \{32\}                                                                     \\
     Inner training step                 & \{3\}                                                                      \\
     Outer batch size (tasks/batch)      & \{5\}                                                                      \\
-    Outer training step                 & \{100\}                                                                    \\ 
+    Outer training step                 & \{100\}                                                                    \\
     \hline
     Lookback window                     & \{10, 20, 30\}                                                             \\
     Inner learning rate                 & \{0.001, 0.005, 0.01, 0.05\}                                               \\
@@ -581,9 +578,9 @@ The fine-tuning process of ML algorithms involves many hyper-parameters such as 
     \centering
     \caption{Search space for fine-tuning NHITS.}
     \label{tab:nhits_finetune}
-    \begin{tabular}{ll} 
+    \begin{tabular}{ll}
     \toprule
-    \multicolumn{1}{c}{Hyper-parameter} & \multicolumn{1}{c}{Seach space}                                                                         \\ 
+    \multicolumn{1}{c}{Hyper-parameter} & \multicolumn{1}{c}{Seach space}                                                                         \\
     \hline
     Random seed                         & \{1\}                                                                                                   \\
     Number of stacks                    & \{3\}                                                                                                   \\
@@ -625,7 +622,7 @@ When performing similar experiments with the \verb|LSTM| model, the accuracy dep
 \begin{figure}[h]
     \centering
     \includegraphics[width=\linewidth]{img/lr.pdf}
-    \caption{Convergence of 32 models LSTM+CNN.}
+    \caption{Convergence processes of 32 models using LSTM+CNN as feature extractor.}
     \label{fig:lr}
 \end{figure}
 
@@ -636,7 +633,7 @@ When performing similar experiments with the \verb|LSTM| model, the accuracy dep
 
 However, the convergence process of the proposed method depends heavily on the lookback window. Experiments on the \verb|LSTM| model with \verb|NHITS| data show that, when considering the same set of hyper-parameters and the same model architecture, if the lookback window is increased from 10 to 20, the number of converged models increases dramatically. In addition, the model convergence level is also significantly improved. When increasing the lookback window from 20 to 30, some potential models appear, the accuracy of which can continue to increase if training continues. This is an interesting insight showing that if we look into the past enough and deeply enough, we can increase the accuracy in future predictions. If the past data is larger, we may have to increase the model size to meet the understanding of this data.
 
-\begin{figure}
+\begin{figure}[H]
     \centering
     \begin{subfigure}[b]{\linewidth}
         \centering
