@@ -1,0 +1,1578 @@
+{
+    "1": {
+        "input_size": 5,
+        "n_stacks": 3,
+        "kernel_size": [
+            2,
+            2,
+            2
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            168,
+            24,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5318461656570435,
+        "precision": 0.5228180552287549,
+        "recall": 0.521499460659292,
+        "f1": 0.518226386879584
+    },
+    "2": {
+        "input_size": 20,
+        "n_stacks": 3,
+        "kernel_size": [
+            2,
+            2,
+            2
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            168,
+            24,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5156317353248596,
+        "precision": 0.5076896387440184,
+        "recall": 0.5074354867907401,
+        "f1": 0.5058063983460119
+    },
+    "3": {
+        "input_size": 30,
+        "n_stacks": 3,
+        "kernel_size": [
+            2,
+            2,
+            2
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            168,
+            24,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5320792198181152,
+        "precision": 0.5227738802426021,
+        "recall": 0.5213482768524019,
+        "f1": 0.5176831526125529
+    },
+    "4": {
+        "input_size": 5,
+        "n_stacks": 3,
+        "kernel_size": [
+            2,
+            2,
+            2
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            24,
+            12,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5318461656570435,
+        "precision": 0.5228180552287549,
+        "recall": 0.521499460659292,
+        "f1": 0.518226386879584
+    },
+    "5": {
+        "input_size": 20,
+        "n_stacks": 3,
+        "kernel_size": [
+            2,
+            2,
+            2
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            24,
+            12,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5156317353248596,
+        "precision": 0.5076896387440184,
+        "recall": 0.5074354867907401,
+        "f1": 0.5058063983460119
+    },
+    "6": {
+        "input_size": 30,
+        "n_stacks": 3,
+        "kernel_size": [
+            2,
+            2,
+            2
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            24,
+            12,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5320792198181152,
+        "precision": 0.5227738802426021,
+        "recall": 0.5213482768524019,
+        "f1": 0.5176831526125529
+    },
+    "7": {
+        "input_size": 5,
+        "n_stacks": 3,
+        "kernel_size": [
+            2,
+            2,
+            2
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            180,
+            60,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5318461656570435,
+        "precision": 0.5228180552287549,
+        "recall": 0.521499460659292,
+        "f1": 0.518226386879584
+    },
+    "8": {
+        "input_size": 20,
+        "n_stacks": 3,
+        "kernel_size": [
+            2,
+            2,
+            2
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            180,
+            60,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5156317353248596,
+        "precision": 0.5076896387440184,
+        "recall": 0.5074354867907401,
+        "f1": 0.5058063983460119
+    },
+    "9": {
+        "input_size": 30,
+        "n_stacks": 3,
+        "kernel_size": [
+            2,
+            2,
+            2
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            180,
+            60,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5320792198181152,
+        "precision": 0.5227738802426021,
+        "recall": 0.5213482768524019,
+        "f1": 0.5176831526125529
+    },
+    "10": {
+        "input_size": 5,
+        "n_stacks": 3,
+        "kernel_size": [
+            2,
+            2,
+            2
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            40,
+            20,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5318461656570435,
+        "precision": 0.5228180552287549,
+        "recall": 0.521499460659292,
+        "f1": 0.518226386879584
+    },
+    "11": {
+        "input_size": 20,
+        "n_stacks": 3,
+        "kernel_size": [
+            2,
+            2,
+            2
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            40,
+            20,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5156317353248596,
+        "precision": 0.5076896387440184,
+        "recall": 0.5074354867907401,
+        "f1": 0.5058063983460119
+    },
+    "12": {
+        "input_size": 30,
+        "n_stacks": 3,
+        "kernel_size": [
+            2,
+            2,
+            2
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            40,
+            20,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5320792198181152,
+        "precision": 0.5227738802426021,
+        "recall": 0.5213482768524019,
+        "f1": 0.5176831526125529
+    },
+    "13": {
+        "input_size": 5,
+        "n_stacks": 3,
+        "kernel_size": [
+            2,
+            2,
+            2
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            64,
+            8,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5318461656570435,
+        "precision": 0.5228180552287549,
+        "recall": 0.521499460659292,
+        "f1": 0.518226386879584
+    },
+    "14": {
+        "input_size": 20,
+        "n_stacks": 3,
+        "kernel_size": [
+            2,
+            2,
+            2
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            64,
+            8,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5156317353248596,
+        "precision": 0.5076896387440184,
+        "recall": 0.5074354867907401,
+        "f1": 0.5058063983460119
+    },
+    "15": {
+        "input_size": 30,
+        "n_stacks": 3,
+        "kernel_size": [
+            2,
+            2,
+            2
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            64,
+            8,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5320792198181152,
+        "precision": 0.5227738802426021,
+        "recall": 0.5213482768524019,
+        "f1": 0.5176831526125529
+    },
+    "16": {
+        "input_size": 5,
+        "n_stacks": 3,
+        "kernel_size": [
+            4,
+            4,
+            4
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            168,
+            24,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.530081570148468,
+        "precision": 0.5214792631166043,
+        "recall": 0.520413876810798,
+        "f1": 0.5177598466048678
+    },
+    "17": {
+        "input_size": 20,
+        "n_stacks": 3,
+        "kernel_size": [
+            4,
+            4,
+            4
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            168,
+            24,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5150324702262878,
+        "precision": 0.5037422806603795,
+        "recall": 0.503473173607238,
+        "f1": 0.4985521171794659
+    },
+    "18": {
+        "input_size": 30,
+        "n_stacks": 3,
+        "kernel_size": [
+            4,
+            4,
+            4
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            168,
+            24,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.53281170129776,
+        "precision": 0.524350670177034,
+        "recall": 0.5231351138995549,
+        "f1": 0.5205091519627142
+    },
+    "19": {
+        "input_size": 5,
+        "n_stacks": 3,
+        "kernel_size": [
+            4,
+            4,
+            4
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            24,
+            12,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.530081570148468,
+        "precision": 0.5214792631166043,
+        "recall": 0.520413876810798,
+        "f1": 0.5177598466048678
+    },
+    "20": {
+        "input_size": 20,
+        "n_stacks": 3,
+        "kernel_size": [
+            4,
+            4,
+            4
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            24,
+            12,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5150324702262878,
+        "precision": 0.5037422806603795,
+        "recall": 0.503473173607238,
+        "f1": 0.4985521171794659
+    },
+    "21": {
+        "input_size": 30,
+        "n_stacks": 3,
+        "kernel_size": [
+            4,
+            4,
+            4
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            24,
+            12,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.53281170129776,
+        "precision": 0.524350670177034,
+        "recall": 0.5231351138995549,
+        "f1": 0.5205091519627142
+    },
+    "22": {
+        "input_size": 5,
+        "n_stacks": 3,
+        "kernel_size": [
+            4,
+            4,
+            4
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            180,
+            60,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.530081570148468,
+        "precision": 0.5214792631166043,
+        "recall": 0.520413876810798,
+        "f1": 0.5177598466048678
+    },
+    "23": {
+        "input_size": 20,
+        "n_stacks": 3,
+        "kernel_size": [
+            4,
+            4,
+            4
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            180,
+            60,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5150324702262878,
+        "precision": 0.5037422806603795,
+        "recall": 0.503473173607238,
+        "f1": 0.4985521171794659
+    },
+    "24": {
+        "input_size": 30,
+        "n_stacks": 3,
+        "kernel_size": [
+            4,
+            4,
+            4
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            180,
+            60,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.53281170129776,
+        "precision": 0.524350670177034,
+        "recall": 0.5231351138995549,
+        "f1": 0.5205091519627142
+    },
+    "25": {
+        "input_size": 5,
+        "n_stacks": 3,
+        "kernel_size": [
+            4,
+            4,
+            4
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            40,
+            20,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.530081570148468,
+        "precision": 0.5214792631166043,
+        "recall": 0.520413876810798,
+        "f1": 0.5177598466048678
+    },
+    "26": {
+        "input_size": 20,
+        "n_stacks": 3,
+        "kernel_size": [
+            4,
+            4,
+            4
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            40,
+            20,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5150324702262878,
+        "precision": 0.5037422806603795,
+        "recall": 0.503473173607238,
+        "f1": 0.4985521171794659
+    },
+    "27": {
+        "input_size": 30,
+        "n_stacks": 3,
+        "kernel_size": [
+            4,
+            4,
+            4
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            40,
+            20,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.53281170129776,
+        "precision": 0.524350670177034,
+        "recall": 0.5231351138995549,
+        "f1": 0.5205091519627142
+    },
+    "28": {
+        "input_size": 5,
+        "n_stacks": 3,
+        "kernel_size": [
+            4,
+            4,
+            4
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            64,
+            8,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.530081570148468,
+        "precision": 0.5214792631166043,
+        "recall": 0.520413876810798,
+        "f1": 0.5177598466048678
+    },
+    "29": {
+        "input_size": 20,
+        "n_stacks": 3,
+        "kernel_size": [
+            4,
+            4,
+            4
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            64,
+            8,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5150324702262878,
+        "precision": 0.5037422806603795,
+        "recall": 0.503473173607238,
+        "f1": 0.4985521171794659
+    },
+    "30": {
+        "input_size": 30,
+        "n_stacks": 3,
+        "kernel_size": [
+            4,
+            4,
+            4
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            64,
+            8,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.53281170129776,
+        "precision": 0.524350670177034,
+        "recall": 0.5231351138995549,
+        "f1": 0.5205091519627142
+    },
+    "31": {
+        "input_size": 5,
+        "n_stacks": 3,
+        "kernel_size": [
+            8,
+            8,
+            8
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            168,
+            24,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5296487212181091,
+        "precision": 0.5189161867425675,
+        "recall": 0.5173270474348994,
+        "f1": 0.5117154828630622
+    },
+    "32": {
+        "input_size": 20,
+        "n_stacks": 3,
+        "kernel_size": [
+            8,
+            8,
+            8
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            168,
+            24,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5240885615348816,
+        "precision": 0.5123261477121437,
+        "recall": 0.5111927271900572,
+        "f1": 0.5046555584854582
+    },
+    "33": {
+        "input_size": 30,
+        "n_stacks": 3,
+        "kernel_size": [
+            8,
+            8,
+            8
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            168,
+            24,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.532944917678833,
+        "precision": 0.523757574519863,
+        "recall": 0.5222920840253364,
+        "f1": 0.5187234542899535
+    },
+    "34": {
+        "input_size": 5,
+        "n_stacks": 3,
+        "kernel_size": [
+            8,
+            8,
+            8
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            24,
+            12,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5296487212181091,
+        "precision": 0.5189161867425675,
+        "recall": 0.5173270474348994,
+        "f1": 0.5117154828630622
+    },
+    "35": {
+        "input_size": 20,
+        "n_stacks": 3,
+        "kernel_size": [
+            8,
+            8,
+            8
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            24,
+            12,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5240885615348816,
+        "precision": 0.5123261477121437,
+        "recall": 0.5111927271900572,
+        "f1": 0.5046555584854582
+    },
+    "36": {
+        "input_size": 30,
+        "n_stacks": 3,
+        "kernel_size": [
+            8,
+            8,
+            8
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            24,
+            12,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.532944917678833,
+        "precision": 0.523757574519863,
+        "recall": 0.5222920840253364,
+        "f1": 0.5187234542899535
+    },
+    "37": {
+        "input_size": 5,
+        "n_stacks": 3,
+        "kernel_size": [
+            8,
+            8,
+            8
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            180,
+            60,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5296487212181091,
+        "precision": 0.5189161867425675,
+        "recall": 0.5173270474348994,
+        "f1": 0.5117154828630622
+    },
+    "38": {
+        "input_size": 20,
+        "n_stacks": 3,
+        "kernel_size": [
+            8,
+            8,
+            8
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            180,
+            60,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5240885615348816,
+        "precision": 0.5123261477121437,
+        "recall": 0.5111927271900572,
+        "f1": 0.5046555584854582
+    },
+    "39": {
+        "mòi moi": 1,
+        "input_size": 30,
+        "n_stacks": 3,
+        "kernel_size": [
+            8,
+            8,
+            8
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            180,
+            60,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.532944917678833,
+        "precision": 0.523757574519863,
+        "recall": 0.5222920840253364,
+        "f1": 0.5187234542899535
+    },
+    "40": {
+        "input_size": 5,
+        "n_stacks": 3,
+        "kernel_size": [
+            8,
+            8,
+            8
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            40,
+            20,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5296487212181091,
+        "precision": 0.5189161867425675,
+        "recall": 0.5173270474348994,
+        "f1": 0.5117154828630622
+    },
+    "41": {
+        "input_size": 20,
+        "n_stacks": 3,
+        "kernel_size": [
+            8,
+            8,
+            8
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            40,
+            20,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5240885615348816,
+        "precision": 0.5123261477121437,
+        "recall": 0.5111927271900572,
+        "f1": 0.5046555584854582
+    },
+    "42": {
+        "input_size": 30,
+        "n_stacks": 3,
+        "kernel_size": [
+            8,
+            8,
+            8
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            40,
+            20,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.532944917678833,
+        "precision": 0.523757574519863,
+        "recall": 0.5222920840253364,
+        "f1": 0.5187234542899535
+    },
+    "43": {
+        "input_size": 5,
+        "n_stacks": 3,
+        "kernel_size": [
+            8,
+            8,
+            8
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            64,
+            8,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5296487212181091,
+        "precision": 0.5189161867425675,
+        "recall": 0.5173270474348994,
+        "f1": 0.5117154828630622
+    },
+    "44": {
+        "input_size": 20,
+        "n_stacks": 3,
+        "kernel_size": [
+            8,
+            8,
+            8
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            64,
+            8,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5240885615348816,
+        "precision": 0.5123261477121437,
+        "recall": 0.5111927271900572,
+        "f1": 0.5046555584854582
+    },
+    "45": {
+        "input_size": 30,
+        "n_stacks": 3,
+        "kernel_size": [
+            8,
+            8,
+            8
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            64,
+            8,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.532944917678833,
+        "precision": 0.523757574519863,
+        "recall": 0.5222920840253364,
+        "f1": 0.5187234542899535
+    },
+    "46": {
+        "input_size": 5,
+        "n_stacks": 3,
+        "kernel_size": [
+            8,
+            4,
+            1
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            168,
+            24,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5311802625656128,
+        "precision": 0.5233855318162051,
+        "recall": 0.522466772266441,
+        "f1": 0.5206095886791079
+    },
+    "47": {
+        "input_size": 20,
+        "n_stacks": 3,
+        "kernel_size": [
+            8,
+            4,
+            1
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            168,
+            24,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5308473706245422,
+        "precision": 0.5166684805329638,
+        "recall": 0.5139591917303467,
+        "f1": 0.5004931292008585
+    },
+    "48": {
+        "input_size": 30,
+        "n_stacks": 3,
+        "kernel_size": [
+            8,
+            4,
+            1
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            168,
+            24,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5283835530281067,
+        "precision": 0.5218700371168383,
+        "recall": 0.5213606998912854,
+        "f1": 0.5205298755008776
+    },
+    "49": {
+        "input_size": 5,
+        "n_stacks": 3,
+        "kernel_size": [
+            8,
+            4,
+            1
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            24,
+            12,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5311802625656128,
+        "precision": 0.5233855318162051,
+        "recall": 0.522466772266441,
+        "f1": 0.5206095886791079
+    },
+    "50": {
+        "input_size": 20,
+        "n_stacks": 3,
+        "kernel_size": [
+            8,
+            4,
+            1
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            24,
+            12,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5308473706245422,
+        "precision": 0.5166684805329638,
+        "recall": 0.5139591917303467,
+        "f1": 0.5004931292008585
+    },
+    "51": {
+        "input_size": 30,
+        "n_stacks": 3,
+        "kernel_size": [
+            8,
+            4,
+            1
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            24,
+            12,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5283835530281067,
+        "precision": 0.5218700371168383,
+        "recall": 0.5213606998912854,
+        "f1": 0.5205298755008776
+    },
+    "52": {
+        "input_size": 5,
+        "n_stacks": 3,
+        "kernel_size": [
+            8,
+            4,
+            1
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            180,
+            60,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5311802625656128,
+        "precision": 0.5233855318162051,
+        "recall": 0.522466772266441,
+        "f1": 0.5206095886791079
+    },
+    "53": {
+        "input_size": 20,
+        "n_stacks": 3,
+        "kernel_size": [
+            8,
+            4,
+            1
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            180,
+            60,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5308473706245422,
+        "precision": 0.5166684805329638,
+        "recall": 0.5139591917303467,
+        "f1": 0.5004931292008585
+    },
+    "54": {
+        "input_size": 30,
+        "n_stacks": 3,
+        "kernel_size": [
+            8,
+            4,
+            1
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            180,
+            60,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5283835530281067,
+        "precision": 0.5218700371168383,
+        "recall": 0.5213606998912854,
+        "f1": 0.5205298755008776
+    },
+    "55": {
+        "input_size": 5,
+        "n_stacks": 3,
+        "kernel_size": [
+            8,
+            4,
+            1
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            40,
+            20,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5311802625656128,
+        "precision": 0.5233855318162051,
+        "recall": 0.522466772266441,
+        "f1": 0.5206095886791079
+    },
+    "56": {
+        "input_size": 20,
+        "n_stacks": 3,
+        "kernel_size": [
+            8,
+            4,
+            1
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            40,
+            20,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5308473706245422,
+        "precision": 0.5166684805329638,
+        "recall": 0.5139591917303467,
+        "f1": 0.5004931292008585
+    },
+    "57": {
+        "input_size": 30,
+        "n_stacks": 3,
+        "kernel_size": [
+            8,
+            4,
+            1
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            40,
+            20,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5283835530281067,
+        "precision": 0.5218700371168383,
+        "recall": 0.5213606998912854,
+        "f1": 0.5205298755008776
+    },
+    "58": {
+        "input_size": 5,
+        "n_stacks": 3,
+        "kernel_size": [
+            8,
+            4,
+            1
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            64,
+            8,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5311802625656128,
+        "precision": 0.5233855318162051,
+        "recall": 0.522466772266441,
+        "f1": 0.5206095886791079
+    },
+    "59": {
+        "input_size": 20,
+        "n_stacks": 3,
+        "kernel_size": [
+            8,
+            4,
+            1
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            64,
+            8,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5308473706245422,
+        "precision": 0.5166684805329638,
+        "recall": 0.5139591917303467,
+        "f1": 0.5004931292008585
+    },
+    "60": {
+        "input_size": 30,
+        "n_stacks": 3,
+        "kernel_size": [
+            8,
+            4,
+            1
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            64,
+            8,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5283835530281067,
+        "precision": 0.5218700371168383,
+        "recall": 0.5213606998912854,
+        "f1": 0.5205298755008776
+    },
+    "61": {
+        "input_size": 5,
+        "n_stacks": 3,
+        "kernel_size": [
+            16,
+            8,
+            1
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            168,
+            24,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5319793820381165,
+        "precision": 0.5217202489781402,
+        "recall": 0.5199957595134337,
+        "f1": 0.5148729657142226
+    },
+    "62": {
+        "input_size": 20,
+        "n_stacks": 3,
+        "kernel_size": [
+            16,
+            8,
+            1
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            168,
+            24,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5300149917602539,
+        "precision": 0.5161426250890864,
+        "recall": 0.5137012523860829,
+        "f1": 0.5014024384794102
+    },
+    "63": {
+        "input_size": 30,
+        "n_stacks": 3,
+        "kernel_size": [
+            16,
+            8,
+            1
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            168,
+            24,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5248543620109558,
+        "precision": 0.5207615625857237,
+        "recall": 0.5206774305203433,
+        "f1": 0.5206586575982776
+    },
+    "64": {
+        "input_size": 5,
+        "n_stacks": 3,
+        "kernel_size": [
+            16,
+            8,
+            1
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            24,
+            12,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5319793820381165,
+        "precision": 0.5217202489781402,
+        "recall": 0.5199957595134337,
+        "f1": 0.5148729657142226
+    },
+    "65": {
+        "input_size": 20,
+        "n_stacks": 3,
+        "kernel_size": [
+            16,
+            8,
+            1
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            24,
+            12,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5300149917602539,
+        "precision": 0.5161426250890864,
+        "recall": 0.5137012523860829,
+        "f1": 0.5014024384794102
+    },
+    "66": {
+        "input_size": 30,
+        "n_stacks": 3,
+        "kernel_size": [
+            16,
+            8,
+            1
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            24,
+            12,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5248543620109558,
+        "precision": 0.5207615625857237,
+        "recall": 0.5206774305203433,
+        "f1": 0.5206586575982776
+    },
+    "67": {
+        "input_size": 5,
+        "n_stacks": 3,
+        "kernel_size": [
+            16,
+            8,
+            1
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            180,
+            60,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5319793820381165,
+        "precision": 0.5217202489781402,
+        "recall": 0.5199957595134337,
+        "f1": 0.5148729657142226
+    },
+    "68": {
+        "input_size": 20,
+        "n_stacks": 3,
+        "kernel_size": [
+            16,
+            8,
+            1
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            180,
+            60,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5300149917602539,
+        "precision": 0.5161426250890864,
+        "recall": 0.5137012523860829,
+        "f1": 0.5014024384794102
+    },
+    "69": {
+        "input_size": 30,
+        "n_stacks": 3,
+        "kernel_size": [
+            16,
+            8,
+            1
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            180,
+            60,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5248543620109558,
+        "precision": 0.5207615625857237,
+        "recall": 0.5206774305203433,
+        "f1": 0.5206586575982776
+    },
+    "70": {
+        "input_size": 5,
+        "n_stacks": 3,
+        "kernel_size": [
+            16,
+            8,
+            1
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            40,
+            20,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5319793820381165,
+        "precision": 0.5217202489781402,
+        "recall": 0.5199957595134337,
+        "f1": 0.5148729657142226
+    },
+    "71": {
+        "input_size": 20,
+        "n_stacks": 3,
+        "kernel_size": [
+            16,
+            8,
+            1
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            40,
+            20,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5300149917602539,
+        "precision": 0.5161426250890864,
+        "recall": 0.5137012523860829,
+        "f1": 0.5014024384794102
+    },
+    "72": {
+        "input_size": 30,
+        "n_stacks": 3,
+        "kernel_size": [
+            16,
+            8,
+            1
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            40,
+            20,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5248543620109558,
+        "precision": 0.5207615625857237,
+        "recall": 0.5206774305203433,
+        "f1": 0.5206586575982776
+    },
+    "73": {
+        "input_size": 5,
+        "n_stacks": 3,
+        "kernel_size": [
+            16,
+            8,
+            1
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            64,
+            8,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5319793820381165,
+        "precision": 0.5217202489781402,
+        "recall": 0.5199957595134337,
+        "f1": 0.5148729657142226
+    },
+    "74": {
+        "input_size": 20,
+        "n_stacks": 3,
+        "kernel_size": [
+            16,
+            8,
+            1
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            64,
+            8,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5300149917602539,
+        "precision": 0.5161426250890864,
+        "recall": 0.5137012523860829,
+        "f1": 0.5014024384794102
+    },
+    "75": {
+        "input_size": 30,
+        "n_stacks": 3,
+        "kernel_size": [
+            16,
+            8,
+            1
+        ],
+        "mlp_units": 512,
+        "lr": 0.001,
+        "freq": [
+            64,
+            8,
+            1
+        ],
+        "interpolation_mode": "linear",
+        "acc": 0.5248543620109558,
+        "precision": 0.5207615625857237,
+        "recall": 0.5206774305203433,
+        "f1": 0.5206586575982776
+    }
+}
