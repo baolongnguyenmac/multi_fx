@@ -4,15 +4,20 @@
 
 - `baseline`: Contain log of fine-tuning baseline model
 - `pretrained_micro`: It's not really `micro`. The word `micro` or `macro` refer to the way we aggregate metrics. Please see `./model/meta_model.py` in the corresponding commit for detail
-- `prertained_macro*`: Well, it's `macro` :v
-    - `prertained_macro_jp`: ML on USD/JPY dataset
-    - `prertained_macro_random`: ML on multi-fx but the datasets are selected randomly (seed=84)
-    - `prertained_macro`: ML on multi-fx but the datasets be like: the first 30 datasets for training, the next 15 datasets for validating, the last 15 datasets for testing
+- `pretrained_macro*`: Well, it's `macro` :v
+    - `pretrained_macro_jp`: ML on USD/JPY dataset
+    - `pretrained_macro_random`: ML on multi-fx but the datasets are selected randomly (seed=84)
+    - `pretrained_macro`: ML on multi-fx but the datasets be like: the first 30 datasets for training, the next 15 datasets for validating, the last 15 datasets for testing
+
+- I am planing to create folders in `pretrained` based on the name of datasets and remove all the `pretrained` prefix from all these folders. So we're gonna have:
+    - `pretrained_macro_random` -> `multi_fx`
+    - `pretrained_macro_jp` -> `USD_JPY`
+    - Create `ett`, `ecl`
 
 ## More datasets
 
-- I need to experiment on many more datasets
-- I don't know if I should change the problem to long-horizon prediction or stay unchanged
+[-] I need to experiment on many more datasets
+[v] I don't know if I should change the problem to long-horizon prediction or stay unchanged >> Stay unchanged
 - The process for experiments:
     - Re-deciding the problem
     - Data implementation (check with model)
