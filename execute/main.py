@@ -18,31 +18,31 @@ def parse_args():
     parser.add_argument('-rounds', '--num_rounds', type=int, default=100, required=False)
     parser.add_argument('-epochs', '--num_epochs', type=int, default=3, required=True) # we need this param in test phase
     parser.add_argument('-ncpus', '--num_cpus', type=int, default=8)
-    parser.add_argument('-test', '--test', type=str, required=False, help='Pass model_name here (e.g: lstm_0.001_0.005)')
-    # parser.add_argument('--test', action='store_true', required=False)
 
     return vars(parser.parse_args())
 
 def main():
     input_dict = parse_args()
 
-    # data preparation
-    # set data_dir='/home/s2210434/fx/fxdata/multi_USDJPY'
-    data_dict = get_data(look_back=input_dict['look_back_window'], data_dir='/home/s2210434/fx/fxdata/multi_USDJPY')
+    # config data_dir right here
+    dataset = MULTI_FX
+    data_dir = os.path.join(RAW_DATA_DIR, dataset)
+    data_dict = get_data(look_back=input_dict['look_back_window'], data_dir=data_dir)
 
-    # # if pretrained models are from `pretrained_macro_random`
-    # # choose randomly 50% clients for training, 25% for validating and 25% for testing (only apply for multi_fx, not multi_USDJPY)
-    # list_id = set(data_dict.keys())
-    # list_id_train = random.sample(sorted(list_id), 30)
-    # list_id_val = random.sample(sorted(list_id.difference(set(list_id_train))), 15)
-    # list_id_test = list(list_id.difference(set(list_id_train).union(list_id_val)))
-
-    # if pretrained models are from `pretrained_macro`
-    # if the data is multi_USDJPY
-    list_id = list(data_dict.keys())
-    list_id_train = list_id[:int(len(list_id)*0.5)]
-    list_id_val = list_id[int(len(list_id)*0.5):int(len(list_id)*0.75)]
-    list_id_test = list_id[int(len(list_id)*0.75):]
+    if 'multi' in data_dir:
+        # only apply for multi_fx
+        # choose randomly 50% clients for training, 25% for validating and 25% for testing
+        list_id = set(data_dict.keys())
+        list_id_train = random.sample(sorted(list_id), 30)
+        list_id_val = random.sample(sorted(list_id.difference(set(list_id_train))), 15)
+        list_id_test = list(list_id.difference(set(list_id_train).union(list_id_val)))
+    else:
+        # bởi vì các dataset khác không multi
+        # nên phải đảm bảo tính thứ tự trong huấn luyện
+        list_id = list(data_dict.keys())
+        list_id_train = list_id[:int(len(list_id)*0.5)]
+        list_id_val = list_id[int(len(list_id)*0.5):int(len(list_id)*0.75)]
+        list_id_test = list_id[int(len(list_id)*0.75):]
 
     tf.config.threading.set_inter_op_parallelism_threads(input_dict['num_cpus'])
     tf.config.threading.set_intra_op_parallelism_threads(input_dict['num_cpus'])
@@ -57,22 +57,18 @@ def main():
     )
 
     # potential pretrained models are copied to ./pretrained/{...}/backup
-    # change to 'pretrained_macro_jp' if data is USD/JPY
-    pretrained_dir = os.path.join(PRETRAINED_DIR, 'pretrained_macro_jp')
-    if input_dict['test']:
-        maml.meta_model = tf.keras.models.load_model(os.path.join(pretrained_dir, 'backup', f'{input_dict["test"]}.keras'))
-        maml.valid(list_id_test, num_epochs=input_dict['num_epochs'])
-    else:
-        for round in range(input_dict['num_rounds']):
-            batch_task = random.sample(list_id_train, input_dict['batch_task_size'])
-            print(f'\nEpoch {round+1}/{input_dict["num_rounds"]}: Meta-train on {batch_task}\n')
-            maml.train(round, input_dict['num_epochs'], batch_task, list_id_val)
+    pretrained_dir = os.path.join(PRETRAINED_DIR, dataset)
+    for round in range(input_dict['num_rounds']):
+        batch_task = random.sample(list_id_train, input_dict['batch_task_size'])
+        print(f'\nEpoch {round+1}/{input_dict["num_rounds"]}: Meta-train on {batch_task}\n')
+        maml.train(round, input_dict['num_epochs'], batch_task, list_id_val)
 
-        # after training, testing is produced automatically
-        maml.valid(list_id_test, num_epochs=input_dict['num_epochs'], mode=TEST)
+    # after training, testing is produced automatically
+    maml.valid(list_id_test, num_epochs=input_dict['num_epochs'], mode=TEST)
 
-        model_name = f"{input_dict['based_model']}_{input_dict['look_back_window']}_{input_dict['inner_learning_rate']}_{input_dict['outer_learning_rate']}"
-        maml.save_model(dir_=pretrained_dir, model_name=model_name)
+    # save log
+    model_name = f"{input_dict['based_model']}_{input_dict['look_back_window']}_{input_dict['inner_learning_rate']}_{input_dict['outer_learning_rate']}"
+    maml.save_model(dir_=pretrained_dir, model_name=model_name)
 
 if __name__ == '__main__':
     main()
