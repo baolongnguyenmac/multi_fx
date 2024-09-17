@@ -28,12 +28,14 @@ def add_log(log:dict, count:int, input_size:int, n_stacks:int, kernel_size:int, 
     log[count]["recall"] = recall
     log[count]["f1"] = f1
 
-def write_log(log:dict, file_name:str='NHITS_USD-JPY.json'):
+def write_log(log:dict, file_name:str):
     with open(os.path.join(PRETRAINED_DIR, 'baseline', file_name), 'w') as fo:
         json.dump(log, fo)
 
 def run():
-    data_ = get_data_for_nhits('/home/s2210434/fx/fxdata')
+    dataset = USD_JPY
+    data_dir = os.path.join(RAW_DATA_DIR, dataset, 'all')
+    data_ = get_data_for_nhits(data_dir=data_dir)
 
     pooling_sizes = [[2,2,2], [4,4,4], [8,8,8], [8,4,1], [16,8,1]]
     freqs = [[168,24,1], [24,12,1], [180,60,1], [40,20,1], [64,8,1]]
@@ -81,7 +83,7 @@ def run():
                     count += 1
 
                     add_log(log, count, input_size, 3, pooling_size, 512, lr, freq, 'linear', acc, precision, recall, f1)
-    write_log(log)
+    write_log(log=log, file_name=f'NHITS_{dataset}.json')
 
 if __name__ == '__main__':
     # data_ = prepare_data()
