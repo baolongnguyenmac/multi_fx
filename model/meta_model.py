@@ -241,8 +241,10 @@ class MAML:
         self.info[f'{mode}_recall'] = f"{tasks_metrics['recall']:.5f} ± {tasks_metrics['std_recall']:.5f}"
         self.info[f'{mode}_f1'] = f"{tasks_metrics['f1']:.5f} ± {tasks_metrics['std_f1']:.5f}"
 
+        return self.info[f'{mode}_accuracy'], self.info[f'{mode}_precision'], self.info[f'{mode}_recall'], self.info[f'{mode}_f1']
+
     def save_model(self, dir_:str, model_name:str):
-        print('\nSave model\n')
+        print(f'\nSave model at {dir_}\n')
         json_file_path = os.path.join(dir_, f'{model_name}.json')
         model_file_path = os.path.join(dir_, f'{model_name}.keras')
         with open(json_file_path, 'w') as fo:
