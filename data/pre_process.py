@@ -5,8 +5,8 @@ import numpy as np
 
 from common.constants import *
 
-def create_label(df:np.ndarray, mode:str=CLF) -> np.ndarray:
-    label = df[:,-1]
+def create_label(df:np.ndarray, label:int, mode:str=CLF) -> np.ndarray:
+    label = df[:,label]
     if mode == CLF:
         label = label[1:] - label[:-1]
         label = (label>0)*1.
@@ -20,14 +20,20 @@ def normalize_data(df:np.ndarray) -> np.ndarray:
     return scaler.fit_transform(df)
 
 # create dataset with lookback window
-def create_dataset(df:np.ndarray, look_back:int)->tuple[np.ndarray, np.ndarray]:
+def create_dataset(df:np.ndarray, look_back:int, label:int)->tuple[np.ndarray, np.ndarray]:
     size = df.shape[0] - look_back
     X = np.array([df[i : i + look_back] for i in range(size)])
-    y = create_label(df)
+    y = create_label(df, label)
     y = y[look_back:]
     return X, y.reshape(-1,1)
 
-def get_data(look_back:int, test_size:float=0.8, batch_size:int=32, data_dir:str=RAW_DATA_DIR) -> dict[str, dict[str, list[np.ndarray]]]:
+def get_data(look_back:int, label:int=-1, test_size:float=0.8, batch_size:int=32, data_dir:str=RAW_DATA_DIR) -> dict[str, dict[str, list[np.ndarray]]]:
+    """
+        read data from files and return a dict whose each value contains data from a file
+
+        label (int, optional): The label to be predict the movement. Defaults to -1 (the final feature).
+        batch_size (int, optional): If `batch_size=-1`, then we don't divide data into batches
+    """
     cid = 0
     data_dict:dict[str, dict[str, pd.DataFrame]] = {}
     for file_name in os.listdir(data_dir):
@@ -39,7 +45,7 @@ def get_data(look_back:int, test_size:float=0.8, batch_size:int=32, data_dir:str
             transformed_df = normalize_data(df)
 
             # create dataset with lookback window
-            X, y = create_dataset(transformed_df, look_back)
+            X, y = create_dataset(transformed_df, look_back, label)
 
             tmp_dict = {}
             tmp_dict['support_X'], tmp_dict['query_X'], tmp_dict['support_y'], tmp_dict['query_y'] = train_test_split(X, y, test_size=test_size, shuffle=False)

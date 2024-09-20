@@ -2,6 +2,8 @@ import tensorflow as tf
 import random
 random.seed(84)
 import argparse
+import pandas as pd
+import json
 
 from model.meta_model import MAML
 from common.constants import *
@@ -21,15 +23,12 @@ def parse_args():
 
     return vars(parser.parse_args())
 
-def main():
-    input_dict = parse_args()
-
-    # config data_dir right here
-    dataset = MULTI_FX
+def run(dataset:str, input_dict:dict, label:int):
+    # prep data
     data_dir = os.path.join(RAW_DATA_DIR, dataset)
-    data_dict = get_data(look_back=input_dict['look_back_window'], data_dir=data_dir)
+    data_dict = get_data(look_back=input_dict['look_back_window'], data_dir=data_dir, label=label)
 
-    if 'multi' in data_dir:
+    if 'multi' in dataset:
         # only apply for multi_fx
         # choose randomly 50% clients for training, 25% for validating and 25% for testing
         list_id = set(data_dict.keys())
@@ -64,14 +63,49 @@ def main():
         maml.train(round, input_dict['num_epochs'], batch_task, list_id_val)
 
     # after training, testing is produced automatically
-    maml.valid(list_id_test, num_epochs=input_dict['num_epochs'], mode=TEST)
+    acc, precision, recall, f1 = maml.valid(list_id_test, num_epochs=input_dict['num_epochs'], mode=TEST)
 
-    # save log
-    model_name = f"{input_dict['based_model']}_{input_dict['look_back_window']}_{input_dict['inner_learning_rate']}_{input_dict['outer_learning_rate']}"
-    maml.save_model(dir_=pretrained_dir, model_name=model_name)
+    # save log and model
+    model_folder = f"{input_dict['based_model']}_{input_dict['look_back_window']}_{input_dict['inner_learning_rate']}_{input_dict['outer_learning_rate']}"
+    model_dir = os.path.join(pretrained_dir, model_folder)
+    # create a folder in `pretrained_dir` named model_name
+    if not os.path.exists(model_dir):
+        os.mkdir(model_dir)
+    maml.save_model(dir_=model_dir, model_name=label)
+
+    return acc, precision, recall, f1, model_dir
 
 if __name__ == '__main__':
-    main()
+    # config data_dir right here
+    dataset = MULTI_FX
+    data_dir = os.path.join(RAW_DATA_DIR, dataset)
+
+    # extract columns
+    for filename in os.listdir(data_dir):
+        if filename.endswith('.csv'):
+            tmp_df = pd.read_csv(os.path.join(data_dir, filename)).to_numpy()[:,1:]
+            columns = list(range(tmp_df.shape[1]))
+            break
+
+    # run stuff
+    input_dict = parse_args()
+    labels = random.sample(population=columns, k=4)
+    summary = {}
+    for idx, label in enumerate(labels):
+        print(f'\nPredict on label {idx+1}/{len(labels)}\n')
+        acc, precision, recall, f1, model_dir = run(dataset, input_dict, label)
+
+        # log for summary a model
+        summary[label] = {}
+        summary[label]['acc'] = acc
+        summary[label]['precision'] = precision
+        summary[label]['recall'] = recall
+        summary[label]['f1'] = f1
+
+    # write summary of models
+    print(f'\nWrite summary log to {model_dir}\n')
+    with open(os.path.join(model_dir, 'summary.json'), 'w') as fo:
+        json.dump(summary, fo)
 
 # # test
-# python -m execute.main -test lstm_30_0.005_0.0055 -window 20 -mode classification -inner_lr 0.001 -epochs 3 -ncpus 16
+# python -m execute.main -window 10 -model lstm_cnn -mode classification -inner_lr 0.001 -outer_lr 0.0055 -bt_size 3 -rounds 3 -epochs 3 -ncpus 26

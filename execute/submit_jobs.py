@@ -3,7 +3,7 @@ this file should be run from the root directory of the project
 >> python -m execute.submit_jobs
 
 it will generate `tmp.sh` to submit the job to server
-all `tmp.sh` file assume that they are called from the root directory
+all `tmp.sh` files are supposed that they are called from the root directory
 '''
 
 import subprocess
@@ -19,7 +19,7 @@ def generate_script(device:str, name_job:str, look_back:int, model_name:str, mod
 
     if device == 'cpu':
         class_name = 'DEFAULT'
-        resources = 'select=1:ncpus=64'
+        resources = f'select=1:ncpus={ncores_limit}'
         load_modules = ''
         test_device = f'echo "Using $(nproc) CPU cores" &>> {log_file_path}'
     elif device == 'gpu':
@@ -52,7 +52,8 @@ def generate_script(device:str, name_job:str, look_back:int, model_name:str, mod
     with open(os.path.join(EXE_DIR, 'tmp.sh'), "w") as fout:
         fout.write("\n".join(tmp_file) + "\n")
 
-def submit_based_model():
+# finetune meta model (based model: CNN, LSTM)
+def finetune_1():
     current_count = None
     prev_count = 96
     count = 0
@@ -81,17 +82,42 @@ def submit_based_model():
     # generate_script('gpu', WEAK_LEARNERS[0], 'boosting')
     # subprocess.run(["qsub", os.path.join(EXE_DIR, 'tmp.sh')])
 
-def submit_tunned_model():
+# finetune meta model (based model: LSTM, LSTM+CNN)
+def finetune_2():
     count = 0
     for window in [20, 30]:
-        for model in [LSTM]:
-            for inner_lr in [0.005]:
-                for outer_lr in [0.0055, 0.005]:
+        for model in [LSTM, LSTM_CNN]:
+            for inner_lr in [0.005, 0.001, 0.01, 0.05]:
+                for outer_lr in [0.0055, 0.005, 0.001, 0.0015]:
+            # for inner_lr in [0.005, 0.001, 0.01]:
+            #     for outer_lr in [0.0055, 0.005]:
                     generate_script('cpu', f'{model}_{count}', window, model, CLF, inner_lr, outer_lr, 5, 100, 3)
                     subprocess.run(["qsub", os.path.join(EXE_DIR, 'tmp.sh')])
                     time.sleep(1)
                     count += 1
 
+'''
+function finetune_3 fine-tunes all of meta-model (LSTM, LSTM+CNN) on all dataset
+    - multi-fx
+        - inner: [0.001, 0.005]
+        - outer: [0.005, 0.0055]
+    - USD/JPY
+        - inner: [0.001, 0.005, 0.01, 0.05]
+        - outer: [0.001, 0.0015, 0.005, 0.0055]
+    - ECL
+    - ETT
+    - WTH
+'''
+def finetune_3():
+    count = 0
+    for window in [20, 30]:
+        for model in [LSTM, LSTM_CNN]:
+            for inner_lr in [0.001, 0.005]:
+                for outer_lr in [0.005, 0.0055]:
+                    generate_script('gpu', f'{model}_{count}', window, model, CLF, inner_lr, outer_lr, 5, 100, 3)
+                    subprocess.run(["qsub", os.path.join(EXE_DIR, 'tmp.sh')])
+                    time.sleep(1)
+                    count += 1
+
 if __name__ == '__main__':
-    # submit_based_model()
-    submit_tunned_model()
+    finetune_3()
