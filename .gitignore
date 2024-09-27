@@ -29,7 +29,8 @@ tmp*
 *.ipynb
 *.csv
 lightning_logs
-pretrained
+*.txt
+# pretrained
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
