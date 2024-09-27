@@ -12,16 +12,20 @@ USD_JPY = 'USD_JPY'
 ETT = 'ett'
 ECL = 'ecl'
 WTH = 'wth'
+FACTORY_1 = 'important_1'
+FACTORY_2 = 'important_2'
 
 # mode
 REG = 'regression'
 CLF = 'classification'
+VAL = 'validation'
+TEST = 'test'
+
+# based model
 LSTM = 'lstm'
 CNN = 'cnn'
 LSTM_CNN = 'lstm_cnn'
 ATT = 'attention'
-VAL = 'validation'
-TEST = 'test'
 
 # layer
 MAX_POOLING = 'max_pooling'
