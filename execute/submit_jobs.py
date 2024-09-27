@@ -98,23 +98,27 @@ def finetune_2():
 
 '''
 function finetune_3 fine-tunes all of meta-model (LSTM, LSTM+CNN) on all dataset
-    - multi-fx
+    [v] multi-fx
         - inner: [0.001, 0.005]
         - outer: [0.005, 0.0055]
-    - USD/JPY
+    [v] USD/JPY
         - inner: [0.001, 0.005, 0.01, 0.05]
         - outer: [0.001, 0.0015, 0.005, 0.0055]
-    - ECL
-    - ETT
-    - WTH
+    [-] ETT  ---> need to run them again (after analyzing)
+        - inner: [0.001, 0.005, 0.01, 0.05]
+        - outer: [0.001, 0.0015, 0.005, 0.0055]
+    [-] WTH
+        - inner: [0.001, 0.005, 0.01, 0.05]
+        - outer: [0.001, 0.0015, 0.005, 0.0055]
+    [x] ECL
 '''
 def finetune_3():
     count = 0
     for window in [20, 30]:
         for model in [LSTM, LSTM_CNN]:
-            for inner_lr in [0.001, 0.005]:
-                for outer_lr in [0.005, 0.0055]:
-                    generate_script('gpu', f'{model}_{count}', window, model, CLF, inner_lr, outer_lr, 5, 100, 3)
+            for inner_lr in [0.001, 0.005, 0.01, 0.05]:
+                for outer_lr in [0.001, 0.0015, 0.005, 0.0055]:
+                    generate_script('cpu', f'{count}.{model}', window, model, CLF, inner_lr, outer_lr, 5, 100, 3)
                     subprocess.run(["qsub", os.path.join(EXE_DIR, 'tmp.sh')])
                     time.sleep(1)
                     count += 1

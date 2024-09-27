@@ -32,8 +32,8 @@ def run(dataset:str, input_dict:dict, label:int):
         # only apply for multi_fx
         # choose randomly 50% clients for training, 25% for validating and 25% for testing
         list_id = set(data_dict.keys())
-        list_id_train = random.sample(sorted(list_id), 30)
-        list_id_val = random.sample(sorted(list_id.difference(set(list_id_train))), 15)
+        list_id_train = random.sample(sorted(list_id), len(list_id)//2)
+        list_id_val = random.sample(sorted(list_id.difference(set(list_id_train))), len(list_id)//4)
         list_id_test = list(list_id.difference(set(list_id_train).union(list_id_val)))
     else:
         # bởi vì các dataset khác không multi
@@ -76,8 +76,8 @@ def run(dataset:str, input_dict:dict, label:int):
     return acc, precision, recall, f1, model_dir
 
 if __name__ == '__main__':
-    # config data_dir right here
-    dataset = MULTI_FX
+    # config right here
+    dataset = ETT
     data_dir = os.path.join(RAW_DATA_DIR, dataset)
 
     # extract columns
@@ -89,7 +89,7 @@ if __name__ == '__main__':
 
     # run stuff
     input_dict = parse_args()
-    labels = random.sample(population=columns, k=4)
+    labels = columns
     summary = {}
     for idx, label in enumerate(labels):
         print(f'\nPredict on label {idx+1}/{len(labels)}\n')
