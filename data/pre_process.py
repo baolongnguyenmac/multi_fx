@@ -58,23 +58,24 @@ def get_data(look_back:int, label:int=-1, test_size:float=0.8, batch_size:int=32
 
     return data_dict
 
-def get_data_for_nhits(data_dir:str=RAW_DATA_DIR):
+def get_data_for_nhits(data_dir:str=RAW_DATA_DIR, label:int=-1):
     for file_name in os.listdir(data_dir):
         # data_dir should contain only 1 *.csv file
         if file_name.endswith('csv'):
             # read dataset, drop the datetime/index column
-            df = pd.read_csv(os.path.join(data_dir, file_name)).to_numpy()[:,1:]
+            df = pd.read_csv(os.path.join(data_dir, file_name))
+            columns = list(df.columns[1:])
+            df = df.to_numpy()[:,1:]
 
             # normalize data
             transformed_df = normalize_data(df)
 
             # create label
-            y = create_label(transformed_df)
+            y = create_label(transformed_df, label=label)
 
             # concat X, y
             transformed_df = np.concatenate([transformed_df, y.reshape(-1,1)], axis=1)
-            transformed_df = pd.DataFrame(transformed_df, columns=['open', 'high', 'low', 'close', 'y'])
+            transformed_df = pd.DataFrame(transformed_df, columns=columns+['y'])
             transformed_df['unique_id'] = 0
             transformed_df['ds'] = pd.date_range(start='2000-01-01', periods=len(transformed_df), freq='h')
-            return transformed_df[['unique_id', 'ds', 'open', 'high', 'low', 'close', 'y']]
-
+            return transformed_df
