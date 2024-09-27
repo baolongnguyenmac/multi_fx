@@ -1,6 +1,6 @@
 # Multi FX
 
-## Some explanation about `pretrained`
+## [v] Some explanation about `pretrained`
 
 - `baseline`: Contain log of fine-tuning baseline model
 - `pretrained_micro`: It's not really `micro`. The word `micro` or `macro` refer to the way we aggregate metrics. Please see `./model/meta_model.py` in the corresponding commit for detail
@@ -14,14 +14,20 @@
     - `pretrained_macro_jp` -> `USD_JPY`
     - Create `ett`, `ecl`
 
+- Actually, after considering the backup problem, I decided to grab all the old pretrained models to a folder called `old`. Then, I created new folder for new pretrained models
+
 ## More datasets
 
-[-] I need to experiment on many more datasets
+[v] I need to experiment on many more datasets
 [v] I don't know if I should change the problem to long-horizon prediction or stay unchanged >> Stay unchanged
-- The process for experiments:
-    - Re-deciding the problem
-    - Data implementation (check with model)
-    - Fine-tune model
+[v] The process for experiments:
+    [x] Re-deciding the problem
+    [v] Data implementation (check with model)
+    [v] Fine-tune model
+
+- Up to Sep 27
+    [-] I was fine-tuning `multi-fx` and `USD/JPY` dataset. I am also running the fine-tune process for 2 more datasets (`WTH, ETT`). The final accuracies (predict on all features, then take the average) are higher than `NHITS`: Accuracies on aperiodic data are much higher than `NHITS` but the ones on usual datasets are just a bit higher (1-2%)
+    - I am about to run the `factory dataset`. Ichiba-sensei has to report the process to industry on Oct 15
 
 ## [v] Baseline (`NHITS` in `NeuralForecast`)
 
