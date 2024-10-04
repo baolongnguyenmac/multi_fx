@@ -3,13 +3,7 @@
 \usepackage{amsmath}
 \newcommand\numberthis{\addtocounter{equation}{1}\tag{\theequation}}
 \usepackage{amssymb}
-% \usepackage{bm}
-% \usepackage{dcolumn}
-% \usepackage{bm}
 \usepackage{url}
-% \usepackage{here}
-% \usepackage{ulem}
-% \usepackage[caption=false]{subfig}
 \usepackage{float}
 \usepackage{caption}
 \usepackage{subcaption}
@@ -18,7 +12,6 @@
 \usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{rotating}
-% \usepackage{makecell}
 \usepackage{multirow}
 
 \usepackage{fvextra}
@@ -40,12 +33,21 @@
 \def\red{\color{red}}
 \def\blue{\color{blue}}
 \def\green{\color{green}}
+
+% \usepackage{makecell}
+% \usepackage{bm}
+% \usepackage{dcolumn}
+% \usepackage{here}
+% \usepackage{ulem}
+% \usepackage[caption=false]{subfig}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
 \title{
     Meta-learning in movement prediction problem of aperiodic time-series data
 }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \author{Bao-Long Nguyen}
 \email{mwklng2309@icloud.com}
 \affiliation{School of Information Science, JAIST, Ishikawa, Japan}
@@ -94,7 +96,7 @@ Aperiodic time-series data prediction faces several inherent challenges: (1) - T
 % Đối với thách thức đầu tiên, các mô hình ensemble [cite something here] thường được sử dụng để hạn chế ảnh hưởng của sự biến đổi variance. Ensemble model giúp cung cấp một cái nhìn tổng quát, tổng hợp từ nhiều khía cạnh dựa trên các sub-models, từ đó giúp mô hình tổng quát thích ứng được với sự thay đổi mạnh của variance.
 % Tuy nhiên, dưới sự tổng hợp cứng nhắc của các mô hình ensemble truyền thống, kết quả thu được trên các bộ dữ liệu phi chi kỳ là rất thấp.
 
-For the first challenge, ensemble models \citep{sadeghi2021combined, zafeiriou2020intraday, ali2020complete} are often used to mitigate the effects of variance variation. Ensemble models provide a holistic and multi-perspective view based on sub-models, thereby helping the overall model adapt to strong variance changes. However, under the rigid synthesis of traditional ensemble models, the results obtained on non-periodic datasets are very poor.
+For the variance variation challenge, ensemble models \citep{sadeghi2021combined, zafeiriou2020intraday, ali2020complete} are often used to mitigate the effects of variance variation. Ensemble models provide a holistic and multi-perspective view based on sub-models, thereby helping the overall model adapt to strong variance changes. However, under the rigid synthesis of traditional ensemble models, the results obtained on non-periodic datasets are very poor.
 
 \vspace{2mm}
 
@@ -102,14 +104,14 @@ For the first challenge, ensemble models \citep{sadeghi2021combined, zafeiriou20
 % Điều này là hoàn toàn dễ hiểu vì \verb|LSTM| và \verb|CNN| đã chứng minh được khả năng của mình trong việc rút trích các đặc trưng không gian, thời gian một cách hiệu quả.
 % Mặc dù vậy, khi đối mặt với tính phi chu kỳ, sau khoảng 100 training steps, \verb|LSTM| vẫn bị underfitting, còn \verb|CNN| bị overfitting chỉ sau 5 training steps
 
-To overcome the second challenge, most studies use features extracted from Long Short-Term Memory neural network (\verb|LSTM|) \cite{hochreiter1997long}, Artificial Neural Network (\verb|ANN|), and Convolution Neural Network (\verb|CNN|)\cite{lecun1989handwritten}. Specifically, in 2022, 20\% of all publications related to financial index prediction used \verb|LSTM|, 20\% used \verb|ANN|, and 6\% used \verb|CNN|\cite{ayitey2023forex}. This is completely understandable because \verb|LSTM| and \verb|CNN| have proven their ability to extract spatial and temporal features effectively. However, when faced with aperiodic data with only 2600 samples, after 40 training steps, \verb|LSTM| is still underfitting, while \verb|CNN| is overfitting after only 5 training steps.
+To overcome the pattern variation challenge, most studies use features extracted from Long Short-Term Memory neural network (\verb|LSTM|) \cite{hochreiter1997long}, Artificial Neural Network (\verb|ANN|), and Convolution Neural Network (\verb|CNN|) \cite{lecun1989handwritten}. Specifically, in 2022, 20\% of all publications related to financial index prediction used \verb|LSTM|, 20\% used \verb|ANN|, and 6\% used \verb|CNN| \cite{ayitey2023forex}. This is completely understandable because \verb|LSTM| and \verb|CNN| have proven their ability to extract spatial and temporal features effectively. However, when faced with aperiodic data with only 2600 samples, after 40 training steps, \verb|LSTM| is still underfitting, while \verb|CNN| is overfitting after only 5 training steps.
 
 \vspace{2mm}
 
 % Đối với thách thức thứ ba, nghiên cứu \cite{fama1970efficient} đưa ra giả thuyết rằng các time-series datasets khác nhau của cùng một lĩnh vực tại cùng thời điểm phản ánh sự tác động của các yếu tố ngoại lai. Ví dụ, các nghiên cứu \citep{overreactioncontrarian, mech1993portfolio} cũng chỉ ra sự phụ thuộc giữa chỉ số tài chính của một công ty nhất định và các chỉ số của các công ty khác. Điều này càng làm tăng tính đúng đắn của giả thuyết trong nghiên cứu \cite{fama1970efficient}.
 % Do đó, bằng việc khai thác các nguồn dữ liệu có cùng domain, chúng ta có thể capture được các thông tin phản ánh các external factors.
 
-Regarding the third challenge, \cite{fama1970efficient} hypothesizes that different time-series datasets of the same domain at the same time reflect the impact of external factors. For example, studies \citep{overreactioncontrarian, mech1993portfolio} show the dependence between the financial ratios of a given company and the ratios of other companies. This further strengthens the hypothesis in study \cite{fama1970efficient}. Therefore, by exploiting data sources with the same domain, we can capture information reflecting external factors.
+Regarding the external influences challenge, \cite{fama1970efficient} hypothesizes that different time-series datasets of the same domain at the same time reflect the impact of external factors. For example, studies \citep{overreactioncontrarian, mech1993portfolio} show the dependence between the financial ratios of a given company and the ratios of other companies. This further strengthens the hypothesis in study \cite{fama1970efficient}. Therefore, by exploiting data sources with the same domain, we can capture information reflecting external factors.
 
 \vspace{2mm}
 
@@ -125,10 +127,10 @@ Finally, we demonstrate the superiority of the proposed algorithm by solving the
 
 \vspace{2mm}
 
-In summary, our main contributions include the following: First, we present a novel \textbf{feature combination technique} that extracts and combines features using both \verb|LSTM| and \verb|CNN| models. Second, we uncover hidden long-term dependencies, demonstrating experimentally that aperiodic time-series data not only rely on external factors but also exhibit dependencies with past period, which we call \textbf{hidden long-term dependencies}. Third, we introduce an \textbf{efficient model parameter aggregation approach} by employing ML algorithm in place of traditional ensemble models for combining parameters from multiple machine learning models. Finally, we validate our method through experiments on exchange rate datasets and show its effectiveness in comparison to the SOTA model, \verb|NHITS|.
+In summary, our main contributions include the following: First, we present a novel \textbf{feature combination technique} for aperiodic time-series data that extracts and combines features using both \verb|LSTM| and \verb|CNN| models. Second, we uncover hidden long-term dependencies, demonstrating experimentally that aperiodic time-series data not only rely on external factors but also exhibit dependencies with past period, which we call \textbf{hidden long-term dependencies}. Third, we introduce an \textbf{efficient model parameter aggregation approach} by employing ML algorithm in place of traditional ensemble models for combining parameters from multiple machine learning models. Finally, we validate our method through experiments on exchange rate datasets and show its effectiveness in comparison to the SOTA model, \verb|NHITS|.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Related work}
+\section{Related works}
 \label{sec.relatedWork}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -144,11 +146,11 @@ As aforementioned, \verb|LSTM| is a well-known neural network for handling predi
 
 \verb|CNN| is widely used in image processing tasks \citep{naranjo2020review, sharma2018analysis} because of its ability to synthesize local relationships. Not only that, \verb|CNN| is also widely used in time-series data processing tasks such as speech recognition \cite{dua2022developing}, natural language processing \cite{varshitha2023natural}. This proves the ability of \verb|CNN| in discovering local temporal relationships between data samples. However, \verb|CNN| is rarely used in aperiodic time-series data prediction tasks. In this study, we take advantage of \verb|CNN|'s excellent local feature extraction ability to incorporate more hidden information into the model training process.
 
-\subsection{Model-agnostic Meta-learning (MAML)}
+\subsection{Optimization-based Meta-learning}
 
 % Các thuật toán Meta-learning (ML), điển hình là MAML \cite{finn2017model} được biết đến với khả năng huấn luyện một mô hình có tính tổng quát cao, thích ứng nhanh trên tập dữ liệu mới thông qua một lượng nhỏ dữ liệu và số bước huấn luyện \citep{hospedales2021meta, vettoruzzo2024advances}. Với khả năng này, ML được sử dụng rất nhiều trong các tác vụ đòi hỏi khả năng đáp ứng của mô hình trên dữ liệu (e.g. cá nhân hóa mô hình học \citep{chen2018federated, fallah2020personalized,nguyen2022meta}, domain adaptation trong online learning \citep{hu2023meta, khoee2024domain}).
 
-Meta-learning (ML) algorithms, typically MAML \cite{finn2017model} are known for their ability to train a highly general, adaptive model on new datasets with a limited amount of data and a small number of training steps \citep{hospedales2021meta, vettoruzzo2024advances}. With this ability, ML is widely used in tasks that require the model's ability to adapt to the data (e.g. personalization of learning models \citep{chen2018federated, fallah2020personalized,nguyen2022meta}, domain adaptation in online learning \citep{hu2023meta, khoee2024domain}).
+Optimization-based Meta-learning (ML) algorithms, typically MAML \cite{finn2017model} are known for their ability to train a highly general, adaptive model on new datasets with a limited amount of data and a small number of training steps \citep{hospedales2021meta, vettoruzzo2024advances}. With this ability, ML is widely used in tasks that require the model's ability to adapt to the data (e.g. personalization of learning models \citep{chen2018federated, fallah2020personalized,nguyen2022meta}, domain adaptation in online learning \citep{hu2023meta, khoee2024domain}).
 
 \vspace{2mm}
 
@@ -187,7 +189,7 @@ In the inference phase, the initial values for the model parameters are assigned
 
 % Các mô hình hybrid ensemble vốn được sử dụng rất nhiều trong các bài toán xử lý time-series và được chứng minh thực nghiệm là có độ chính xác cao hơn so với các mô hình handle time-series data tiêu chuẩn vì có thể tổng hợp được sức mạnh của nhiều mô hình \cite{ayitey2023forex}. Tuy vậy, các hình thức tổng hợp của ensemble model hiện nay vẫn còn rất cứng nhắc vì chỉ có thể tổng hợp dựa trên kết quả cuối (cơ chế voting của bagging models) và kết quả gần cuối (đối với stacking models). Dưới góc nhìn của ensemble model, có thể coi phương trình \ref{eq:outer_opt} là một phương pháp tổng hợp hiệu quả các sub-model, giúp tận dụng khả năng rút trích đặc trưng của từng mô hình. Nói cách khác, mô hình sau khi tổng hợp có thể rút trích đặc trưng ở mức sâu hơn, cải thiện đáng kể khả năng dự đoán so với các mô hình ensemble truyền thống.
 
-Hybrid ensemble models have been widely used in time-series processing problems and have been experimentally proven to be more accurate than standard time-series models because they can synthesize the strengths of many sub-models \cite{ayitey2023forex}. However, current ensemble model synthesis forms are still very rigid because they can only synthesize based on the final results (voting mechanism of bagging models) and near-final results (for stacking models). From the perspective of ensemble models, the equation \ref{eq:outer_opt} can be considered an effective method of synthesizing sub-models, which helps to take advantage of the feature extraction capabilities of each model. In other words, the synthesized model can extract features at a deeper level, significantly improving the prediction ability compared to traditional ensemble models.
+Hybrid ensemble models have been widely used in time-series processing problems and have been experimentally proven to be more accurate than standard time-series models because they can synthesize the strengths of many sub-models \cite{ayitey2023forex}. However, current ensemble model synthesis forms are still very rigid because they can only synthesize based on the final results (e.g. voting mechanism of bagging models) and near-final results (e.g. stacking models). From the perspective of ensemble models, the equation \ref{eq:outer_opt} can be considered an effective method of synthesizing sub-models, which helps to take advantage of the feature extraction capabilities of each model. In other words, the synthesized model can extract features at a deeper level, significantly improving the prediction ability compared to traditional ensemble models.
 
 \subsection{Neural Hierarchical Interpolation\\for Time Series (NHITS)}
 
@@ -204,9 +206,16 @@ Hybrid ensemble models have been widely used in time-series processing problems 
     \mathbf{\hat{y}}_{t+1:t+H, l} &= g\left(\mathbf{\theta}_l^f\right)
 \end{align}
 
-% Trong đó, \verb|FullyConnected| là các lớp multi-layer perception (\verb|MLP|) xếp chồng với hàm kích hoạt phi tuyến. $\mathbf{\theta}_l^f, \mathbf{\theta}_l^b$ là các hệ số nội suy forecast và backcast, được dùng để tổng hợp các giá trị đầu ra của block $l$ bằng hàm nội suy $g(\cdot)$. Đầu ra của block $l$ là giá trị forecast $\mathbf{\hat{y}}_{t+1:t+H, l}$ và giá trị backcast $\mathbf{\hat{y}}_{t-L:t, l}$. Input của block $l+1$ được tính theo phương trình \ref{eq:input_l1}.
+% Trong đó, \verb|FullyConnected| là các lớp multi-layer perception (\verb|MLP|) xếp chồng với hàm kích hoạt phi tuyến. $\mathbf{\theta}_l^f, \mathbf{\theta}_l^b$ là các hệ số nội suy forecast và backcast, được dùng để tổng hợp các giá trị đầu ra của block $l$ bằng hàm nội suy $g(\cdot)$. Số chiều của các hệ số nội suy trong mỗi stack được quy định bởi expressiveness ratio $r_l$: $\left| \theta_l \right| =  \left \lceil r_l H \right \rceil$. Thông thường, expressiveness ratio sẽ rất nhỏ ở các stack đầu tiên và tăng dần về cuối. Theo đó, các stack có thể mô phỏng lại các tần số từ thấp đến cao. Ngoài ra, bằng việc sử dụng hàm nội suy, \verb|NHITS| không cần quá nhiều phần cứng để huấn luyện mạng neural trong trường hợp H lớn.
 
-Accordingly, \verb|FullyConnected| are stacked multi-layer perception (\verb|MLP|) layers with nonlinear activation functions. $\mathbf{\theta}_l^f, \mathbf{\theta}_l^b$ are the forecast and backcast interpolation coefficients, which are used to aggregate the output values of block $l$ using the interpolation function $g(\cdot)$. The output of block $l$ is the forecast value $\mathbf{\hat{y}}_{t+1:t+H, l}$ and the backcast value $\mathbf{\hat{y}}_{t-L:t, l}$. The input of block $l+1$ is calculated according to the equation \ref{eq:input_l1}.
+
+Accordingly, \verb|Pooling| compresses the original data into $\mathbf{y}_{t-L:t, l}^{(p)}$. \verb|FullyConnected| contains many perceptron layers with nonlinear activation functions. $\mathbf{\theta}_l^f, \mathbf{\theta}_l^b$ are the forecast and backcast interpolation coefficients, which are used to aggregate the output values of block $l$ using the interpolation function $g(\cdot)$. The dimensionality of the interpolation coefficients in each stack is determined by the expressiveness ratio: $\left| \theta_l \right| = \left \lceil r_l H \right \rceil$. Typically, the expressiveness ratio will be very small in the first stacks and increase towards the end. Accordingly, the stacks can simulate frequencies from low to high. In addition, by using $g(\cdot)$, \verb|NHITS| does not require too much hardware to train the neural network in the case of large $H$.
+
+\vspace{2mm}
+
+% Đầu ra của block $l$ là giá trị forecast $\mathbf{\hat{y}}_{t+1:t+H, l}$ và giá trị backcast $\mathbf{\hat{y}}_{t-L:t, l}$. Input của block $l+1$ được tính theo phương trình \ref{eq:input_l1}.
+
+The output of block $l$ is the forecast value $\mathbf{\hat{y}}_{t+1:t+H, l}$ and the backcast value $\mathbf{\hat{y}}_{t-L:t, l}$. The input of block $l+1$ is calculated according to the equation \ref{eq:input_l1}.
 
 \begin{align}
     \mathbf{y}_{t-L:t, l+1} = \mathbf{y}_{t-L:t, l-1} - \mathbf{\hat{y}}_{t-L:t, l}
@@ -228,8 +237,8 @@ By concatenating stacks, each receiving the remainder of the previous stack, the
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=\linewidth]{img/CHF_NZD.pdf}
-    \caption{Exchange rate (close price) between Swiss franc and New Zealand dollar by day (2014-2024).}
+    \includegraphics[width=\linewidth]{img/USD_JPY.pdf}
+    \caption{Exchange rate (close price) between US dollar and Japanese yen by day (2014-2024).}
     \label{fig:fx}
 \end{figure}
 
@@ -272,7 +281,7 @@ A data sample consists of pairs of values $(\mathbf{x}_{t-L:t}, y)$. In which, $
 
 % Lấy cảm hứng từ nghiên cứu \cite{vo2017multi}, chúng tôi đề xuất kết hợp các đặc trưng rút trích được từ mạng \verb|LSTM| và \verb|CNN|. Cụ thể, chúng tôi đưa từng phần tử trong vector $\mathbf{x}_{t-L:t}$ qua một lớp \verb|MLP| có đầu ra lớn hơn số chiều của $\vec x_i, i\in[t-L, t]$ để phân giải thành các đặc trưng nhỏ $\vec x'_i$. Các đặc trưng này sau đó được truyền qua mạng \verb|LSTM| và \verb|CNN| để lần lượt rút trích các phụ thuộc thời gian dài hạn ($\mathbf{h}_{LSTM}$) và các đặc trưng thời gian cục bộ ($\mathbf{h}_{CNN}$). Để có thể khai thác tối đa các ràng buộc thời gian dài hạn, chúng tôi sử dụng \verb|BidirectionalLSTM| để rút trích từ hai phía của của $\mathbf{x}_{t-L:t}$. Toàn bộ quy trình rút trích đặc trưng được tóm tắt như sau:
 
-Inspired by the \cite{vo2017multi} study, we propose to combine the features extracted from \verb|LSTM| and \verb|CNN| networks. Specifically, we pass each element in the vector $\mathbf{x}_{t-L:t}$ through a \verb|MLP| layer whose output'dimension is larger than the one of $\vec x_i, i\in[t-L, t]$ to decompose it into smaller features $\vec x'_i$. These features are then passed through \verb|LSTM| and \verb|CNN| networks to extract long-term temporal dependencies ($\mathbf{h}_{LSTM}$) and local temporal features ($\mathbf{h}_{CNN}$), respectively. To exploit the long-term temporal constraints, we use \verb|BidirectionalLSTM| to extract from both sides of $\mathbf{x}_{t-L:t}$. The entire feature extraction process is summarized as follows:
+Inspired by the \cite{vo2017multi} study, we propose to combine the features extracted from \verb|LSTM| and \verb|CNN| networks. Specifically, we pass each element in the vector $\mathbf{x}_{t-L:t}$ through \verb|FullyConnected| layers whose output'dimension is larger than the one of $\vec x_i, i\in[t-L, t]$ to decompose it into smaller features $\vec x'_i$. These features are then passed through \verb|LSTM| and \verb|CNN| networks to extract long-term temporal dependencies ($\mathbf{h}_{LSTM}$) and local temporal features ($\mathbf{h}_{CNN}$), respectively. To exploit the long-term temporal constraints, we use \verb|BidirectionalLSTM| to extract from both sides of $\mathbf{x}_{t-L:t}$. The entire feature extraction process is summarized as follows:
 
 \begin{align}
     \mathbf{x'}_{t-L:t} &= \mathbf{FullyConnected}\left( \mathbf{x'}_{t-L:t} \right)\\
@@ -285,7 +294,7 @@ Inspired by the \cite{vo2017multi} study, we propose to combine the features ext
 
 % Mạng \verb|LSTM| duy trì giá trị cell-state nhằm lưu trữ có chọn lọc các phụ thuộc dài hạn. Điều này rất thích hợp trong việc giải quyết các bài toán time-series data. Mặt khác, giá trị tương lai thường phụ thuộc rất lớn vào các giá trị lịch sử gần nhất. Chúng tôi đề xuất sử dụng mạng \verb|CNN| để nhấn mạnh các đặc trưng cục bộ, từ đó hướng một phần sự chú ý của mô hình vào các thời điểm nhất định. Do đó, phương pháp đề xuất không chỉ nhớ được các đặc trưng long-term mà còn highlight được các đặc trưng short-term.
 
-The \verb|LSTM| network maintains cell-state values ​​to selectively store long-term dependencies. This is very suitable for solving time-series data problems. On the other hand, future values ​​often depend heavily on recent historical values. We propose to use the \verb|CNN| network to emphasize local features, thereby directing part of the model's attention to certain time points. Therefore, the proposed method can not only remember long-term features but also highlight short-term features.
+The \verb|LSTM| network maintains cell-state values to selectively store long-term dependencies. This is very suitable for solving time-series data problems. On the other hand, future values often depend heavily on recent historical values. We propose to use the \verb|CNN| network to emphasize local features, thereby directing part of the model's attention to certain time points. Therefore, the proposed method can not only remember long-term features but also highlight short-term features.
 
 \vspace{2mm}
 
@@ -302,7 +311,7 @@ Next, $\mathbf{h}_{LSTM}$ and $\mathbf{h}_{CNN}$ are concatenated (equation \ref
 
 % Chúng tôi sử dụng \verb|MAML| để huấn luyện và tổng hợp trọng số của các mô hình tại các task. Như đã đề cập trong phần \ref{sec.relatedWork}, tối ưu tham số theo cách tiếp cận của ML chính là đi giải hai phương trình \ref{eq:inner_opt} và \ref{eq:outer_opt} bằng các phương pháp tối ưu trên dữ liệu support và query. Cụ thể, quá trình tối ưu bao gồm nhiều bước toàn cục (outer optimization), thực hiện trên tất cả các tasks tham gia huấn luyện. Mỗi bước toàn cục bao gồm nhiều bước cục bộ (inner optimization) thực hiện trên từng task riêng lẻ. Tại bước toàn cục $r$, quá trình tối ưu cục bộ lần thứ $e$ tại tập support của task $t$ diễn ra như sau:
 
-We use \verb|MAML| to train and aggregate the weights of the models at the tasks. As mentioned in \ref{sec.relatedWork}, parameter optimization in the ML approach is to solve the two equations \ref{eq:inner_opt} and \ref{eq:outer_opt} using optimization methods on the support and query data. Specifically, the optimization process includes many global steps (outer optimization), performed on all tasks participating in training. Each global step includes many local steps (inner optimization) performed on each individual task. At global step $r$, the $e$th local optimization process at the support set of task $t$ occurs as follows:
+We use \verb|MAML| to train and aggregate the weights of the models at the tasks. As mentioned in \ref{sec.relatedWork}, parameter optimization in the ML approach is to solve the two equations \ref{eq:inner_opt} and \ref{eq:outer_opt} using optimization methods on the support and query data. Specifically, the optimization process includes many global steps (outer optimization), performed on all tasks participating in training. Each global step includes many local steps (inner optimization) performed on each individual task. At global step $r$-th, the $e$-th local optimization process at the support set of task $t$ occurs as follows:
 
 \begin{align}
     \begin{cases}
@@ -324,6 +333,8 @@ Next, the outer optimization process at the global step is performed by aggregat
     \end{cases}
     \label{eq:outer_sol}
 \end{align} Where, $\beta$ is the outer learning rate.
+
+\vspace{2mm}
 
 % Giả sử thuật toán chạy $E$ steps trong inner optimization, lượng đạo hàm tại phương trình \ref{eq:outer_sol} được viết lại như sau (the notations of dataset are removed):
 
@@ -349,30 +360,36 @@ The presence of the product of second order derivatives in the equation \ref{eq:
 
 % FX nói riêng và các chỉ số tài chính nói chung là dạng dữ liệu điển hình cho aperiodic time-series data. Do đó, chúng tôi chọn loại dữ liệu này để kiểm thử mô hình. Cụ thể, chúng tôi cấu hình hai bộ dữ liệu sử dụng dữ liệu FX. Bộ dữ liệu \verb|USD/JPY| chỉ gồm dữ liệu của cặp tiền tệ USD/JPY, được chia thành 60 tập dữ liệu con theo trình tự thời gian với kích thước bằng nhau. Dữ liệu được sample theo giờ từ năm 2000 đến năm 2024, bao gồm các thuộc tính open, low, high, và close price. Bộ dữ liệu \verb|multi-fx| bao gồm 60 cặp tiền tệ giữa 18 quốc gia Australia, Canada, Switzerland, Denmark, EU, United Kingdom, Hong Kong, Iceland, Japan, Norway, New Zealand, Singapore, Sweden, Turkey, United States, Mexico, China, South Africa. Dữ liệu có thuộc tính tương tự như \verb|USD/JPY| và được sample theo ngày từ năm 2014 đến 2024. Số lượng mẫu dữ liệu của hai tập dữ liệu là tương đương nhau và xấp xỉ $156000$ mẫu.
 
-FX in particular and financial indices in general are typical data types for aperiodic time-series data. Therefore, we choose this type of data to test the model. Specifically, we configure two datasets using FX data. The \verb|USD/JPY| dataset consists of only data of the USD/JPY currency pair, divided into 60 time-sequenced subsets of equal size. The data is sampled hourly from 2000 to 2024, including the attributes of open, low, high, and close price. The \verb|multi-fx| dataset consists of 60 currency pairs made up of 18 countries: Australia, Canada, Switzerland, Denmark, EU, United Kingdom, Hong Kong, Iceland, Japan, Norway, New Zealand, Singapore, Sweden, Turkey, United States, Mexico, China, South Africa. The data has similar attributes to \verb|USD/JPY| and sampled daily from 2014 to 2024. The number of data samples of these two datasets are similar and approximately $156000$ samples.
+FX in particular and financial indices in general are typical data types for aperiodic time-series data. Therefore, we choose this type of data to test the model. Specifically, we configure two datasets using FX data. \verb|USD/JPY| dataset consists of only data of the exchange rate between US dollar and Japanese yen, is divided into 60 time-sequenced subsets of equal size. The data is sampled hourly from 2000 to 2024, including the attributes of open, low, high, and close price. \verb|multi-fx| dataset consists of 60 currency pairs made of 18 countries: Australia, Canada, Switzerland, Denmark, EU, United Kingdom, Hong Kong, Iceland, Japan, Norway, New Zealand, Singapore, Sweden, Turkey, United States, Mexico, China, South Africa. The data has similar attributes to \verb|USD/JPY| and sampled daily from 2014 to 2024.
 
 \vspace{2mm}
 
 % Bộ dữ liệu \verb|multi-fx| được sử dụng để rút trích và tổng hợp thông tin về các yếu tố ngoại lai (i.e. thông tin thị trường, kinh tế, chính trị,...), vốn được cho là có ảnh hưởng đến kết quả của một chỉ số tài chính nhất định \citep{overreactioncontrarian,fama1970efficient,mech1993portfolio}. Bộ dữ liệu \verb|USD/JPY| được sử dụng để kiếm chứng giả thuyết của chúng tôi về việc dữ liệu tương lai ngầm phụ thuộc vào các thời điểm nhất định trong quá khứ và cần phải tổng hợp đặc trưng quá khứ một cách hiệu quả để làm rõ được các phụ thuộc này.
 
-The \verb|multi-fx| dataset is used to extract and aggregate information about outliers (i.e. market, economic, political, etc.) that are believed to influence the outcome of a given financial index \citep{overreactioncontrarian,fama1970efficient,mech1993portfolio}. The \verb|USD/JPY| dataset is used to test our hypothesis that future data implicitly depend on certain points in the past and that efficient past feature aggregation is needed to reveal these dependencies.
+Our goal is to use \verb|multi-fx| dataset to extract and aggregate information about outliers (i.e. market, economic, political, etc.) that are believed to influence the outcome of a given financial index \citep{overreactioncontrarian,fama1970efficient,mech1993portfolio}. Meanwhile \verb|USD/JPY| dataset is used to test our hypothesis that future data implicitly depend on certain points in the past and that efficient past feature aggregation is needed to reveal these dependencies.
+
+\vspace{2mm}
+
+% Ngoài ra, chúng tôi sử dụng thêm 2 bộ dữ liệu: Electricity Transformer Temperature (\verb|ETT-m2|) và Weather (\verb|WTH|). Tập dữ liệu \verb|ETT-m2| bao gồm 7 trường dữ liệu, đo đạc các thông số của máy biến áp tại một tỉnh của Trung Quốc sau mỗi 15 phút trong khoảng thời gian từ July 2016 to July 2018. Tập dữ liệu \verb|WTH| bao gồm 12 trường dữ liệu, ghi nhận các thông số của thời tiết tại Weather Station of the Max Planck Biogeochemistry Institute in Jena, Germany sau mỗi 10 phút trong năm 2020. Đây là hai tập dữ liệu thể hiện tính chu kỳ rất mạnh mà \verb|NHITS| đã rất thành công trong việc dự đoán. Thực nghiệm trên chúng giúp so sánh toàn diện hơn về khả năng của phương pháp đề xuất đối với \verb|NHITS|.
+
+In addition, we used two periodic datasets: Electricity Transformer Temperature (\verb|ETT-m2|) \cite{zhou2021informer} and Weather (\verb|WTH|) \cite{Kolle}. \verb|ETT-m2| dataset consists of 7 data fields, measuring the parameters of a transformer in a province of China every 15 minutes from July 2016 to July 2018. \verb|WTH| dataset consists of 12 data fields, recording the weather parameters at the Weather Station of the Max Planck Biogeochemistry Institute in Jena, Germany every 10 minutes in 2020. These two datasets exhibit very strong periodicity, which \verb|NHITS| has been very successful in predicting. Experiments on them provide a more comprehensive comparison of the proposed method's capabilities against \verb|NHITS|.
 
 \vspace{2mm}
 
 % Nghiên cứu sử dụng macro accuracy, macro precision, macro recall, và macro F1 để đánh giá các mô hình. Theo đó, trong quá trình inference, mô hình sẽ chạy trên từng task để tính metrics của mỗi task. Sau đó tính trung bình cộng các metrics của các task để thu được kết quả cuối.
 
-The study uses macro accuracy, macro precision, macro recall, and macro F1 score to evaluate the models. Accordingly, during the inference phase, the model will run on each task to calculate the metrics of each task. Then, the average of the metrics of the tasks is calculated to obtain the final result.
+The study uses macro accuracy, macro precision, macro recall, and macro F1 score to evaluate the models. Accordingly, during the inference phase, the model will run on all tasks to calculate the metrics of each one. Then, the average of the metrics of the tasks is calculated to obtain the final result.
 
 \vspace{2mm}
 \subsection{Experiment}
 
 % Chúng tôi tiến hành so sánh phương pháp đề xuất với mô hình \verb|NHITS| thông qua các metrics nêu trên. Dữ liệu tổng quan được cấu trúc thành training sets, validation sets, và testing sets với tỷ lệ 6:2:2. Tập train dùng để huấn luyện mô hình, tập validation dùng để tìm kiếm siêu tham số và tập test để đánh giá mô hình. Đối với \verb|NHITS|, chúng tôi chia dữ liệu như bình thường theo tỷ lệ định sẵn ở trên. Đối với thuật toán đề xuất, vì quá trình meta-training và meta-testing đòi hỏi phải chia dữ liệu thành các task nhỏ, và cho phép mô hình adapt trên tập support của mỗi task, chúng tôi chia dữ liệu thành 60 tasks. Trong mỗi task, tập support chiếm 20\% với mục đích để mô hình học cách thích ứng với dữ liệu, tập query chiếm 80\% để kiểm tra khả năng tương thích của mô hình. Chúng tôi sử dụng 30 tasks để meta-train, 15 tasks để meta-validate, 15 tasks để meta-test. Với cách chia này, chúng tôi đảm bảo được tính công bằng khi mô hình ML được huấn luyện với lượng dữ liệu tương đương mô hình \verb|NHITS|.
 
-We compare the proposed method with \verb|NHITS| using the above metrics on \verb|USD/JPY| and \verb|multi-fx| datasets. We also test different feature extractors (\verb|LSTM|, \verb|CNN|) for the proposed method to demonstrate the deep data understanding capabilities of \verb|LSTM+CNN|. The overall data is structured into training sets, validation sets, and testing sets with a ratio of 6:2:2 for training, fine-tuning and testing model, respectively.
+We compare the proposed method with \verb|NHITS| using the above metrics and dataset. For each dataset, each attribute will be predicted for future trends based on past data. The final result is calculated by averaging the metrics across the attributes. We also test different feature extractors (\verb|LSTM|, \verb|CNN|) for the proposed method to demonstrate the deep data understanding capabilities of \verb|LSTM+CNN|. The overall data is structured into training sets, validation sets, and testing sets with a ratio of 6:2:2 for training, fine-tuning and testing model, respectively.
 
 \vspace{2mm}
 
-For \verb|NHITS| model, we split the data as usual according to the above predetermined ratio. For the proposed algorithm, because the meta-training and meta-testing processes require dividing the data into small tasks, and allowing the model to adapt on the support set of each task, we split the data into 60 tasks (see table \ref{tab:stat_} for statistical detail). In each task, the support set accounts for 20\% with the purpose of letting the model adapt to the data, the query set accounts for 80\% to check the model's compatibility. We use 30 tasks for meta-training, 15 tasks for meta-validation, and 15 tasks for meta-testing. With this division, we ensure the fairness that the ML model is trained with the same amount of data as \verb|NHITS|. After the data configuration, we perform experiment as in appendix \ref{app:our_experiment} and \ref{app:nhits_experiment}.
+For \verb|NHITS| model, we split the data as usual according to the above predetermined ratio. For the proposed algorithm, because the meta-training and meta-testing processes require dividing the data into small tasks, and allowing the model to adapt on the support set of each task, we split the data into 40-60 tasks (see table \ref{tab:stat_} for statistical detail). In each task, the support set accounts for 20\% with the purpose of letting the model adapt to the data, the query set accounts for 80\% to check the model's compatibility. We use 50\% of tasks for meta-training, 25\% for meta-validation, and 25\% for meta-testing. With this division, we ensure the fairness that the ML model is trained with the same amount of data as \verb|NHITS|. After the data configuration, we perform experiment as in appendix \ref{app:our_experiment} and \ref{app:nhits_experiment}.
 
 \begin{table}
     \centering
@@ -386,6 +403,8 @@ For \verb|NHITS| model, we split the data as usual according to the above predet
     \hline
     \Verb|USD/JPY|           & 60                      & 150,175                     & 2,502 & 2,502.92 & 0.28 & 2,503           \\
     \Verb|multi-fx|          & 60                      & 154,440                     & 2,467 & 2,575 & 58.61   & 2748           \\
+    \Verb|ETT-m2|            & 48                      & 69,680                      & 1,451 & 1,451.67 & 0.47   & 1,452           \\
+    \Verb|WTH|               & 40                      & 35,064                      & 876 & 876.6 & 0.49   & 877           \\
     \bottomrule
     \end{tabular}
 \end{table}
@@ -393,17 +412,16 @@ For \verb|NHITS| model, we split the data as usual according to the above predet
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Result \& Discussion}
 \label{sec.results}
+% TODO: phải viết lại đống nhận xét dựa trên kết quả mới
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % nói 1 chút về việc xài lstm+cnn/meta-learning sẽ giảm sự phụ thuộc của kết quả vào mạng NN/siêu tham số
 % cụ thể, khi xài ML, tham số finetune rất dễ, cái nào cũng cao, chỉ cần chọn ra cái cao nhất
 % giải thích tại sao cnn perform poorly: quá chú ý đến đặc trưng cục bộ mà quên mất các phụ thuộc dài hạn
 
-% Bảng \ref{tab:rs} so sánh kết quả giữa mô hình đề xuất và mô hình \verb|NHITS| trên các tập dữ liệu kể trên. Phương pháp của chúng tôi đạt mức hội tụ cao hơn hẳn so với mô hình \verb|NHITS| thể hiện trên tất cả các metrics. Cụ thể, độ chính xác cải thiện từ 5\% đến 11\% so với \verb|NHITS| trên dữ liệu \verb|USD/JPY| và \verb|multi-fx|. Các metrics còn lại cũng đều tăng từ 5\% đến 20\%. Sau đây, chúng tôi phân tích kết quả này dựa trên hai yếu tố: (1) - Khả năng rút trích đặc trưng; (2) - Khả năng tổng hợp mô hình.
+% Bảng \ref{tab:rs} so sánh kết quả giữa mô hình đề xuất và mô hình \verb|NHITS| trên các tập dữ liệu kể trên. Trên dữ liệu phi chu kỳ (\verb|multi-fx| and \verb|USD/JPY|), phương pháp của chúng tôi đạt mức hội tụ cao hơn hẳn so với mô hình \verb|NHITS| thể hiện trên tất cả các metrics. Cụ thể, độ chính xác cải thiện từ 5\% đến 11\% so với \verb|NHITS| trên dữ liệu \verb|USD/JPY| và \verb|multi-fx|. Các metrics còn lại cũng đều tăng từ 5\% đến 20\%. Trên dữ liệu có chu kỳ, phương pháp của chúng tôi ghi nhận các kết quả cao hơn hoặc xấp xỉ kết quả của \verb|NHITS|. Cụ thể, trên tập \verb|WTH|, phương pháp của chúng tôi cho giá trị cao hơn khoảng 1\% trên tất cả các độ đo, trên tập \verb|ETT-m2|, chúng tôi thu được độ chính xác cao hơn khoảng 1\% trong khi các metrics khác thấp hơn khoảng 3\%. Sau đây, chúng tôi phân tích kết quả này dựa trên hai yếu tố: (1) - Khả năng rút trích đặc trưng; (2) - Khả năng tổng hợp mô hình.
 
-Table \ref{tab:rs} compares the results between the proposed model and the \verb|NHITS| model on the above datasets. Our method achieves a much higher convergence rate than the \verb|NHITS| model on all metrics. Specifically, the accuracy improves from 5\% to 11\% compared to \verb|NHITS| on \verb|USD/JPY| and \verb|multi-fx| data. The remaining metrics also increase from 5\% to 20\%. Next, we analyze this result based on two factors: (1) - Feature extraction ability; (2) - Model synthesis ability.
-
-\vspace{2mm}
+Table \ref{tab:rs} compares the results between the proposed model and the \verb|NHITS| model on the above datasets. On aperiodic data, our method achieves a much higher convergence rate than the \verb|NHITS| model on all metrics. Indeed, the accuracy improves from 5\% to 11\% compared to \verb|NHITS| on \verb|USD/JPY| and \verb|multi-fx| data. The remaining metrics also increase from 5\% to 20\%. On periodic data (\verb|ETT-m2| and \verb|WTH| dataset), our method obtains results that are higher than or close to those of \verb|NHITS|. Specifically, our results differ by 1-3\% on all metrics compared to the results of \verb|NHITS|. In the following subsections, we analyze these results on aperiodic datasets based on two factors: (1) - Feature extraction ability; (2) - Model synthesis ability; and relate to periodic datasets.
 
 \begin{table*}
     \centering
@@ -411,15 +429,23 @@ Table \ref{tab:rs} compares the results between the proposed model and the \verb
     \label{tab:rs}
     \begin{tabular}{c|c|cccc}
     \toprule
-    \multicolumn{1}{c}{}                          &                                    & $accuracy$            & $precision$           & $recall$              & $F1$                    \\
+    \multicolumn{1}{c}{}                &                        & $accuracy$            & $precision$           & $recall$              & $F1-score$                    \\
     \hline
-    \multirow{3}{*}{\Verb|USD/JPY|}  & \Verb|NHITS|          & 53.29                 & 52.38                 & 52.23                 & 51.87                   \\
-                                                & Ours(\Verb|LSTM|)     & $57.12±0.08$ & $58.32±2.72$ & $57.44±2.62$ & $56.87±3.56$    \\
-                                                & Ours(\Verb|LSTM+CNN|) & $\mathbf{58.05±0.01}$ & $\mathbf{59.57±2.53}$ & $\mathbf{58.31±2.57}$ & $\mathbf{56.6±3.74}$    \\
+    \multirow{3}{*}{\Verb|USD/JPY|}     & \Verb|NHITS|           & $58.09$               & $58.32$               & $57.53$               & $56.53$              \\
+                                        & Ours(\Verb|LSTM|)      & $69.45±1.2$           & $69.87±1.04$          & $69.49±0.59$          & $68.89±1.43$            \\
+                                        & Ours(\Verb|LSTM+CNN|)  & $\mathbf{69.67±1.07}$ & $\mathbf{70.12±1.02}$ & $\mathbf{69.74±0.33}$ & $\mathbf{69.08±0.34}$    \\
     \hline
-    \multirow{3}{*}{\Verb|multi-fx|} & \Verb|NHITS|          & 51.12                 & 51.22                 & 51.16                 & 50.54                   \\
-                                                & Ours(\Verb|LSTM|)     & $61.23±0.06$          & $70.52±9.17$          & $69.51±9.31$          & $68.9±10.0$             \\
-                                                & Ours(\Verb|LSTM+CNN|) & $\mathbf{62.39±0.06}$ & $\mathbf{71.11±9.34}$ & $\mathbf{70.14±9.6}$  & $\mathbf{69.21±11.07}$  \\
+    \multirow{3}{*}{\Verb|multi-fx|}    & \Verb|NHITS|           & $52.63$               & $52.62$               & $52.59$               & $52.49$              \\
+                                        & Ours(\Verb|LSTM|)      & $63.63±2.79$          & $64.58±2.65$          & $63.87±1.93$          & $62.33±5.07$             \\
+                                        & Ours(\Verb|LSTM+CNN|)  & $\mathbf{63.78±2.4}$  & $\mathbf{64.84±0.76}$ & $\mathbf{64.06±1.67}$ & $\mathbf{62.37±3.89}$  \\
+    \hline
+    \multirow{3}{*}{\Verb|ETT-m2|}      & \Verb|NHITS|           & $71.72$               & $\mathbf{67.22}$      & $\mathbf{63.69}$      & $\mathbf{63.28}$             \\
+                                        & Ours(\Verb|LSTM|)      & $71.41±6.36$          & $63.48±2.41$          & $60.57±3.16$          & $59.77±3.42$             \\
+                                        & Ours(\Verb|LSTM+CNN|)  & $\mathbf{72.09±5.37}$ & $64.12±2.66$          & $61.13±2.78$          & $60.45±3.19$              \\
+    \hline
+    \multirow{3}{*}{\Verb|WTH|}         & \Verb|NHITS|           & $74.17$               & $68.18$               & $66.77$               & $67.08$              \\
+                                        & Ours(\Verb|LSTM|)      & $74.65±2.31$          & $68.76±2.38$          & $65.68±1.8$           & $65.84±2.03$             \\
+                                        & Ours(\Verb|LSTM+CNN|)  & $\mathbf{75.45±2.07}$ & $\mathbf{69.64±1.96}$ & $\mathbf{67.18±1.49}$ & $\mathbf{67.09±1.82}$  \\
     \bottomrule
     \end{tabular}
 \end{table*}
@@ -428,12 +454,12 @@ Table \ref{tab:rs} compares the results between the proposed model and the \verb
 
 % Chúng tôi huấn luyện ba mô hình \verb|CNN|, \verb|LSTM|, \verb|LSTM+CNN| trên 2600 mẫu dữ liệu \verb|CHF/NZD| theo cách thông thường. Sau khi quan sát quá trình huấn luyện của chúng (hình \ref{fig:lstm_cnn}), chúng tôi nhận thấy khả năng rút đặc trưng cục bộ tuyệt vời trên dữ liệu ngắn hạn của \verb|CNN|. Mặt khác, \verb|LSTM| không cải thiện sau 40 epochs, chứng tỏ rằng nếu chỉ tập trung vào khai thác các phụ thuộc ngắn/dài hạn mà không rút trích đặc trưng đủ sâu thì sẽ không mang lại kết quả cao. Khi kết hợp cả hai đặc trưng, mô hình cho thấy sự cải thiện trong khả năng học trên tập train. Mức hội tụ nhìn chung đều tăng so với việc sử dụng từng mô hình riêng lẻ. Điều này có thể được lý giải thông qua việc \verb|LSTM| đã tích hợp thành công các long-term feature vào mô hình, cũng như việc tận dụng các đặc trưng cục bộ của \verb|CNN|.
 
-We trained three models \verb|CNN|, \verb|LSTM|, \verb|LSTM+CNN| on 2600 samples of \verb|CHF/NZD| data in the conventional way. After observing their training process (figure \ref{fig:lstm_cnn}), we found that \verb|CNN| has excellent local feature extraction ability on short-term data. On the other hand, \verb|LSTM| does not improve after 40 epochs, indicating that focusing on exploiting short/long-term dependencies without extracting deep enough features will not yield good results. When combining both features, the model shows an improvement in learning ability on the training set. The convergence rate is generally higher than when using each model separately. This can be explained by the fact that \verb|LSTM| successfully integrated long-term features into the model, as well as taking advantage of the local features of \verb|CNN|.
+We trained three models \verb|CNN|, \verb|LSTM|, \verb|LSTM+CNN| on 2600 samples of \verb|USD/JPY| data in the conventional way. After observing their training process (figure \ref{fig:lstm_cnn}), we found that \verb|CNN| has excellent local feature extraction ability on short-term data. On the other hand, \verb|LSTM| does not improve after 40 epochs, indicating that focusing on exploiting short/long-term dependencies without extracting deep enough features will not yield good results. When combining both features, the model shows an improvement in learning ability on the training set. The convergence rate is generally higher than when using each model separately. This can be explained by the fact that \verb|LSTM| successfully integrated long-term features into the model, as well as taking advantage of the local features of \verb|CNN|.
 
 \begin{figure}
     \centering
     \includegraphics[width=\linewidth]{img/models.pdf}
-    \caption{Training process of LSTM, CNN, and LSTM+CNN using 2600 samples from CHF/NZD dataset.}
+    \caption{Training process of LSTM, CNN, and LSTM+CNN using 2600 samples from USD/JPY dataset.}
     \label{fig:lstm_cnn}
 \end{figure}
 
@@ -447,36 +473,43 @@ However, when observing the results on the validation set, all three models abov
 
 % Sau này, khi sử dụng thuật toán ML để huấn luyện các mạng rút trích đặc trưng, chúng tôi còn nhận thấy mô hình sử dụng đặc trưng kết hợp ít bị phụ thuộc vào learning rate hơn các mô hình sử dụng đặc trưng đơn lẻ. Cụ thể, đối với không gian learning rate mà chúng tôi định nghĩa trong Appendix \ref{app:lr}, tất cả các mô hình đều hội tụ với độ chính xác thấp nhất từ 54\%. Việc này minh chứng cho khả năng ưu việt của đặc trưng do \verb|LSTM+CNN| mang lại.
 
-Later, when we used ML algorithms to train feature extraction networks, we also found that the model using combined features was less dependent on the learning rate than the model using single features. Specifically, for the learning rate space we defined in Appendix \ref{app:lr}, all models converged with an accuracy of at least 54\%. This demonstrates the superiority of the feature provided by \verb|LSTM+CNN|.
+% % phải lột đoạn này đi, mà chắc tôi đi ăn trước đã
+% Later, when we used ML algorithms to train feature extraction networks, we also found that the model using combined features was less dependent on the learning rate than the model using single features. Specifically, for the learning rate space we defined in Appendix \ref{app:lr}, all models converged with an accuracy of at least 54\%. This demonstrates the superiority of the feature provided by \verb|LSTM+CNN|.
+
+% \vspace{2mm}
 
 \begin{figure}
     \centering
     \includegraphics[width=\linewidth]{img/acc.pdf}
-    \caption{Convergence process on validation set of neural network using LSTM+CNN feature and LSTM feature only (multi-fx dataset). The blur domains cover 99.73\% ($±3\sigma$) values of accuracies.}
+    \caption{Convergence process on validation set of ML model using LSTM+CNN feature and LSTM feature only (predict close price of multi-fx dataset). The blur domains cover 99.73\% ($±3\sigma$) values of accuracies.}
     \label{fig:lstm_cnn_feature}
 \end{figure}
 
-% Quan sát quá trình rút trích đặc trưng của \verb|NHITS|, có thể thấy mô hình này đang cố gắng mô phỏng lại quá trình phân giải tần số của Fourier transform. Tuy nhiên, trong toàn bộ quá trình thực thi, \verb|NHITS| sử dụng các kiến trúc rất đơn giản (chỉ bao gồm các lớp \verb|MLP| và \verb|Pooling|). Đối với các dữ liệu phức tạp và phi chu kỳ, sử dụng các layer \verb|MLP| là không đủ để rút trích các đặc trưng ẩn.
+% Quá trình rút trích và tổng hợp đặc trưng của \verb|NHITS| thể hiện rằng phương pháp này đang cố gắng mô phỏng lại quá trình phân giải tần số của Fourier transform. Đặc trưng về các giải tần là thông tin tối quan trọng đối với dữ liệu có chu kỳ. Do đó, các dự đoán của \verb|NHITS| có thể dễ dàng đạt được độ chính xác cao trên loại dữ liệu này. Tuy nhiên, rất khó để có thể phân giải tần số trên dữ liệu phi chu kỳ. Hơn nữa, không khó để nhận ra các kỹ thuật rút trích đặc trưng của \verb|NHITS| là vô cùng đơn giản (chỉ gồm các lớp \verb|FullyConnected| và \verb|Pooling|). Chính những điều này đã khiến cho \verb|NHITS| gặp trở ngại lớn trên \verb|multi-fx|, \verb|USD/JPY| datasets và các dữ liệu phi chu kỳ nói chung. Mặt khác, phương pháp đề xuất của chúng tôi sử dụng các mạng deep learning để rút trích đặc trưng nên có thể dễ dàng thu được các deep hidden feature. Do đó, trên cả periodic data lẫn aperiodic data, phương pháp của chúng tôi đều đạt được kết quả xấp xỉ hoặc cao hơn \verb|NHITS|.
 
-Looking at the feature extraction process of \verb|NHITS|, it can be seen that this model tries to simulate the frequency resolution process of Fourier transform. However, in the whole implementation, \verb|NHITS| uses a very simple architecture (only including \verb|MLP| and \verb|Pooling| layers). For complex and non-periodic data, using \verb|MLP| layers is not enough to extract hidden features.
+The feature extraction process of \verb|NHITS| shows that this method is trying to simulate the frequency resolution process of Fourier transform. The frequency features are the most important information for periodic data. Therefore, the predictions of \verb|NHITS| can easily achieve high accuracy on this type of data. However, it is very difficult to resolve the frequency on non-periodic data. Moreover, it is not difficult to see that the feature extraction techniques of \verb|NHITS| are extremely simple (only including \verb|FullyConnected| and \verb|Pooling| classes). These are the reasons why \verb|NHITS| encountered great difficulties on \verb|multi-fx|, \verb|USD/JPY| dataset and non-periodic data in general. On the other hand, our proposed method uses deep learning networks for feature extraction, so it can easily obtain deep hidden features. Therefore, on both periodic and aperiodic data, our method achieves results approximately equal to or better than \verb|NHITS|.
+
+% Quan sát quá trình rút trích đặc trưng của \verb|NHITS|, có thể thấy mô hình này đang cố gắng mô phỏng lại quá trình phân giải tần số của Fourier transform. Đối với dữ liệu thể hiện tính chu kỳ rõ rệt như \verb|ETT-m2| và \verb|WTH|, hiệu quả mà \verb|NHITS| mang lại là rất lớn. Tuy nhiên, trong toàn bộ quá trình thực thi, \verb|NHITS| sử dụng các kiến trúc rất đơn giản (chỉ bao gồm các lớp \verb|MLP| và \verb|Pooling|). Đối với các dữ liệu phức tạp và phi chu kỳ, sử dụng các layer \verb|MLP| là không đủ để rút trích các đặc trưng ẩn. Trái lại, phương pháp của chúng tôi có thể dễ dàng rút trích các deep hidden features, thể hiện ở việc đạt độ chính xác cao trên dữ liệu phi chu kỳ. Nhưng khi đối 
+
+% Observing the feature extraction process of \verb|NHITS|, it can be seen that this model is trying to simulate the frequency resolution process of Fourier transform. For data with obvious periodicity such as \verb|ETT-m2| and \verb|WTH|, the efficiency that \verb|NHITS| brings is very good. However, in the whole implementation, \verb|NHITS| uses very simple architectures (only including \verb|MLP| and \verb|Pooling| layers). For complex and aperiodic data, using \verb|FullyConnected| layers is not enough to extract hidden features.
 
 \subsection{Sub-model synthesis ability}
 
 % Lý do phương pháp huấn luyện thông thường không đạt hiệu quả cao mặc cho khả năng rút trích đặc trưng đã được cải thiện là vì thiếu khả năng sử dụng đặc trưng một cách hiệu quả. Khả năng này trong các nghiên cứu trước đây thường được cải thiện bằng việc sử dụng các mô hình ensemble. Chúng tôi đã thử sử dụng các mô hình truyền thống (boosting, stacking) nhằm tăng độ chính xác của mô hình nhưng sớm nhận ra rằng phương pháp này không khả thi. Ngay cả khi chúng tôi vét cạn cạn trên không gian hyper-parameter để tìm ra kiến trúc mô hình con tốt nhất bằng \verb|AutoKeras| \cite{jin2023autokeras}, độ chính xác thu được trên tập \verb|USD/JPY| chỉ ở mức 52.53\% và 53.71\%, respectively.
 
-The reason why conventional training methods do not perform well despite the improved feature extraction capabilities is the lack of the ability to use features effectively. This ability in previous studies has often been improved by using ensemble models. We tried using traditional models (boosting, stacking) to increase the model accuracy but soon realized that this method was not feasible. Even when we performed brute-force search the hyper-parameter space to find the best sub-model architecture using \verb|AutoKeras| \cite{jin2023autokeras}, the accuracy on \verb|USD/JPY| was only 52.53\% and 53.71\%, respectively.
+The reason why conventional training methods do not perform well despite the improved feature extraction capabilities is due to the lack of the ability to use features effectively. This ability in previous studies has often been improved by using ensemble models. We tried using traditional models (boosting, stacking) to increase the model accuracy but soon realized that this method was not feasible. Even when we performed brute-force search the hyper-parameter space to find the best sub-model architecture using \verb|AutoKeras| \cite{jin2023autokeras}, the accuracy on \verb|USD/JPY| was only 52.53\% and 53.71\%, respectively.
 
 \vspace{2mm}
 
 % Khi sử dụng \verb|MAML| để tổng hợp đặc trưng của mô hình \verb|LSTM| và \verb|LSTM+CNN|, khả năng tương thích (thể hiện qua việc hội tụ sớm) cũng như kết quả (thể hiện qua độ chính xác) của mô hình sử dụng \verb|LSTM+CNN| cao hơn hoàn toàn so với mô hình chỉ sử dụng \verb|LSTM| (xem hình \ref{fig:lstm_cnn_feature}). Thật vậy, chỉ sau 40 epochs, các đặc trưng \verb|LSTM+CNN| cho mức hội tụ trên 60\% và sau 100 epochs, mô hình hội tụ ở mức 62\%, vượt trên những gì các đặc trưng \verb|LSTM| có thể làm được. Độ biến thiên của các giá trị accuracy là rất nhỏ, cho thấy sự ổn định của \verb|MAML|. Đối với mô hình ML chỉ sử dụng \verb|CNN|, độ chính xác cũng như giá trị lỗi thậm chí còn không cải thiện trong toàn bộ quá trình huấn luyện. Giải thích cho việc này, chúng tôi cho rằng các đặc trưng của \verb|CNN| đã quá tập trung vào tính cục bộ của dữ liệu mà bỏ qua các phụ thuộc dài hạn, vốn là một đặc trưng quan trọng của dữ liệu time-series. Trái lại, đặc trưng của \verb|LSTM+CNN| không chỉ nắm bắt được các phụ thuộc dài hạn mà còn có thể highlight các tính chất cục bộ trong dữ liệu, khiến cho nó hoàn toàn outperform \verb|CNN| cũng như \verb|NHITS|. Do đó, \textbf{chúng tôi kết luận rằng ML tỏ ra linh hoạt và đạt hiệu quả cao trong việc tổng hợp các sub-model so với các mô hình ensemble cứng nhắc truyền thống}.
 
-When using \verb|MAML| to synthesize the features of the \verb|LSTM| and \verb|LSTM+CNN| models, the compatibility (indicated by early convergence) as well as the results (indicated by accuracy) of the model using \verb|LSTM+CNN| are significantly higher than those of the model using only \verb|LSTM| (see figure \ref{fig:lstm_cnn_feature}) and the \verb|NHITS| model. Indeed, after only 40 epochs, the \verb|LSTM+CNN| features converge to over 60\% and after 100 epochs, the model converges to 62\%, exceeding what the \verb|LSTM| features can do. The variation of the accuracy values ​​is very small, indicating the stability of \verb|MAML|. For the ML model using only \verb|CNN|, the accuracy and error values ​​do not even improve during the entire training process. We explain this by saying that the features of \verb|CNN| focus too much on the locality of the data and ignore the long-term dependencies, which is an important feature of time-series data. In contrast, the features of \verb|LSTM+CNN| not only capture the long-term dependencies but also highlight the local properties in the data, making it completely outperform \verb|CNN| as well as \verb|NHITS|. Therefore, \textbf{we conclude that ML is more flexible and efficient in synthesizing sub-models than traditional rigid ensemble models}.
+When using \verb|MAML| to synthesize the features of the \verb|LSTM| and \verb|LSTM+CNN| models, the compatibility (indicated by early convergence) as well as the results (indicated by accuracy) of the model using \verb|LSTM+CNN| are significantly higher than those of the model using only \verb|LSTM| (see figure \ref{fig:lstm_cnn_feature}) and \verb|NHITS| model. Indeed, on \verb|multi-fx| dataset, after only 40 epochs, the \verb|LSTM+CNN| features converge to over 60\% and after 100 epochs, the model converges to 62\%, exceeding what the \verb|LSTM| features can do. The variation of the accuracy values is very small, indicating the stability of \verb|MAML|. For the ML model using only \verb|CNN|, the accuracy and error values do not even improve during the entire training process. We explain this by saying that the features of \verb|CNN| focus too much on the locality of the data and ignore the long-term dependencies, which is an important feature of time-series data. In contrast, the features of \verb|LSTM+CNN| not only capture the long-term dependencies but also highlight the local properties in the data, making it completely outperform \verb|CNN| as well as \verb|NHITS|. Therefore, \textbf{we conclude that ML is more flexible and efficient in synthesizing sub-models than traditional rigid ensemble models}.
 
 \vspace{2mm}
 
 % Khi tiếp cận dữ liệu \verb|USD/JPY| bằng ML, mô hình cũng cho độ chính xác cao. Bằng việc nhìn vào các khoảng thời gian trong quá khứ, \textbf{phương pháp đề xuất đã tỏ ra hiệu quả hơn trong việc nắm bắt các hidden long-term dependency thông qua việc tổng hợp hiệu quả các đặc trưng mà} \verb|LSTM| \textbf{dễ dàng quên đi trong quá trình huấn luyện}. Điều này đã chứng minh giả thuyết về sự tồn tại của các hidden long-term dependency mà chúng tôi nêu ra ở phần \ref{sec.intro}.
 
-When approaching the \verb|USD/JPY| data using ML, the model also shows high accuracy. By looking at the past time periods, \textbf{the proposed method has proven to be more effective in capturing hidden long-term dependencies through the efficient aggregation of features that the} \verb|LSTM| \textbf{easily forgets during training}. This proves the hypothesis of the existence of hidden long-term dependencies that we stated in section \ref{sec.intro}.
+When approaching \verb|USD/JPY|, \verb|ETT-m2|, and \verb|WTH| dataset using ML, the model also shows accuracies higher than or close to \verb|NHITS|. By looking at the past time periods, \textbf{the proposed method has proven to be more effective in capturing hidden long-term dependencies through the efficient aggregation of features that the} \verb|LSTM| \textbf{easily forgets during training}. This proves the hypothesis of the existence of hidden long-term dependencies that we stated in section \ref{sec.intro}.
 
 % dis NHITS vì tổng hợp đặc trưng chỉ bằng phép cộng :v
 % Trong quá trình tổng hợp các đặc trưng để đưa ra dự đoán cuối, \verb|NHITS| chỉ sử dụng các phép cộng trừ đơn giản. Điều này đặt trong ngữ cảnh của việc tổng hợp thông tin dựa trên các hàm nội suy và phần dư của input là hợp lý. Tuy nhiên, đối diện với sự phức tạp trong dữ liệu đòi hỏi một cấu trúc phức tạp hơn để có thể tổng hợp các đặc trưng một cách hợp lý hơn. Việc sử dụng nội suy trên dữ liệu có thể coi là rất đơn giản so với quá trình meta-optimization của các thuật toán ML. Hơn nữa, việc phân tách và kết hợp các dải tần số dữ liệu của \verb|NHITS| chỉ có thể hoạt động tốt nếu dữ liệu thực sự tồn tại chu kỳ. Dữ liệu phi chi kỳ như FX hoặc stock price có thể là điểm yếu chí mạng cho hướng tiếp cận này.
@@ -490,7 +523,7 @@ In the process of synthesizing features to make the final prediction, \verb|NHIT
 
 % Các bài toán trên aperiodic time-series data đặt ra một thử thách lớn cho các mô hình học máy hiện nay bởi tính bất định trong variance cũng như tính phi chu kỳ loại dữ liệu này. Bằng việc kết hợp các đặc trưng cục bộ và các phụ thuộc dài hạn cũng như khai thác các phụ thuộc ẩn trong từng khoảng thời gian quá khứ, chúng tôi đã cải khả năng của mô hình học máy trên các classification metrics trong bài toán dự đoán xu hướng giá của ngày tiếp theo trên dữ liệu FX. Thuật toán đề xuất đã chứng minh được khả năng vượt trội của mình khi so sánh với mô hình \verb|NHITS|.
 
-Problems on aperiodic time-series data pose a great challenge to current machine learning models due to the uncertainty in variance as well as the aperiodicity of this type of data. By combining local features and long-term dependencies as well as exploiting hidden dependencies in each past time period, we have improved the ability of machine learning models on classification metrics in the problem of predicting the next day's price trend on FX data. The proposed algorithm has demonstrated its superior ability when compared with the \verb|NHITS| model.
+Problems on aperiodic time-series data pose a great challenge to current machine learning models due to the uncertainty in variance as well as the aperiodicity of this type of data. By combining local features and long-term dependencies as well as exploiting hidden dependencies in each past time period, we have improved the ability of machine learning models on classification metrics in the problem of predicting the next day's price trend on FX data. The proposed algorithm has demonstrated its superior performance when compared to \verb|NHITS| on aperiodic data as well as achieving an accuracy close to \verb|NHITS| on periodic data.
 
 \vspace{2mm}
 
@@ -530,11 +563,11 @@ All authors contributed to conceiving the idea. Bao-Long Nguyen, Tom Ichibha per
 The datasets used and/or analyzed during the current study available from the corresponding authors on reasonable request.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\clearpage
+% \clearpage
 % \bibliographystyle{elsarticle-harv}
 \bibliographystyle{splncs04}
 \bibliography{references}
-\clearpage
+% \clearpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \appendix
@@ -549,7 +582,7 @@ We use a \verb|FullyConnected| layer of 16 units with a \verb|ReLU| activation f
 
 The fine-tuning process of ML algorithms involves many hyper-parameters such as inner batch size, outer batch size, inner training steps, outer training steps. To facilitate fine-tuning, we fix most of the parameters and only fine-tune the size of lookback window, the inner and outer learning rates. Details are presented in table \ref{tab:our_finetune}.
 
-\begin{table}[h]
+\begin{table}[H]
     \centering
     \caption{Search space for fine-tuning our method.}
     \label{tab:our_finetune}
@@ -571,8 +604,6 @@ The fine-tuning process of ML algorithms involves many hyper-parameters such as 
 
 \section{Experimental detail for NHITS}
 \label{app:nhits_experiment}
-
-% Đối với mô hình \verb|NHITS|, chúng tôi dựa trên \cite{challu2023nhits} để định nghĩa không gian tìm kiếm cho việc fine-tune tham số, cũng như kiến trúc mô hình. Đối với các tham số không được đề cập trong bảng, chúng tôi sử dụng giá trị mặc định của cài đặt \verb|NHITS| trong thư viện \verb|NeuralForecast| \cite{neuralforecast}. Chi tiết quá trình fine-tune được trình bày trong phần phụ lục \ref{app:experiment}. Kết quả tốt nhất của các lần fine-tune được chọn ra và báo cáo trong nghiên cứu này.
 
 \begin{table}
     \centering
@@ -598,67 +629,69 @@ The fine-tuning process of ML algorithms involves many hyper-parameters such as 
     \end{tabular}
 \end{table}
 
+% Đối với mô hình \verb|NHITS|, chúng tôi dựa trên \cite{challu2023nhits} để định nghĩa không gian tìm kiếm cho việc fine-tune tham số, cũng như kiến trúc mô hình. Đối với các tham số không được đề cập trong bảng, chúng tôi sử dụng giá trị mặc định của cài đặt \verb|NHITS| trong thư viện \verb|NeuralForecast| \cite{neuralforecast}. Chi tiết quá trình fine-tune được trình bày trong phần phụ lục \ref{app:experiment}. Kết quả tốt nhất của các lần fine-tune được chọn ra và báo cáo trong nghiên cứu này.
+
 We rely on \cite{challu2023nhits} to define the search space (table \ref{tab:nhits_finetune}) for parameter fine-tuning, as well as to fine-tune the model architecture. For parameters not mentioned in the table, we use the default values of the \verb|NHITS| implementation in the \verb|NeuralForecast| library \cite{neuralforecast}. The best results of fine-tuning process are selected and reported in this study.
 
-\section{Hyper-parameter dependence}
-\label{app:lr}
+% \section{Hyper-parameter dependence}
+% \label{app:lr}
 
-% Trong quá trình thực nghiệm, chúng tôi nhận thấy việc hội tụ của mô hình ML sử dụng đặc trưng của \verb|LSTM+CNN| có thể giảm bớt sự phụ thuộc vào learning rate. Cụ thể, chúng tôi thử nghiệm trên 32 mô hình trên dữ liệu \verb|multi-fx|. Inner learning rate và outer learning rate của mỗi mô hình được lấy ngẫu nhiên trong khoảng $[0.001, 0.05]$ và $[0.001, 0.009]$. Cần phải hiểu rằng, đối với outer learning rate, đây là một khoảng rất rộng vì thông thường, giá trị này luôn rất nhỏ so với inner learning rate.
+% % Trong quá trình thực nghiệm, chúng tôi nhận thấy việc hội tụ của mô hình ML sử dụng đặc trưng của \verb|LSTM+CNN| có thể giảm bớt sự phụ thuộc vào learning rate. Cụ thể, chúng tôi thử nghiệm trên 32 mô hình trên dữ liệu \verb|multi-fx|. Inner learning rate và outer learning rate của mỗi mô hình được lấy ngẫu nhiên trong khoảng $[0.001, 0.05]$ và $[0.001, 0.009]$. Cần phải hiểu rằng, đối với outer learning rate, đây là một khoảng rất rộng vì thông thường, giá trị này luôn rất nhỏ so với inner learning rate.
 
-During the experiment, we found that the convergence of ML models using the \verb|LSTM+CNN| feature can reduce the dependence on learning rate. Specifically, we tested 32 models on \verb|multi-fx| data. The inner learning rate and outer learning rate of each model were randomly selected in the range $[0.001, 0.05]$ and $[0.001, 0.009]$. It is important to understand that, for outer learning rate, this is a very wide range because usually, this value is always very small compared to inner learning rate.
+% During the experiment, we found that the convergence of ML models using the \verb|LSTM+CNN| feature can reduce the dependence on learning rate. Specifically, we tested 32 models on \verb|multi-fx| data. The inner learning rate and outer learning rate of each model were randomly selected in the range $[0.001, 0.05]$ and $[0.001, 0.009]$. It is important to understand that, for outer learning rate, this is a very wide range because usually, this value is always very small compared to inner learning rate.
 
-\vspace{2mm}
+% \vspace{2mm}
 
-% Quá trình hội tụ trên tập validation của các mô hình được ghi lại trong hình \ref{fig:lr}. Theo đó, toàn bộ mô hình đều đạt hội tụ với độ chính xác thấp nhất là trên 54\%. Hơn một nửa số mô hình đạt mức hội tụ cao trên 60\%. Các mô hình còn lại phần lớn giao động trong khoảng 58\%-60\%.
+% % Quá trình hội tụ trên tập validation của các mô hình được ghi lại trong hình \ref{fig:lr}. Theo đó, toàn bộ mô hình đều đạt hội tụ với độ chính xác thấp nhất là trên 54\%. Hơn một nửa số mô hình đạt mức hội tụ cao trên 60\%. Các mô hình còn lại phần lớn giao động trong khoảng 58\%-60\%.
 
-The convergence process on the validation set of the models is recorded in figure \ref{fig:lr}. Accordingly, all models achieved convergence with the lowest accuracy of over 54\%. More than half of the models achieved a high convergence level of over 60\%. The remaining models mostly fluctuated in the range of 58\%-60\%.
+% The convergence process on the validation set of the models is recorded in figure \ref{fig:lr}. Accordingly, all models achieved convergence with the lowest accuracy of over 54\%. More than half of the models achieved a high convergence level of over 60\%. The remaining models mostly fluctuated in the range of 58\%-60\%.
 
-\vspace{2mm}
+% \vspace{2mm}
 
-% Khi thực hiện thí nghiệm tương tự với mô hình \verb|LSTM|, độ chính xác phụ thuộc rất nhiều vào việc lựa chọn các siêu tham số học. Khả năng tương thích trên dữ liệu cũng giảm đáng kể. Đối với mô hình \verb|CNN|, quá trình hội tụ thậm chí còn không xảy ra.
+% % Khi thực hiện thí nghiệm tương tự với mô hình \verb|LSTM|, độ chính xác phụ thuộc rất nhiều vào việc lựa chọn các siêu tham số học. Khả năng tương thích trên dữ liệu cũng giảm đáng kể. Đối với mô hình \verb|CNN|, quá trình hội tụ thậm chí còn không xảy ra.
 
-When performing similar experiments with the \verb|LSTM| model, the accuracy depends heavily on the choice of learning hyper-parameters. The adaptability to the data also drops significantly. For the \verb|CNN| model, convergence does not even occur.
+% When performing similar experiments with the \verb|LSTM| model, the accuracy depends heavily on the choice of learning hyper-parameters. The adaptability to the data also drops significantly. For the \verb|CNN| model, convergence does not even occur.
 
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=\linewidth]{img/lr.pdf}
-    \caption{Convergence processes of 32 models using LSTM+CNN as feature extractor.}
-    \label{fig:lr}
-\end{figure}
+% \begin{figure}[h]
+%     \centering
+%     \includegraphics[width=\linewidth]{img/lr.pdf}
+%     \caption{Convergence processes of 32 models using LSTM+CNN as feature extractor.}
+%     \label{fig:lr}
+% \end{figure}
 
-\vspace{2mm}
+% \vspace{2mm}
 
-% tôi có thể viết thêm 1 phần phụ lục nhằm phân tích tác động của lookback window
-% Tuy vậy, quá trình hội tụ của chúng tôi lại phụ thuộc rất lớn vào lookback window. Thử nghiệm trên mô hình \verb|LSTM| với dữ liệu \verb|NHITS| cho thấy, khi xét trên cùng một tập siêu tham số và cùng một kiến trúc mô hình, nếu tăng lookback window từ 10 lên 20, số lượng mô hình hội tụ tăng đột biến. Ngoài ra, mức hội tụ mô hình cũng được cải thiện đáng kể. Khi tăng lookback window từ 20 lên 30, xuất hiện một số mô hình tiềm năng, mà độ chính xác của những mô hình này có thể tiếp tục tăng nếu tiếp tục huấn luyện. Đây là một insight thú vị cho thấy nếu nhìn vào quá khứ đủ nhiều và đủ sâu, chúng ta có thể tăng độ chính xác trong các dự đoán tương lai. Nếu dữ liệu quá khứ nhiều hơn, có thể sẽ phải tăng kích thước mô hình để đáp ứng việc hiểu được dữ liệu này.
+% % tôi có thể viết thêm 1 phần phụ lục nhằm phân tích tác động của lookback window
+% % Tuy vậy, quá trình hội tụ của chúng tôi lại phụ thuộc rất lớn vào lookback window. Thử nghiệm trên mô hình \verb|LSTM| với dữ liệu \verb|NHITS| cho thấy, khi xét trên cùng một tập siêu tham số và cùng một kiến trúc mô hình, nếu tăng lookback window từ 10 lên 20, số lượng mô hình hội tụ tăng đột biến. Ngoài ra, mức hội tụ mô hình cũng được cải thiện đáng kể. Khi tăng lookback window từ 20 lên 30, xuất hiện một số mô hình tiềm năng, mà độ chính xác của những mô hình này có thể tiếp tục tăng nếu tiếp tục huấn luyện. Đây là một insight thú vị cho thấy nếu nhìn vào quá khứ đủ nhiều và đủ sâu, chúng ta có thể tăng độ chính xác trong các dự đoán tương lai. Nếu dữ liệu quá khứ nhiều hơn, có thể sẽ phải tăng kích thước mô hình để đáp ứng việc hiểu được dữ liệu này.
 
-However, the convergence process of the proposed method depends heavily on the lookback window. Experiments on the \verb|LSTM| model with \verb|NHITS| data show that, when considering the same set of hyper-parameters and the same model architecture, if the lookback window is increased from 10 to 20, the number of converged models increases dramatically. In addition, the model convergence level is also significantly improved. When increasing the lookback window from 20 to 30, some potential models appear, the accuracy of which can continue to increase if training continues. This is an interesting insight showing that if we look into the past enough and deeply enough, we can increase the accuracy in future predictions. If the past data is larger, we may have to increase the model size to meet the understanding of this data.
+% However, the convergence process of the proposed method depends heavily on the lookback window. Experiments on the \verb|LSTM| model with \verb|NHITS| data show that, when considering the same set of hyper-parameters and the same model architecture, if the lookback window is increased from 10 to 20, the number of converged models increases dramatically. In addition, the model convergence level is also significantly improved. When increasing the lookback window from 20 to 30, some potential models appear, the accuracy of which can continue to increase if training continues. This is an interesting insight showing that if we look into the past enough and deeply enough, we can increase the accuracy in future predictions. If the past data is larger, we may have to increase the model size to meet the understanding of this data.
 
-\begin{figure}[H]
-    \centering
-    \begin{subfigure}[b]{\linewidth}
-        \centering
-        \includegraphics[width=\textwidth]{img/lstm_10.pdf}
-        \caption{lookback window = 10}
-        \label{fig:image1}
-    \end{subfigure}
-    % \hfill
-    % \vspace{2mm}
-    \begin{subfigure}[b]{\linewidth}
-        \centering
-        \includegraphics[width=\textwidth]{img/lstm_20.pdf}
-        \caption{lookback window = 20}
-        \label{fig:image2}
-    \end{subfigure}
-    % \hfill
-    % \vspace{2mm}
-    \begin{subfigure}[b]{\linewidth}
-        \centering
-        \includegraphics[width=\textwidth]{img/lstm_30.pdf}
-        \caption{lookback window = 30}
-        \label{fig:image3}
-    \end{subfigure}
-    \caption{Change in the model's convergence process when changing the lookback window.}
-    \label{fig:three_images}
-\end{figure}
+% \begin{figure}[H]
+%     \centering
+%     \begin{subfigure}[b]{\linewidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{img/lstm_10.pdf}
+%         \caption{lookback window = 10}
+%         \label{fig:image1}
+%     \end{subfigure}
+%     % \hfill
+%     % \vspace{2mm}
+%     \begin{subfigure}[b]{\linewidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{img/lstm_20.pdf}
+%         \caption{lookback window = 20}
+%         \label{fig:image2}
+%     \end{subfigure}
+%     % \hfill
+%     % \vspace{2mm}
+%     \begin{subfigure}[b]{\linewidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{img/lstm_30.pdf}
+%         \caption{lookback window = 30}
+%         \label{fig:image3}
+%     \end{subfigure}
+%     \caption{Change in the model's convergence process when changing the lookback window.}
+%     \label{fig:three_images}
+% \end{figure}
 
 \end{document}
