@@ -19,7 +19,6 @@
 *.log
 *blx.bib
 *Notes.bib
-*.pdf
 
 # code
 *job.*
@@ -30,6 +29,7 @@ tmp*
 *.ipynb
 *.csv
 lightning_logs
+*.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
