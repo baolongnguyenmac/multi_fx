@@ -30,6 +30,7 @@ tmp*
 *.csv
 lightning_logs
 *.txt
+# pretrained
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
