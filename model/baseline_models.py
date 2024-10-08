@@ -1,17 +1,18 @@
 from neuralforecast import NeuralForecast
 from neuralforecast.models import NHITS
-from neuralforecast.losses.pytorch import DistributionLoss
+from neuralforecast.losses.pytorch import DistributionLoss, MSE
 
 import os
 import json
 import pandas as pd
 import json
+import itertools
 
-from data.pre_process import get_data_for_nhits
+from data.dataloader import DataLoader
 from common.constants import *
 from common.common import compute_metrics
 
-def add_log(log:dict, count:int, input_size:int, n_stacks:int, kernel_size:int, mlp_units:int, lr:float, freq:list[int], interpolation_mode:str, acc:float, precision:float, recall:float, f1:float):
+def add_log(log:dict, count:int, input_size:int, n_stacks:int, kernel_size:int, mlp_units:int, lr:float, freq:list[int], interpolation_mode:str, metric_log:dict):
     # init
     log[count] = {}
 
@@ -25,82 +26,97 @@ def add_log(log:dict, count:int, input_size:int, n_stacks:int, kernel_size:int, 
     log[count]["interpolation_mode"] = interpolation_mode
 
     # metrics
-    log[count]["acc"] = acc
-    log[count]["precision"] = precision
-    log[count]["recall"] = recall
-    log[count]["f1"] = f1
+    for key in metric_log:
+        log[count][key] = metric_log[key]
 
 def write_log(log:dict, file_name:str):
     with open(os.path.join(PRETRAINED_DIR, 'baseline', file_name), 'w') as fo:
         json.dump(log, fo)
 
-def run(dataset:str, label:int, columns:list[str]):
-    data_dir = os.path.join(RAW_DATA_DIR, dataset, 'all')
-    data_dict = get_data_for_nhits(data_dir=data_dir, label=label)
+def run(df:pd.DataFrame, param_dict:dict, columns:list[str]):
+    loss_fn = param_dict['loss_fn']
+    model = NHITS(
+        # const
+        h=1, loss=loss_fn, valid_loss=loss_fn, max_steps=500, hist_exog_list=columns, val_check_steps=5,
+        # early_stop_patience_steps=5,
 
+        # finetune
+        n_pool_kernel_size = param_dict['n_pool_kernel_size'],
+        n_freq_downsample = param_dict['n_freq_downsample'],
+        learning_rate = param_dict['learning_rate'],
+        input_size = param_dict['input_size'],
+
+        # semi-fixed: minor modification can be done on these params to change the structure of network
+        stack_types = 3 * ["identity"],
+        n_blocks = 3 * [1],
+        mlp_units = 3 * [[512, 512]],
+        interpolation_mode = 'linear',
+        batch_size = 256,
+    )
+
+    nf = NeuralForecast(models=[model], freq='h')
+    rs_frame = nf.cross_validation(df=df, n_windows=None, val_size=len(df)//5, test_size=len(df)//5)
+    return rs_frame
+
+if __name__ == '__main__':
+    # config data and problem
+    dataset = MULTI_FX
+    mode = CLF
+    dataloader = DataLoader(dataset=dataset)
+
+    # hyper-param search space
     pooling_sizes = [[2,2,2], [4,4,4], [8,8,8], [8,4,1], [16,8,1]]
     freqs = [[168,24,1], [24,12,1], [180,60,1], [40,20,1], [64,8,1]]
     lrs = [0.001]
     input_sizes = [5,20,30]
+    loss_fn = DistributionLoss('Bernoulli') if mode==CLF else MSE()
 
-    count = 0
-    num_models = len(pooling_sizes)*len(freqs)*len(lrs)*len(input_sizes)
-    log = {}
-    for pooling_size in pooling_sizes:
-        for freq in freqs:
-            for lr in lrs:
-                for input_size in input_sizes:
-                    model = NHITS(
-                        # const
-                        h=1, loss=DistributionLoss('Bernoulli'), valid_loss=DistributionLoss('Bernoulli'), max_steps=500, hist_exog_list=columns, val_check_steps=5,
-                        # early_stop_patience_steps=5,
+    # predict all columns (1 by 1) in the dataset
+    # since NHITS doesn't take much time to run
+    # i decided not to split the fine-tune process into jobs
+    # 75 models will be run simultaneously
+    for idx, label in enumerate(dataloader.columns):
+        # get data and the given label
+        print(f'\nPredict on label {idx+1}/{len(dataloader.columns)}\n')
+        df, mean_, std_ = dataloader.get_data(label)
 
-                        # finetune
-                        input_size = input_size,
-                        stack_types = 3*["identity"],
-                        n_blocks = 3 * [1],
-                        n_freq_downsample = freq,
-                        n_pool_kernel_size = pooling_size,
-                        mlp_units = 3 * [[512, 512]],
-                        learning_rate = lr,
-                        interpolation_mode = 'linear',
-                        batch_size=256
-                    )
+        # fine-tune
+        count = 0
+        log = {}
+        hyper_param_combinations = list(itertools.product(pooling_sizes, freqs, lrs, input_sizes))
+        for pooling_size, freq, lr, input_size in hyper_param_combinations:
+            param_dict = {
+                "n_pool_kernel_size": pooling_size,
+                "n_freq_downsample": freq,
+                "learning_rate": lr,
+                "input_size": input_size,
+                "loss_fn": DistributionLoss('Bernoulli') if mode==CLF else MSE() if mode==REG else None
+            }
+            rs_frame = run(df, param_dict, dataloader.columns)
 
-                    # fit model
-                    nf = NeuralForecast(models=[model], freq='h')
-                    y_hat = nf.cross_validation(df=data_dict, n_windows=None, val_size=len(data_dict)//5, test_size=len(data_dict)//5)
-                    y_hat['NHITS'] = (y_hat['NHITS'] > 0.5) * 1
+            # compute metrics
+            if mode == CLF:
+                rs_frame['NHITS'] = (rs_frame['NHITS'] > 0.5) * 1
+                acc, precision, recall, f1 = compute_metrics(rs_frame['NHITS'], rs_frame['y'])
+                metric_log = {
+                    "acc": acc,
+                    "precision": precision,
+                    "recall": recall,
+                    "f1": f1,
+                }
+            elif mode == REG:
+                mse = compute_metrics(rs_frame['NHITS'], rs_frame['y']) * (std_**2)
+                metric_log = {'mse': mse}
 
-                    # compute acc
-                    acc, precision, recall, f1 = compute_metrics(y_hat['NHITS'], y_hat['y'])
-                    print(f'\nModel {count+1}/{num_models}')
-                    print('=============================')
-                    print(f'Acc:\t\t{acc:.5f}')
-                    print(f'Precision:\t{precision:.5f}')
-                    print(f'Recall:\t\t{recall:.5f}')
-                    print(f'F1:\t\t{f1:.5f}')
-                    print('=============================\n')
-                    count += 1
+            # print out the metric
+            count += 1
+            print(f'\nModel {count+1}/{len(hyper_param_combinations)}')
+            print('=============================')
+            for key in metric_log:
+                print(f'{key}:\t\t{metric_log[key]:.5f}')
+            print('=============================\n')
 
-                    add_log(log, count, input_size, 3, pooling_size, 512, lr, freq, 'linear', acc, precision, recall, f1)
-    write_log(log=log, file_name=f'NHITS-{dataset}-{label}.json')
+            add_log(log, count, input_size, 3, pooling_size, 512, lr, freq, 'linear', metric_log)
 
-if __name__ == '__main__':
-    # config data right here
-    dataset = WTH
-    data_dir = os.path.join(RAW_DATA_DIR, dataset)
-
-    # extract columns
-    for filename in os.listdir(data_dir):
-        if filename.endswith('.csv'):
-            tmp_df = pd.read_csv(os.path.join(data_dir, filename))
-            columns = list(tmp_df.columns)[1:]
-            break
-
-    # run stuff
-    labels = columns
-    summary = {}
-    for idx, label in enumerate(labels):
-        print(f'\nPredict on label {idx+1}/{len(labels)}\n')
-        run(dataset, idx, columns)
+        # save log for 75 models for a predicted label
+        write_log(log, f'NHITS-{dataset}-{label}.json')

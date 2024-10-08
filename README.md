@@ -1,5 +1,29 @@
 # Multi FX
 
+## `CLF` and `REG`
+
+- The problem is that I have to perform the regression task on new data. I was aware this at the beginning of the project and designed a part of its to be easy to scale (data and based-model). But later on, I was tired and designed the meta-model in stupid way
+- I have to change them back to the scalable version, which I can switch between `CLF` and `REG` easily. First step is to change:
+    [v] The way we compute metric in `common.py`
+    [v] The way we load data in `dataloader.py` (renamed from `pre_process.py`): I change it to class
+    [v] `main.py`: The return stuff of `run(.)` function should be a dictionary containing all metrics. The logging function should be independent from the content it has to write
+    [v] I also use the `itertools` to wrap up those for loop in `submit_jobs.py`
+    [-] In `meta_model.py`, we have to change thing to scalable version, but not for this commit, I think I will get back for it later
+    [v] In `baseline_models.py`: it's reconstructed the way `main.py` and `submit_jobs.py` are
+    [v] The problem is that I haven't tested these code yet. But I will create a commit for them on Github first
+
+## Explain for the fluctuation in metrics
+
+- My very first version for meta-evaluating was constructed as follows:
+
+    data batch (compute exactly) --> dataset (**compute mean of batch**) --> task batch (compute mean of task) --> final (compute mean of task)
+
+- The current version:
+
+    data batch (compute exactly) --> dataset (**compute exactly**) --> task batch (compute mean of task) --> final (compute mean of task)
+
+- This is why there exists a quite big fluctuation in metrics (from ±0.06 to ±2.4). But ±2.4 is better in describe the metrics
+
 ## [v] Some explanation about `pretrained`
 
 - `baseline`: Contain log of fine-tuning baseline model

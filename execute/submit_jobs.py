@@ -8,6 +8,7 @@ all `tmp.sh` files are supposed that they are called from the root directory
 
 import subprocess
 import time
+import itertools
 
 from common.constants import *
 
@@ -54,29 +55,21 @@ def generate_script(device:str, name_job:str, look_back:int, model_name:str, mod
 
 # finetune meta model (based model: CNN, LSTM)
 def finetune_1():
-    current_count = None
-    prev_count = 96
+    windows = [10, 20, 30]
+    models = [LSTM, CNN]
+    inner_lrs = [0.001, 0.005, 0.01, 0.05]
+    outer_lrs = [0.001, 0.005, 0.0015, 0.0055]
+
     count = 0
-    for window in [10, 20, 30]:
-        for model in [LSTM, CNN]:
-            for inner_lr in [0.001, 0.005, 0.01, 0.05]:
-                for outer_lr in [0.001, 0.005, 0.0015, 0.0055]:
-                    if count < 20:
-                        count += 1
-                        continue
+    for window, model, inner_lr, outer_lr in itertools.product(windows, models, inner_lrs, outer_lrs):
+        if count < 20:
+            count += 1
+            continue
 
-                    generate_script('cpu', f'{model}_{count}', window, model, CLF, inner_lr, outer_lr, 5, 100, 3)
-                    subprocess.run(["qsub", os.path.join(EXE_DIR, 'tmp.sh')])
-                    time.sleep(1)
-                    count += 1
-
-                    if count == current_count:
-                        return
-
-    # for project_name in [LSTM, CNN]:
-    #     generate_script('cpu', project_name)
-    #     subprocess.run(["qsub", os.path.join(EXE_DIR, 'tmp.sh')])
-    #     time.sleep(3)
+        generate_script('cpu', f'{model}_{count}', window, model, CLF, inner_lr, outer_lr, 5, 100, 3)
+        subprocess.run(["qsub", os.path.join(EXE_DIR, 'tmp.sh')])
+        time.sleep(1)
+        count += 1
 
     # # demo
     # generate_script('gpu', WEAK_LEARNERS[0], 'boosting')
@@ -84,17 +77,19 @@ def finetune_1():
 
 # finetune meta model (based model: LSTM, LSTM+CNN)
 def finetune_2():
+    windows = [20, 30]
+    models = [LSTM, LSTM_CNN]
+    inner_lrs = [0.001, 0.005, 0.01, 0.05]
+    outer_lrs = [0.001, 0.0015, 0.005, 0.0055]
+    # inner_lrs = [0.005, 0.001, 0.01]
+    # outer_lrs = [0.0055, 0.005]
+
     count = 0
-    for window in [20, 30]:
-        for model in [LSTM, LSTM_CNN]:
-            for inner_lr in [0.005, 0.001, 0.01, 0.05]:
-                for outer_lr in [0.0055, 0.005, 0.001, 0.0015]:
-            # for inner_lr in [0.005, 0.001, 0.01]:
-            #     for outer_lr in [0.0055, 0.005]:
-                    generate_script('cpu', f'{model}_{count}', window, model, CLF, inner_lr, outer_lr, 5, 100, 3)
-                    subprocess.run(["qsub", os.path.join(EXE_DIR, 'tmp.sh')])
-                    time.sleep(1)
-                    count += 1
+    for window, model, inner_lr, outer_lr in itertools.product(windows, models, inner_lrs, outer_lrs):
+        generate_script('cpu', f'{model}_{count}', window, model, CLF, inner_lr, outer_lr, 5, 100, 3)
+        subprocess.run(["qsub", os.path.join(EXE_DIR, 'tmp.sh')])
+        time.sleep(1)
+        count += 1
 
 '''
 function finetune_3 fine-tunes all of meta-model (LSTM, LSTM+CNN) on all dataset
@@ -113,15 +108,17 @@ function finetune_3 fine-tunes all of meta-model (LSTM, LSTM+CNN) on all dataset
     [x] ECL
 '''
 def finetune_3():
+    windows = [20, 30]
+    models = [LSTM, LSTM_CNN]
+    inner_lrs = [0.001, 0.005, 0.01, 0.05]
+    outer_lrs = [0.001, 0.0015, 0.005, 0.0055]
+
     count = 0
-    for window in [20, 30]:
-        for model in [LSTM, LSTM_CNN]:
-            for inner_lr in [0.001, 0.005, 0.01, 0.05]:
-                for outer_lr in [0.001, 0.0015, 0.005, 0.0055]:
-                    generate_script('cpu', f'{count}.{model}', window, model, CLF, inner_lr, outer_lr, 5, 100, 3)
-                    subprocess.run(["qsub", os.path.join(EXE_DIR, 'tmp.sh')])
-                    time.sleep(1)
-                    count += 1
+    for window, model, inner_lr, outer_lr in itertools.product(windows, models, inner_lrs, outer_lrs):
+        generate_script('cpu', f'{count}.{model}', window, model, CLF, inner_lr, outer_lr, 5, 100, 3)
+        subprocess.run(["qsub", os.path.join(EXE_DIR, 'tmp.sh')])
+        time.sleep(1)
+        count += 1
 
 if __name__ == '__main__':
     finetune_3()

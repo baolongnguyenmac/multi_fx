@@ -2,12 +2,12 @@ import tensorflow as tf
 import random
 random.seed(84)
 import argparse
-import pandas as pd
 import json
+import numpy as np
 
 from model.meta_model import MAML
 from common.constants import *
-from data.pre_process import get_data
+from data.dataloader import DataLoader
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -23,22 +23,28 @@ def parse_args():
 
     return vars(parser.parse_args())
 
-def run(dataset:str, input_dict:dict, label:int):
-    # prep data
-    data_dir = os.path.join(RAW_DATA_DIR, dataset)
-    data_dict = get_data(look_back=input_dict['look_back_window'], data_dir=data_dir, label=label)
+def run(data_dict:dict[str, dict[str, list[np.ndarray]]], input_dict:dict, model_dir:str, is_multi:bool=False) -> dict[str:float]:
+    """train model with given hyper-param in `input_dict`
 
-    if 'multi' in dataset:
+    Args:
+        data_dict (dict[str, dict[str, list[np.ndarray]]]): dictionary containing all tasks
+        input_dict (dict): hyper-param
+        model_dir (str): directory to save model and its log
+        is_multi (bool, optional): if True, shuffle tasks. Defaults to False.
+
+    Returns:
+        metric_dict_: a dictionary containing all metrics for CLF or REG problem
+    """
+    list_id = set(data_dict.keys())
+    if is_multi:
         # only apply for multi_fx
         # choose randomly 50% clients for training, 25% for validating and 25% for testing
-        list_id = set(data_dict.keys())
         list_id_train = random.sample(sorted(list_id), len(list_id)//2)
         list_id_val = random.sample(sorted(list_id.difference(set(list_id_train))), len(list_id)//4)
         list_id_test = list(list_id.difference(set(list_id_train).union(list_id_val)))
     else:
         # bởi vì các dataset khác không multi
         # nên phải đảm bảo tính thứ tự trong huấn luyện
-        list_id = list(data_dict.keys())
         list_id_train = list_id[:int(len(list_id)*0.5)]
         list_id_val = list_id[int(len(list_id)*0.5):int(len(list_id)*0.75)]
         list_id_test = list_id[int(len(list_id)*0.75):]
@@ -55,57 +61,69 @@ def run(dataset:str, input_dict:dict, label:int):
         mode=input_dict['mode']
     )
 
-    # potential pretrained models are copied to ./pretrained/{...}/backup
-    pretrained_dir = os.path.join(PRETRAINED_DIR, dataset)
+    # meta-train
     for round in range(input_dict['num_rounds']):
         batch_task = random.sample(list_id_train, input_dict['batch_task_size'])
         print(f'\nEpoch {round+1}/{input_dict["num_rounds"]}: Meta-train on {batch_task}\n')
         maml.train(round, input_dict['num_epochs'], batch_task, list_id_val)
 
-    # after training, testing is produced automatically
-    acc, precision, recall, f1 = maml.valid(list_id_test, num_epochs=input_dict['num_epochs'], mode=TEST)
+    # after meta-training, meta-testing is produced automatically
+    if input_dict['mode'] == CLF:
+        acc, precision, recall, f1 = maml.valid(list_id_test, num_epochs=input_dict['num_epochs'], mode=TEST)
+        metric_dict = {
+            'acc': acc,
+            'precision': precision,
+            'recall': recall,
+            'f1': f1
+        }
+    elif input_dict['mode'] == REG:
+        mse = maml.valid(list_id_test, num_epochs=input_dict['num_epochs'], mode=TEST)
+        metric_dict = {'mse': mse}
 
     # save log and model
-    model_folder = f"{input_dict['based_model']}_{input_dict['look_back_window']}_{input_dict['inner_learning_rate']}_{input_dict['outer_learning_rate']}"
-    model_dir = os.path.join(pretrained_dir, model_folder)
-    # create a folder in `pretrained_dir` named model_name
-    if not os.path.exists(model_dir):
-        os.mkdir(model_dir)
     maml.save_model(dir_=model_dir, model_name=label)
 
-    return acc, precision, recall, f1, model_dir
+    return metric_dict
 
-if __name__ == '__main__':
-    # config right here
-    dataset = ETT
-    data_dir = os.path.join(RAW_DATA_DIR, dataset)
+def add_summary_log(summary:dict, label:int, metric_dict:dict[str:float]):
+    # log for summary a model
+    summary[label] = {}
+    for key in metric_dict.keys():
+        summary[label][key] = metric_dict[key]
 
-    # extract columns
-    for filename in os.listdir(data_dir):
-        if filename.endswith('.csv'):
-            tmp_df = pd.read_csv(os.path.join(data_dir, filename)).to_numpy()[:,1:]
-            columns = list(range(tmp_df.shape[1]))
-            break
-
-    # run stuff
-    input_dict = parse_args()
-    labels = columns
-    summary = {}
-    for idx, label in enumerate(labels):
-        print(f'\nPredict on label {idx+1}/{len(labels)}\n')
-        acc, precision, recall, f1, model_dir = run(dataset, input_dict, label)
-
-        # log for summary a model
-        summary[label] = {}
-        summary[label]['acc'] = acc
-        summary[label]['precision'] = precision
-        summary[label]['recall'] = recall
-        summary[label]['f1'] = f1
-
-    # write summary of models
+def write_summary_log(summary:dict, model_dir:str):
     print(f'\nWrite summary log to {model_dir}\n')
     with open(os.path.join(model_dir, 'summary.json'), 'w') as fo:
         json.dump(summary, fo)
 
-# # test
-# python -m execute.main -window 10 -model lstm_cnn -mode classification -inner_lr 0.001 -outer_lr 0.0055 -bt_size 3 -rounds 3 -epochs 3 -ncpus 26
+if __name__ == '__main__':
+    # get input_dict
+    input_dict = parse_args()
+
+    # config data
+    dataset = MULTI_FX
+    dataloader = DataLoader(dataset=dataset, look_back=input_dict['look_back'], mode=input_dict['mode'])
+
+    # specify model_dir to save model and its log
+    pretrained_dir = os.path.join(PRETRAINED_DIR, dataset)
+    model_folder = f"{input_dict['based_model']}_{input_dict['look_back_window']}_{input_dict['inner_learning_rate']}_{input_dict['outer_learning_rate']}"
+    model_dir = os.path.join(pretrained_dir, model_folder)
+
+    # create a folder in `pretrained_dir` named model_name
+    if not os.path.exists(model_dir):
+        os.mkdir(model_dir)
+
+    summary = {}
+    for idx, label in enumerate(dataloader.columns):
+        # get data and the given label
+        print(f'\nPredict on label {idx+1}/{len(dataloader.columns)}\n')
+        data_dict = dataloader.get_multi_data(label)
+
+        # meta-train, then meta-test and obtain metrics
+        metric_dict = run(data_dict, input_dict, model_dir, 'multi' in dataset)
+
+        # log for summary a model
+        add_summary_log(summary, label, metric_dict)
+
+    # write summary of models
+    write_summary_log(summary, model_dir)

@@ -12,14 +12,14 @@ USD_JPY = 'USD_JPY'
 ETT = 'ett'
 ECL = 'ecl'
 WTH = 'wth'
-FACTORY_1 = 'important_1'
-FACTORY_2 = 'important_2'
+FACTORY_1 = 'factory_1'
+FACTORY_2 = 'factory_2'
 
 # mode
 REG = 'regression'
 CLF = 'classification'
-VAL = 'validation'
-TEST = 'test'
+VAL = 'Validation'
+TEST = 'Test'
 
 # based model
 LSTM = 'lstm'

@@ -1,6 +1,5 @@
 # libraries
-from keras import Sequential, layers, models
-import tensorflow as tf
+from keras import layers, models
 
 from common.constants import *
 
