@@ -29,7 +29,7 @@ def add_log(log:dict, count:int, input_size:int, n_stacks:int, kernel_size:int, 
     for key in metric_log:
         log[count][key] = metric_log[key]
 
-def write_log(log:dict, file_name:str):
+def write_log(log:dict, file_name:str='NHITS_USD-JPY.json'):
     with open(os.path.join(PRETRAINED_DIR, 'baseline', file_name), 'w') as fo:
         json.dump(log, fo)
 

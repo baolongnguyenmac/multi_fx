@@ -20,6 +20,8 @@ def parse_args():
     parser.add_argument('-rounds', '--num_rounds', type=int, default=100, required=False)
     parser.add_argument('-epochs', '--num_epochs', type=int, default=3, required=True) # we need this param in test phase
     parser.add_argument('-ncpus', '--num_cpus', type=int, default=8)
+    parser.add_argument('-test', '--test', type=str, required=False, help='Pass model_name here (e.g: lstm_0.001_0.005)')
+    # parser.add_argument('--test', action='store_true', required=False)
 
     return vars(parser.parse_args())
 

@@ -3,7 +3,7 @@ this file should be run from the root directory of the project
 >> python -m execute.submit_jobs
 
 it will generate `tmp.sh` to submit the job to server
-all `tmp.sh` files are supposed that they are called from the root directory
+all `tmp.sh` file assume that they are called from the root directory
 '''
 
 import subprocess
@@ -20,7 +20,7 @@ def generate_script(device:str, name_job:str, look_back:int, model_name:str, mod
 
     if device == 'cpu':
         class_name = 'DEFAULT'
-        resources = f'select=1:ncpus={ncores_limit}'
+        resources = 'select=1:ncpus=64'
         load_modules = ''
         test_device = f'echo "Using $(nproc) CPU cores" &>> {log_file_path}'
     elif device == 'gpu':

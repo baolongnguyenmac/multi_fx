@@ -235,7 +235,7 @@ class MAML:
         return (self.info[f'{mode}_accuracy'], self.info[f'{mode}_precision'], self.info[f'{mode}_recall'], self.info[f'{mode}_f1']) if self.mode == CLF else self.info[f'{mode}_mse']
 
     def save_model(self, dir_:str, model_name:str):
-        print(f'\nSave model at {dir_}\n')
+        print('\nSave model\n')
         json_file_path = os.path.join(dir_, f'{model_name}.json')
         model_file_path = os.path.join(dir_, f'{model_name}.keras')
         with open(json_file_path, 'w') as fo:
