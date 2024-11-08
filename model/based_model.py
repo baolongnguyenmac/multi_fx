@@ -32,7 +32,7 @@ def _get_lstm_cnn(input_layer):
 
     return layers.Concatenate()([cnn_output, lstm_output])
 
-def get_model(model_name:str, input_shape:tuple, mode:str):
+def get_model(model_name:str, input_shape:tuple, output_shape:int, mode:str):
     input_ = layers.Input(shape=input_shape)
     if model_name == LSTM:
         x = _get_lstm(input_)
@@ -48,7 +48,7 @@ def get_model(model_name:str, input_shape:tuple, mode:str):
     if mode == REG:
         output_ = layers.Dense(units=1)(x)
     elif mode == CLF:
-        output_ = layers.Dense(units=1, activation='sigmoid')(x)
+        output_ = layers.Dense(units=output_shape, activation='softmax')(x)
     return models.Model(inputs=input_, outputs=output_)
 
 # bla = get_model(LSTM, (20,4), CLF)
