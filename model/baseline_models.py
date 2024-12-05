@@ -69,7 +69,7 @@ if __name__ == '__main__':
     freqs = [[168,24,1], [24,12,1], [180,60,1], [40,20,1], [64,8,1]]
     lrs = [0.001]
     input_sizes = [5,20,30]
-    loss_fn = DistributionLoss('Bernoulli') if mode==CLF else MSE()
+    loss_fn = DistributionLoss('Bernoulli') if mode==CLF else MSE() if mode==REG else None
 
     # predict all columns (1 by 1) in the dataset
     # since NHITS doesn't take much time to run
