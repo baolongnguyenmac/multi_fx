@@ -1,5 +1,22 @@
 # Multi FX
 
+## Next thing to do
+
+[-] The construction of `multi-fx` is changed. It now satisfies the time constrain. But I have to re-run it (Meta method and `NHITS`)
+[-] I am re-analyzing metrics obtained from `multi-fx` and other datasets in `./pretrained/analyze.ipynb`
+- I also have to implement `DistillBERT`
+
+## New `dataloader.py`
+
+- I changed the old file `preprocess.py` into `dataloader.py`
+- I also changed all function in the old file into OOP in the new one
+- For normal datasets (not really multi-task, like `USD/JPY`), we just divide it normally (each task = a period of time)
+- For `multi-fx`
+    - Each pair is divided into 2 part (by time), part 1 for training and part 2 for validating/testing
+    - 60 pairs are then divided into 120 tasks. 60 pairs of part 1 are used for training, 30 pairs of part 2 for validating, 30 ones for testing
+    - Therefore, we now have 3 folders in pre-trained regarding to `multi-fx`: first one is `old_multi_fx` which contains pre-trained models for only close price. second one is `old/multi_fx` which contains pre-trained models for all prices, but the time constrain is not guaranteed. third one is `./pretrained/multi_fx` which contains the pre-trained models and guarantees the time constrain
+- `REG` is no longer my concern.
+
 ## `CLF` and `REG`
 
 - The problem is that I have to perform the regression task on new data. I was aware this at the beginning of the project and designed a part of its to be easy to scale (data and based-model). But later on, I was tired and designed the meta-model in stupid way

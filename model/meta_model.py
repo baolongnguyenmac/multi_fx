@@ -14,16 +14,27 @@ class MAML:
     def __init__(
         self,
         data_dict:dict[str, dict[str, np.ndarray]],
+        output_shape:int,
         based_model:str,
         inner_lr:float,
         outer_lr:float,
         mode:str=CLF
     ):
+        """init stuff for MAML model
+
+        Args:
+            data_dict (dict[str, dict[str, np.ndarray]]): a dictionary containing tasks
+            output_shape (int): 1 for regression, ≥2 for classification
+            based_model (str): specify the based model
+            inner_lr (float): inner learning rate
+            outer_lr (float): outer learning rate
+            mode (str, optional): CLF or REG. Defaults to CLF.
+        """
         # get data
         self.data_dict:dict[str, dict[str, np.ndarray]] = data_dict
 
         # init model stuff
-        self.meta_model:models.Model = get_model(based_model, data_dict[0]['support_X'][0].shape[1:], mode)
+        self.meta_model:models.Model = get_model(based_model, data_dict[0]['support_X'][0].shape[1:], output_shape, mode)
         self.outer_opt:optimizers.Optimizer = optimizers.Adam(learning_rate=outer_lr)
         self.inner_lr:float = inner_lr
 
@@ -45,7 +56,7 @@ class MAML:
             self.info['train_acc'] = []
             self.info['val_acc'] = []
             self.info['val_std_acc'] = []
-            self.loss_fn = metrics.binary_crossentropy
+            self.loss_fn = metrics.sparse_categorical_crossentropy
 
     def inner_training_step(self, model:models.Model, X:list[np.ndarray], y:list[np.ndarray], num_epochs:int=2):
         """fast adapt on support set (inner step)
@@ -109,17 +120,17 @@ class MAML:
 
                 # store prediction and true label for computing acc
                 if self.mode == CLF:
-                    pred = (pred.numpy()>=0.5)*1.
-                    pred_values = np.vstack((pred_values, pred))
+                    pred = np.argmax(pred.numpy(), axis=1)
+                    pred_values = np.vstack((pred_values, pred.reshape(-1,1)))
                     true_values = np.vstack((true_values, batch_y))
 
             # compute sum loss for back-propagation
             sum_task_losses += task_loss
 
             # compute acc + loss of a task then print out
-            task_loss /= len(X)
-            tasks_metrics['loss'].append(task_loss)
             if self.mode == CLF:
+                task_loss /= len(true_values)
+                tasks_metrics['loss'].append(task_loss)
                 acc_, precision_, recall_, f1_ = compute_metrics(pred_values, true_values)
                 tasks_metrics['acc'].append(acc_)
                 tasks_metrics['precision'].append(precision_)
@@ -127,7 +138,9 @@ class MAML:
                 tasks_metrics['f1'].append(f1_)
                 print(f'Outer compute on task {task_id}: loss={task_loss:.5f}\t acc={acc_:.5f}')
             elif self.mode == REG:
-                print(f'Outer compute on task {task_id}: loss={task_loss:.5f}')
+                # since i normalize the dataset, task_loss has to multiply by `std^2` to obtain the real loss
+                tasks_metrics['loss'].append(task_loss * (self.data_dict[task_id]['std']**2))
+                print(f'Outer compute on task {task_id}: loss={tasks_metrics["loss"][-1]:.5f}')
 
         tasks_metrics['loss'], tasks_metrics['std_loss'] = compute_metrics(tasks_metrics['loss'])
         print(f"\n\tMean loss:\t{tasks_metrics['loss']:.5f} ± {tasks_metrics['std_loss']:.5f}")
@@ -198,6 +211,16 @@ class MAML:
             self.valid(list_id_val, num_epochs)
 
     def valid(self, list_id_val:list[int], num_epochs:int=2, mode:str=VAL):
+        """validate model using list_id_val
+
+        Args:
+            list_id_val (list[int]): id of validated task
+            num_epochs (int, optional): number of adaptation steps. Defaults to 2.
+            mode (str, optional): VAL or TEST. Defaults to VAL.
+
+        Returns:
+            tuple[float]: if self.mode==CLF, return (acc, p, r, f1). if self.mode==REG, return mse
+        """
         print(f'\n{mode}\n')
         model:models.Model = deepcopy(self.meta_model)
         meta_weights = model.get_weights()
