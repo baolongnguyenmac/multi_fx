@@ -7,6 +7,7 @@ import json
 import pandas as pd
 import json
 import itertools
+import argparse
 
 from data.dataloader import DataLoader
 from common.constants import *
@@ -29,8 +30,8 @@ def add_log(log:dict, count:int, input_size:int, n_stacks:int, kernel_size:int, 
     for key in metric_log:
         log[count][key] = metric_log[key]
 
-def write_log(log:dict, file_name:str='NHITS_USD-JPY.json'):
-    with open(os.path.join(PRETRAINED_DIR, 'baseline', file_name), 'w') as fo:
+def write_log(log:dict, dataset_dir:str, label:int):
+    with open(os.path.join(dataset_dir, f'{label}.json'), 'w') as fo:
         json.dump(log, fo)
 
 def run(df:pd.DataFrame, param_dict:dict, columns:list[str]):
@@ -59,10 +60,25 @@ def run(df:pd.DataFrame, param_dict:dict, columns:list[str]):
     return rs_frame
 
 if __name__ == '__main__':
-    # config data and problem
-    dataset = MULTI_FX
+    # get dataset from command line
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-dataset', '--dataset', type=str, required=True)
+    input_dict = vars(parser.parse_args())
+
+    # config dataset and model
+    dataset = input_dict['dataset']
     mode = CLF
     dataloader = DataLoader(dataset=dataset)
+
+    # create baseline_dir if needed
+    baseline_dir = os.path.join(PRETRAINED_DIR, 'baseline')
+    if not os.path.exists(baseline_dir):
+        os.mkdir(baseline_dir)
+
+    # create a folder for each dataset in baseline_dir
+    dataset_dir = os.path.join(baseline_dir, dataset)
+    if not os.path.exists(dataset_dir):
+        os.mkdir(dataset_dir)
 
     # hyper-param search space
     pooling_sizes = [[2,2,2], [4,4,4], [8,8,8], [8,4,1], [16,8,1]]
@@ -74,7 +90,7 @@ if __name__ == '__main__':
     # predict all columns (1 by 1) in the dataset
     # since NHITS doesn't take much time to run
     # i decided not to split the fine-tune process into jobs
-    # 75 models will be run simultaneously
+    # 75 models will be run sequentially
     for idx, label in enumerate(dataloader.columns):
         # get data and the given label
         print(f'\nPredict on label {idx+1}/{len(dataloader.columns)}\n')
@@ -119,4 +135,4 @@ if __name__ == '__main__':
             add_log(log, count, input_size, 3, pooling_size, 512, lr, freq, 'linear', metric_log)
 
         # save log for 75 models for a predicted label
-        write_log(log, f'NHITS-{dataset}-{label}.json')
+        write_log(log, dataset_dir, label)
