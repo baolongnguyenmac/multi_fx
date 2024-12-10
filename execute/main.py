@@ -10,6 +10,7 @@ from data.dataloader import DataLoader
 
 def parse_args():
     parser = argparse.ArgumentParser()
+    parser.add_argument('-dataset', '--dataset', type=str, required=True)
     parser.add_argument('-window', '--look_back_window', type=int, required=True)
     parser.add_argument('-model', '--based_model', type=str, choices=[LSTM, CNN, LSTM_CNN, ATT], default=LSTM, required=False)
     parser.add_argument('-mode', '--mode', type=str, choices=[REG, CLF], default=CLF, required=True)
@@ -96,7 +97,7 @@ if __name__ == '__main__':
     input_dict = parse_args()
 
     # config data
-    dataset = MULTI_FX
+    dataset = input_dict['dataset']
     dataloader = DataLoader(dataset=dataset, look_back=input_dict['look_back_window'], mode=input_dict['mode'], is_multi='multi' in dataset)
 
     # specify model_dir to save model and its log
@@ -130,4 +131,4 @@ if __name__ == '__main__':
     # write summary of models
     write_summary_log(summary, model_dir)
 
-# python -m execute.main -window 10 -model lstm_cnn -mode classification -out_shape 2 -inner_lr 0.001 -outer_lr 0.0055 -bt_size 3 -rounds 3 -epochs 3 -ncpus 8
+# python -m execute.main -dataset USD_JPY -window 10 -model lstm_cnn -mode classification -out_shape 2 -inner_lr 0.001 -outer_lr 0.0055 -bt_size 3 -rounds 3 -epochs 3 -ncpus 8

@@ -3,7 +3,7 @@ import os
 # dirs
 RAW_DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data')
 EXE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../execute')
-PRETRAINED_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../pretrained')
+PRETRAINED_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../pretrained_new')
 LOG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../execute/log')
 
 # dataset

@@ -12,22 +12,21 @@ import itertools
 
 from common.constants import *
 
-def generate_script(device:str, name_job:str, look_back:int, model_name:str, mode:str, out_shape:int, inner_lr:float, outer_lr:float, bt_size:int, rounds:int, epochs:int):
-    ncores_limit = 64 if device=='cpu' else 26 if device=='gpu' else 0
+def generate_script(device:str, name_job:str, command:str):
     log_file_path = os.path.join(LOG_DIR, f"{name_job}.log")
-    command = f'python -m execute.main -window {look_back} -model {model_name} -mode {mode} -out_shape {out_shape} -inner_lr {inner_lr} -outer_lr {outer_lr} -bt_size {bt_size} -rounds {rounds} -epochs {epochs} -ncpus {ncores_limit} &>> {log_file_path}'
+    command = f'{command} &>> {log_file_path}'
     name_job = f'{name_job}_job'
 
     if device == 'cpu':
         class_name = 'DEFAULT'
         resources = 'select=1:ncpus=64'
-        timeout = 'walltime=24:00:00'
+        timeout = 'walltime=72:00:00'
         load_modules = ''
         test_device = f'echo "Using $(nproc) CPU cores" &>> {log_file_path}'
     elif device == 'gpu':
         class_name = 'GPU-1A'
         resources = 'select=1:ngpus=1'
-        timeout = 'walltime=24:00:00'
+        timeout = 'walltime=72:00:00'
         load_modules = 'module load cuda'
         test_device = f'nvidia-smi &>> {log_file_path}'
     else:
@@ -46,7 +45,7 @@ def generate_script(device:str, name_job:str, look_back:int, model_name:str, mod
 
         '\n# Commands to run your job',
 
-        f'echo "Starting {model_name} at `date`" &> {log_file_path}',
+        f'echo "Starting {name_job} at `date`" &> {log_file_path}',
         f'conda activate fx_env',
         f'conda env list &>> {log_file_path}',
         test_device,
@@ -57,36 +56,52 @@ def generate_script(device:str, name_job:str, look_back:int, model_name:str, mod
         fout.write("\n".join(tmp_file) + "\n")
 
 '''
-function finetune_3 fine-tunes all of meta-model (LSTM, LSTM+CNN) on all dataset
-    [v] multi-fx
+function finetune_meta_model tunes all of meta-model (LSTM, LSTM+CNN) on all dataset
+    - multi-fx
         - inner: [0.001, 0.005, 0.01, 0.05]
         - outer: [0.001, 0.0015, 0.005, 0.0055]
-    [v] USD/JPY
+    [-] USD/JPY
+        - inner: [0.001, 0.005, 0.01, 0.05]
+        - outer: [0.005, 0.0055, 0.001, 0.0015]
+    - ETT  ---> need to run them again (after analyzing)
         - inner: [0.001, 0.005, 0.01, 0.05]
         - outer: [0.001, 0.0015, 0.005, 0.0055]
-    [-] ETT  ---> need to run them again (after analyzing)
-        - inner: [0.001, 0.005, 0.01, 0.05]
-        - outer: [0.001, 0.0015, 0.005, 0.0055]
-    [-] WTH
+    - WTH
         - inner: [0.001, 0.005, 0.01, 0.05]
         - outer: [0.001, 0.0015, 0.005, 0.0055]
     [x] ECL
 '''
-def finetune_3():
+def finetune_meta_model():
     windows = [20, 30]
-    models = [LSTM, LSTM_CNN]
+    models = [ATT, LSTM]
     inner_lrs = [0.001, 0.005, 0.01, 0.05]
-    outer_lrs = [0.001, 0.0015, 0.005, 0.0055]
-    old_limit = 40
-    limit = 64
+    outer_lrs = [0.005, 0.0055, 0.001, 0.0015]
+    old_limit = 0
+    limit = 40
 
     for idx, (window, model, inner_lr, outer_lr) in enumerate(itertools.product(windows, models, inner_lrs, outer_lrs)):
         if idx < old_limit:
             continue
         if idx < limit:
-            generate_script('cpu', f'{idx}.{model}', window, model, CLF, 2, inner_lr, outer_lr, 5, 100, 3)
+            dataset = USD_JPY
+            device = 'cpu'
+            ncores_limit = 64 if device=='cpu' else 26 if device=='gpu' else 0
+            rounds = 100 if model==LSTM else 150 if model==ATT else 0
+            command = f'python -m execute.main -dataset {dataset} -window {window} -model {model} -mode {CLF} -out_shape 2 -inner_lr {inner_lr} -outer_lr {outer_lr} -bt_size 5 -rounds {rounds} -epochs 3 -ncpus {ncores_limit}'
+
+            generate_script(device=device, name_job=f'{idx}.{model}', command=command)
             subprocess.run(["qsub", os.path.join(EXE_DIR, 'tmp.sh')])
             time.sleep(1)
 
+# once again, since NHITS doesn't take much time to run
+# i decided not to split the fine-tune process into jobs
+# 75 models will be run sequentially
+def finetune_nhits():
+    for idx, dataset in enumerate([USD_JPY, ETT, WTH]):
+        generate_script(device='cpu', name_job=f'{idx}.{dataset}', command=f'python -m model.baseline_models -dataset {dataset}')
+        subprocess.run(["qsub", os.path.join(EXE_DIR, 'tmp.sh')])
+        time.sleep(1)
+
 if __name__ == '__main__':
-    finetune_3()
+    finetune_meta_model()
+    # finetune_nhits()
