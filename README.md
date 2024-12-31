@@ -1,10 +1,19 @@
 # Multi FX
 
-## Next thing to do
+## A note on pre-processing
+
+- NHITS's data:
+    - Perform `z-score` normalization on `80%` of data.
+    - It should be like: Fit on `60% (training data)`, transform on `20% (val data)` and `20% (test data)`.
+    - Since we can gather training and validating data to train for the last time before testing (only once) on testing data, but I don't train it on (train+val) data, so I use val data as an additional info for training process.
+
+- Meta's data: Fit on `60% (training data)`, transform on `20% (val data)` and `20% (test data)` since val part and test part do not belong to 1 dataset.
+
+## Next thing to do`
 
 [-] The construction of `multi-fx` is changed. It now satisfies the time constrain. But I have to re-run it (Meta method and `NHITS`)
-[-] I am re-analyzing metrics obtained from `multi-fx` and other datasets in `./pretrained/analyze.ipynb`
-- I also have to implement `DistillBERT`
+[x] I am re-analyzing metrics obtained from `multi-fx` and other datasets in `./pretrained/analyze.ipynb`
+[x] I also have to implement `DistillBERT`
 
 ## New `dataloader.py`
 

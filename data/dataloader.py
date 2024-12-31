@@ -25,6 +25,7 @@ class DataLoader:
             batch_size (int, optional): batch size. Defaults to 32. If `batch_size=-1`, then we don't divide data into batches
             test_size (float, optional): the amount of data in query set. Defaults to 0.8.
             mode (str, optional): either classification problem or regression problem. Defaults to CLF.
+            is_multi (bool, optional): whether the dataset contains many sub-datasets or not
         """
         self.look_back = look_back
         self.batch_size = batch_size
@@ -57,15 +58,20 @@ class DataLoader:
         if self.mode == CLF:
             label_col = label_col[1:] - label_col[:-1]
             label_col = (label_col>0)*1.
-            label_col = np.append([-1], label_col) # the first value is assigned to -1, it's removed anyway
+            label_col = np.append([-1.], label_col) # the first value is assigned to -1, it's removed anyway
         elif self.mode == REG:
             # if it is regression problem, we don't have to to anything
             pass
         return label_col
 
-    def _normalize_data(self, df:np.ndarray, label:int=-1):
+    # normalize: fit on 80% data and transform on 20% for nhits, 60% and 40% for meta
+    def _normalize_data(self, df:np.ndarray, label:int=-1, test_size:float=0.4):
+        train_, test_ = train_test_split(df, test_size=test_size, shuffle=False)
         scaler = StandardScaler()
-        return (scaler.fit_transform(df), scaler.mean_[label], scaler.scale_[label]) if self.mode == REG else (scaler.fit_transform(df), None, None)
+        train_ = scaler.fit_transform(train_)
+        test_ = scaler.transform(test_)
+        mean_, std_ = scaler.mean_[label], scaler.scale_[label]
+        return np.concatenate([train_, test_], axis=0), mean_, std_
 
     def _create_dataset(self, df:np.ndarray, label:int)->tuple[np.ndarray, np.ndarray]:
         size = df.shape[0] - self.look_back
@@ -163,12 +169,12 @@ class DataLoader:
                 df = pd.read_csv(os.path.join(data_path, file_name)).to_numpy()[:,1:]
 
                 # normalize data
-                transformed_df, mean_, std_ = self._normalize_data(df, label)
+                transformed_df, mean_, std_ = self._normalize_data(df, label, 0.2)
 
                 # create label
                 y = self._create_label(transformed_df, label)
 
-                # concat X, y
+                # concat transformed_df, y
                 transformed_df = np.concatenate([transformed_df, y.reshape(-1,1)], axis=1)
                 transformed_df = pd.DataFrame(transformed_df, columns=self.columns+['y'])
                 transformed_df['unique_id'] = 0
