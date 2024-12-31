@@ -1,0 +1,72 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% User Packages
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage[a4paper,margin=2.5cm,footskip=1.25cm]{geometry}% Page layout
+\usepackage{color}            % Color support
+\usepackage{cite}             % Enhanced citation handling
+\usepackage{url}              % Formatting URLs
+
+% line spacing
+\usepackage{setspace}
+\onehalfspacing
+
+% format algorithm
+% \usepackage{algorithm}        % Algorithm environment
+% \usepackage{algorithmic}      % Algorithmic formatting
+% \usepackage{listings}
+\usepackage{fvextra}          % Verb|| in caption
+
+% Chèn và định dạng mã giả
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\makeatletter
+\def\BState{\State\hskip-\ALG@thistlm}
+\makeatother
+
+% indent for first paragraph
+\usepackage{indentfirst}
+
+% table
+\usepackage{tabularray}
+\usepackage{booktabs}         % Professional tables
+\usepackage{multirow}         % Multi row cells in tables
+\usepackage{longtable}        % Tables spanning multiple pages
+\usepackage{rotating}
+\usepackage{vcell}
+\usepackage{array}
+\usepackage{diagbox}
+\usepackage{colortbl}
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+
+% math stuff
+\usepackage{mathtools}        % Math enhancements
+\usepackage{amsmath}          % Advanced math typesetting
+\usepackage{amssymb}          % Additional math symbols
+\usepackage{amsthm}           % Theorem environment
+\usepackage{amsfonts}
+\newcommand\numberthis{\addtocounter{equation}{1}\tag{\theequation}} % đánh số tại phương trình chỉ định bằng \numberthis
+% \usepackage{breqn}
+% \usepackage{bm}
+
+% Font tiếng Việt
+\usepackage[T5]{fontenc}
+\usepackage[utf8]{inputenc}
+\DeclareTextSymbolDefault{\DH}{T1}
+
+% image
+\usepackage{float}            % Improved figure/table placement
+\usepackage{graphicx}         % Include graphics
+\usepackage{subcaption}       % Sub-captions for figures/tables
+\usepackage{caption}          % Customizing captions
+\usepackage{cprotect}         % Verb|| in caption
+
+% Trang bìa
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\newcommand\HRule{\rule{\textwidth}{1pt}}
+
+\usepackage[colorlinks=true, linkcolor=black, citecolor=black, urlcolor=black]{hyperref}
+\usepackage{doi}

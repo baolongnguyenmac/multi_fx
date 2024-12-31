@@ -19,6 +19,7 @@
 *.log
 *blx.bib
 *Notes.bib
+*.cpt
 
 # code
 *job.*

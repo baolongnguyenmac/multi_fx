@@ -1,0 +1,137 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Chapter 3: Method
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Methodology}
+\label{chap:method}
+
+% Phương pháp của chúng tôi bao gồm hai phần chính hoạt động song song nhau: (1) - Feature extraction; (2) - Model synthesis. Tổng quan phương pháp được minh họa trong hình \ref{fig:flow}. Trong phần feature extraction, chúng tôi kết hợp hai loại đặc trưng từ mạng \verb|LSTM| và \verb|LSTM+CNN|. Trong phần Model synthesis, chúng tôi sử dụng \verb|MAML| để tổng hợp tham số của các mô hình. Với sự góp mặt của các đặc trưng từ các mạng học sâu, chúng tôi kỳ vọng sẽ rút trích được các đặc trưng ẩn trong dữ liệu aperiodic. Thông qua sự kết hợp giữa quá trình tổng hợp mô hình bằng thuật toán \verb|MAML| và quá trình rút trích đặc trưng bằng \verb|LSTM|/\verb|LSTM+CNN|, phương pháp đề xuất được kỳ vọng là một giải pháp thay thế hợp lý và hiệu quả cho các mô hình ensemble truyền thống trong việc tổng hợp hiệu quả external factors, giảm thiểu tác động của sự biến thiên phương sai, cũng như rút trích được các hidden long-term dependency trong quá khứ.
+
+We propose \verb|Temporal-ML|, a ML-based method which consists of two main parts that work in parallel: (1) - Temporal feature extraction; (2) - Models' parameter synthesis. The overview of the method is illustrated in figure \ref{fig:flow} and the detail is presented in algorithm \ref{alg:maml}. In the \textit{Temporal feature extraction} section, we use two types of features from \verb|LSTM| and \verb|LSTM+CNN| networks. In the \textit{Effective synthesis of model's parameters} section, we use \verb|MAML| to synthesize the parameters of the models.
+
+Due to the contribution of \verb|LSTM| and \verb|LSTM+CNN| features, we expect to effectively extract hidden features from aperiodic data. By using \verb|MAML| in the weight aggregation process, the proposed method is expected to be a reasonable and effective alternative to traditional ensemble models in effectively synthesizing external factors, minimizing the impact of variance variation, and efficiency capturing hidden long-term dependencies in the past.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{meta.png}
+    \caption{The full-flow of meta-training and meta-testing on multi-fx data. Each currency pair is regarded as a task.}
+    \label{fig:flow}
+\end{figure}
+
+\begin{algorithm}[H]
+    \caption{Temporal-ML} \label{alg:maml}
+    \begin{algorithmic}[1]
+        \State Initialize $\phi_0$
+        \For{round $r=1,2,...$} \Comment{Outer loop}
+            \State Sample a subset $T_r$ of $m$ tasks
+            \For{task $t \in T_r$} \Comment{Inner loop}
+                \State Initialize inner weight $\theta_t^{(0)} \leftarrow \phi_{r-1}$
+                \State Forward: For all data point $\mathbf{x}_{}$ in $\mathcal{D}_t^{support}$
+                \begin{align*}
+                    \mathbf{x'} &= \mathbf{FullyConnected}\left( \mathbf{x} \right)\\
+                    \mathbf{h}_{LSTM} &= \mathbf{BidirectionalLSTM}\left( \mathbf{x'} \right)\\
+                    \mathbf{h}_{CNN} &= \mathbf{Convolution1D}\left( \mathbf{x'} \right)\\
+                    \hat{y} &= \begin{cases}
+                        \mathbf{FullyConnected}\left( \mathbf{h}_{LSTM} \right)\\
+                        \mathbf{FullyConnected}\left( \mathbf{Concatenate}\left( \mathbf{h}_{LSTM}, \mathbf{h}_{CNN} \right)\right)
+                    \end{cases}
+                \end{align*}
+
+                \State Backward and aggregate meta loss:\Comment{Inner optimization}
+                \begin{align*}
+                    &\mathcal{L}_t^{task}\left( \theta_t^{(e-1)}, \mathcal{D}_t^{support} \right) = \mathbf{CrossEntropyLoss}\left( \mathbf{y}, \hat{\mathbf{y}} \right)\\
+                    &\theta_t^{(e)} \leftarrow \theta_t^{(e-1)} - \alpha\nabla_\theta\mathcal{L}_t^{task}\left( \theta_t^{(e-1)}, \mathcal{D}_t^{support} \right)\\
+                    &\mathcal{L}^{meta} \leftarrow \mathcal{L}^{meta} + \mathcal{L}_t^{meta}\left( \theta_t^{(e)}, \mathcal{D}_t^{query} \right)
+                \end{align*}
+            \EndFor
+
+            \State Outer optimization at round $r$:\Comment{Outer optimization}
+            \begin{align*}
+                \phi_{r+1} \leftarrow \phi_r - \beta\nabla_\phi\mathcal{L}^{meta}
+            \end{align*}
+        \EndFor
+    \end{algorithmic}
+\end{algorithm}
+
+\section{Data preparation}
+\label{sec:data_prep}
+
+% Phương pháp đề xuất sử dụng các thuật toán ML để huấn luyện mô hình. Do đó, dữ liệu cần được tổ chức lại để các thuật toán ML có thể hoạt động được. Trong trường hợp dữ liệu bao gồm nhiều datasets khác nhau thuộc cùng một lĩnh vực, mỗi dataset sẽ được coi là một task của \verb|MAML|. Trong trường hợp dữ liệu bao gồm một dataset duy nhất, cần chia nhỏ dataset này thành các tập con ứng với các task riêng biệt. Tóm lại, tập dữ liệu sau khi chuẩn bị bao gồm $n$ tasks: $\mathcal{D} = \left\{ \mathcal{D}_t \right\}_{t=1}^{n}$. Dữ liệu tại mỗi task được chia thành tập support và query: $\mathcal{D}_t = \left\{ \mathcal{D}_t^{support}, \mathcal{D}_t^{query} \right\}$.
+
+\verb|Temporal-ML| uses ML algorithms to train the model. Therefore, the data needs to be reorganized so that the ML algorithms can work. In case the data includes many different datasets belonging to the same field, each dataset will be considered a task of \verb|MAML|. In case the data includes a single dataset, it is necessary to divide this dataset into subsets corresponding to separate tasks. In summary, the prepared dataset includes $n$ tasks: $\mathcal{D} = \left\{ \mathcal{D}_t \right\}_{t=1}^{n}$. The data at each task is divided into support and query sets: $\mathcal{D}_t = \left\{ \mathcal{D}_t^{support}, \mathcal{D}_t^{query} \right\}$.
+
+% Một sample dữ liệu bao gồm các cặp giá trị $(\mathbf{x}_{t-L:t}, y)$. Trong đó, $\mathbf{x}_{t-L:t}$ bao gồm $L$ giá trị lịch sử tính từ thời điểm $t$ trở về trước; $y\in \{0,1\}$ là nhãn dữ liệu, thể hiện xu hướng giảm, hoặc tăng của mẫu dữ liệu $x_{t+1}$ so với $x_{t}$. Tùy vào từng bài toán và cách cài đặt mà các phần tử trong $\mathbf{x}_{t-L:t}$ có thể là các vector hoặc các scalar number. Ví dụ, đối với dữ liệu chứng khoán, $\mathbf{x}_{t-L:t}$ có thể chứa các vector dữ liệu $\vec x_i = (\text{open, low, high, close})$ hoặc chỉ một giá trị close price duy nhất.
+
+A data sample consists of pairs of values $(\mathbf{x}_{t-L:t}, y)$. In which, $\mathbf{x}_{t-L:t}$ includes $L$ historical values from time $t$ back; $y\in \{0,1\}$ is the data label, showing the decreasing or increasing trend of the data sample $x_{t+1}$ compared to $x_{t}$. Depending on each problem and the implementation, the elements in $\mathbf{x}_{t-L:t}$ can be a matrix or a vector. For example, for stock data, $\mathbf{x}_{t-L:t}$ can contain $L$ vectors $\vec x_i = (\text{open, low, high, close})$ or can be a vector of close price values only.
+
+\section{Temporal feature extraction}
+
+% Quá trình rút trích đặc trưng được thực hiện bằng hai phương pháp khác nhau: thông qua \verb|LSTM| và \verb|LSTM+CNN|. Đối với phương pháp sử dụng \verb|LSTM|, từng phần tử trong ma trận $\mathbf{x}_{t-L:t}$ (viết gọn là $\mathbf{x}$) được đưa qua một lớp \verb|FullyConnected| có đầu ra lớn hơn số chiều của $\vec x_i, i\in[t-L, t]$ to present the input by a larger vector $\vec x'_i$ (equation \ref{eq:decompose}). Theo đó, các đặc trưng được thể hiện sâu sắc và rõ ràng hơn. Các đặc trưng này sau đó được truyền qua mạng \verb|LSTM| rút trích có chọn lọc các phụ thuộc thời gian dài hạn ($\mathbf{h}_{LSTM}$). Để có thể khai thác tối đa các ràng buộc thời gian dài hạn, chúng tôi sử dụng \verb|BidirectionalLSTM| để rút trích từ hai phía của của $\mathbf{x}$ (equation \ref{eq:feature_lstm})
+
+Feature extraction is performed using two different methods: via \verb|LSTM| and \verb|LSTM+CNN|. For the method using \verb|LSTM|, each element in the matrix $\mathbf{x}_{t-L:t}$ (abbreviated as $\mathbf{x}$) is passed through a \verb|FullyConnected| layer whose output is larger than the dimension of $\vec x_i, i\in[t-L, t]$ to obtain vector $\vec x'_i$ (equation \ref{eq:decompose}). Accordingly, the data characteristics are expressed more deeply and clearly. These features are then passed through the \verb|LSTM| network to selectively extract long-term temporal dependencies ($\mathbf{h}_{LSTM}$). To fully exploit the long-term time constraints, we use \verb|BidirectionalLSTM| to extract from both sides of $\mathbf{x}$ (equation \ref{eq:feature_lstm})
+
+\begin{align}
+    \mathbf{x'} &= \mathbf{FullyConnected}\left( \mathbf{x} \right) \label{eq:decompose}\\
+    \mathbf{h}_{LSTM} &= \mathbf{BidirectionalLSTM}\left( \mathbf{x'} \right) \label{eq:feature_lstm}
+\end{align}
+
+% Lấy cảm hứng từ nghiên cứu \cite{vo2017multi}, chúng tôi đề xuất \verb|LSTM+CNN|, kết hợp các đặc trưng rút trích được từ mạng \verb|LSTM| và \verb|CNN|. Cụ thể, ngoài việc sử dụng \verb|LSTM|, $\mathbf{x'}$ còn được đưa vào \verb|CNN| để rút trích đặc trưng thời gian cục bộ ($\mathbf{h}_{CNN}$) (equation \ref{eq:feature_cnn}). Tiếp đến, $\mathbf{h}_{LSTM}$ và $\mathbf{h}_{CNN}$ được nối với nhau (equation \ref{eq:concat}) sau đó chuyển đến phần phân lớp của neural network (equation \ref{eq:clf}).
+
+Inspired by study \cite{vo2017multi}, we use \verb|LSTM+CNN| features, which combines the features extracted from \verb|LSTM| and \verb|CNN|. Specifically, in addition to using \verb|LSTM|, $\mathbf{x'}$ is also fed into \verb|CNN| to extract local temporal features $\mathbf{h}_{CNN}$ (equation \ref{eq:feature_cnn}). Next, $\mathbf{h}_{LSTM}$ and $\mathbf{h}_{CNN}$ are concatenated (equation \ref{eq:concat}) and then passed to the classification head of the neural network (equation \ref{eq:clf}).
+
+\begin{align}
+    \mathbf{h}_{CNN} &= \mathbf{Convolution1D}\left( \mathbf{x'} \right) \label{eq:feature_cnn}\\
+    \mathbf{h} &= \mathbf{Concatenate}\left( \mathbf{h}_{LSTM}, \mathbf{h}_{CNN} \right) \label{eq:concat} \\
+    \hat y &= \mathbf{FullyConnected}\left( \mathbf{h} \right) \label{eq:clf}
+\end{align}
+
+% Mạng \verb|LSTM| duy trì giá trị cell-state nhằm lưu trữ có chọn lọc các phụ thuộc dài hạn. Điều này rất thích hợp trong việc giải quyết các bài toán time-series data. Mặt khác, giá trị tương lai thường phụ thuộc rất lớn vào các giá trị lịch sử gần nhất. Chúng tôi đề xuất sử dụng mạng \verb|CNN| để nhấn mạnh các đặc trưng cục bộ, từ đó hướng một phần sự chú ý của mô hình vào các thời điểm nhất định. Do đó, phương pháp đề xuất không chỉ nhớ được các đặc trưng long-term mà còn highlight được các đặc trưng short-term.
+
+The \verb|LSTM| network maintains cell-state values to selectively store long-term dependencies. This is very suitable for solving time-series data problems. On the other hand, future values often depend heavily on recent historical values. We propose to use the \verb|CNN| network to emphasize local features, thereby directing part of the model's attention to certain time points. Therefore, the proposed method not only remembers long-term features but also highlights short-term features.
+
+% Next, $\mathbf{h}_{LSTM}$ and $\mathbf{h}_{CNN}$ are concatenated (equation \ref{eq:concat}) and then passed to the classification part of the neural network (equation \ref{eq:clf}).
+
+\section{Effective synthesis of models' parameters}
+
+% Chúng tôi sử dụng \verb|MAML| như trình bày trong thuật toán \ref{alg:maml} để huấn luyện và tổng hợp trọng số của các mô hình tại các task. Như đã đề cập trong phần \ref{sec:ml}, tối ưu tham số theo cách tiếp cận của ML chính là đi giải hai phương trình \ref{eq:inner_opt} và \ref{eq:outer_opt} bằng các phương pháp tối ưu trên dữ liệu support và query. Cụ thể, quá trình tối ưu bao gồm nhiều bước toàn cục (outer optimization), thực hiện trên tất cả các tasks tham gia huấn luyện. Mỗi bước toàn cục bao gồm nhiều bước cục bộ (inner optimization) thực hiện trên từng task riêng lẻ. Tại bước toàn cục $r$, quá trình tối ưu cục bộ lần thứ $e$ tại tập support của task $t$ diễn ra như sau:
+
+We use \verb|MAML| as presented in the algorithm \ref{alg:maml} to train and aggregate the weights of the models at the tasks. As mentioned in section \ref{sec:ml}, parameter optimization in the ML approach is to solve the two equations \ref{eq:inner_opt} and \ref{eq:outer_opt} using optimization methods on the support set and query set. Specifically, the optimization process includes many global steps (outer optimization), performed on all tasks participating in training. Each global step includes many local steps (inner optimization) performed on each individual task. At global step $r$, the $e$th local optimization process on the support set of task $t$ proceeds as follows:
+
+\begin{align}
+    \begin{cases}
+        \theta_t^{(0)} &= \phi_{r-1} \\
+        \theta_t^{(e)} &= \theta_t^{(e-1)} - \alpha \nabla_{\theta} \mathcal{L}^{task}_t\left( \theta_t^{(e-1)}, \mathcal{D}_t^{support} \right)
+    \end{cases}
+\end{align} In which, $\phi_{r-1}$ is the result of the $r-1$ outer optimization process, $\alpha$ is the inner learning rate.
+
+% Tiếp đó, quá trình outer optimization tại bước toàn cục được thực hiện bằng cách tổng hợp độ lỗi trên tập query của các task và tối ưu trên đó (equation \ref{eq:outer_sol}).
+
+Next, the outer optimization process is performed by aggregating the losses on the query set of the tasks and optimizing on it (equation \ref{eq:outer_sol}).
+
+\begin{align}
+    \begin{cases}
+        \phi_0 = \text{Random Initialization}\\
+        \phi_r = \phi_{r-1} - \beta \nabla_{\phi} \sum_{t=1}^n{\mathcal{L}^{meta}_t \left( \theta_t^*(\phi), \mathcal{D}_t^{query} \right)}
+    \end{cases}
+    \label{eq:outer_sol}
+\end{align} Where, $\beta$ is the outer learning rate.
+
+% Giả sử thuật toán chạy $E$ steps trong inner optimization, lượng đạo hàm tại phương trình \ref{eq:outer_sol} được viết lại như sau (the notations of dataset are removed):
+
+Assuming the algorithm runs $E$ steps in inner optimization, the derivative quantity at equation \ref{eq:outer_sol} is rewritten as follows (the notations of dataset are removed):
+
+\begin{align*}
+    \nabla_{\phi} \sum_{t=1}^n{\mathcal{L}^{meta}_t \left( \theta_t^*(\phi)\right)} =&\nabla_{\phi} \sum_{t=1}^n{\mathcal{L}^{meta}_t \left( \theta_t - \alpha \nabla_{\theta} \mathcal{L}^{task}_t\left( \theta_t \right) \right)}\\
+    = &\sum_{t=1}^n{ \frac{\partial \mathcal{L}^{meta}_t\left(\theta_t^{(E)}\right)}{\partial \theta_t^{(E)}} \frac{\partial \theta_t^{(E)}}{\partial \phi}}\\
+    = &\sum_{t=1}^n{ \nabla_{\theta} \mathcal{L}^{meta}_t\left(\theta_t^{(E)}\right) \prod_{j=0}^{E-1} {\left[\mathbb{I} - \alpha\nabla^2_{\theta}\mathcal{L}^{task}_{t}\left(\theta_t^{(j)}\right)\right]}} \numberthis
+    \label{eq:outer_grad}
+\end{align*}
+
+% Sự xuất hiện của tích các đạo hàm bậc hai trong phương trình \ref{eq:outer_grad} khiến quá trình đạo hàm trở nên phức tạp vì phải tốn rất nhiều chi phí để duy trì các ma trận Hessian. Do đó, số bước tính toán để tìm ra $\theta^*$ cần phải hạn chế. Trên thực tế, các phương pháp sử dụng ML \cite{fallah2020personalized, chen2018federated, nguyen2022meta,finn2017model, li2017meta} thường sẽ chọn $E\in [1,5]$.
+
+The presence of the product of second order derivatives in the equation \ref{eq:outer_grad} makes the derivation process complicated because it requires a lot of overhead to maintain Hessian matrices. Therefore, the number of computational steps to find $\theta^*$ needs to be limited. In practice, methods using ML \cite{fallah2020personalized, chen2018federated, nguyen2022meta,finn2017model, li2017meta} often choose $E\in [1,5]$.
+
+% phải cmt thêm về phương pháp tổng hợp mô hình
+% Các mô hình hybrid ensemble vốn được sử dụng rất nhiều trong các bài toán xử lý time-series và được chứng minh thực nghiệm là có độ chính xác cao hơn so với các mô hình handle time-series data tiêu chuẩn vì có thể tổng hợp được sức mạnh của nhiều mô hình \cite{ayitey2023forex}. Tuy vậy, các hình thức tổng hợp của ensemble model hiện nay vẫn còn rất cứng nhắc vì chỉ có thể tổng hợp dựa trên kết quả cuối (cơ chế voting của bagging models) và kết quả gần cuối (đối với stacking models). Dưới góc nhìn của ensemble model, có thể coi outer optimization nói chung hay phương trình \ref{eq:outer_opt} nói riêng, là một phương pháp tổng hợp hiệu quả các sub-model thông qua quá trình tối ưu, giúp tận dụng hiệu quả khả năng rút trích đặc trưng của từng mô hình. Nói cách khác, mô hình sau khi tổng hợp có thể rút trích đặc trưng ở mức sâu hơn, cải thiện đáng kể khả năng dự đoán so với các mô hình ensemble truyền thống.
+
+Hybrid ensemble models have been widely used in time-series processing problems and have been experimentally proven to be more accurate than standard time-series models because they can synthesize the strengths of many sub-models \cite{ayitey2023forex}. However, current ensemble model synthesis forms are still very rigid because they can only synthesize based on the final results (e.g. voting mechanism of bagging models) and semi-final results (e.g. stacking models). From the perspective of ensemble models, the equation \ref{eq:outer_sol} can be considered an optimization-based method of synthesizing sub-models, which helps to take advantage of the feature extraction capabilities of each model. In other words, the synthesized model can extract features at a deeper level, significantly improving the prediction ability compared to traditional ensemble models.
