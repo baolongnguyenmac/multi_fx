@@ -5,21 +5,35 @@
 \chapter{Related Works}
 \label{chap:related_work}
 
-% % tôi sẽ chuyển cái này thành 1 idea để viết phương pháp
-% % kiểu: Lấy ý tưởng từ ensemble model này kia
-% \section{Ensemble models}
+In this chapter, we analyze several approaches in handling time-series data, indicating the advantages and disadvantages of each approach. The related studies range from old methods such as ensemble model, deep feature-based approach, to recent methods which aim to decompose the input signal to frequency bands.
+
+\section{Ensemble models}
+
+% cơ chế tổng hợp cùi bắp
+
 
 \section{Deep feature-based approach}
 
+% không có cơ chế tổng hợp multiple source
+
+
 \subsection{Convolutional neural network}
+
+% viết về conv1d, 2d, 3d...
 
 \subsection{Recurrent Neural Network}
 
 \subsection{Long Short-Term Memory}
 
+% viết 1 chút về bidirectional lstm
+
 \section{Frequency decomposition approach}
 
+% không có cơ chế tổng hợp multiple source
+
 \subsection{A transformer-based method}
+
+% require massive overhead
 
 \subsection{NHITS}
 
@@ -87,7 +101,7 @@ Summing the forecast values of $B$ blocks as in equation \ref{eq:sum_block}, we 
 
 % Bằng cách xếp chồng các stack, stack sau nhận vào phần dư của stack trước, kiến trúc trên được kỳ vọng là sẽ phân rã dữ liệu thành các frequency bands khác nhau (weekly, daily, even hourly). Trong thực tế, \verb|NHITS| perform rất tốt đối với các bộ dữ liệu có tính chu kỳ cao như mức tiêu thụ điện, thời tiết, giao thông. Tuy nhiên, chúng tôi đang hướng đến aperiodic time-series dataset, vốn có tính chu kỳ rất thấp. Điều này gây ra khó khăn rất lớn cho \verb|NHITS|.
 
-By concatenating stacks, each receiving the remainder of the previous stack, the above architecture is expected to decompose the data into different frequency bands (weekly, daily, even hourly). In practice, \verb|NHITS| performs very well for highly periodic datasets such as electricity consumption, weather, traffic. However, we are aiming for an aperiodic time-series dataset, which has very low, or even non-existent, periodicity. This poses a huge challenge for \verb|NHITS|.
+By concatenating stacks, each receiving the remainder of the previous stack, \textbf{the above architecture is expected to decompose the data into different frequency bands (weekly, daily, even hourly)}. In practice, \verb|NHITS| performs very well for highly periodic datasets such as electricity consumption, weather, traffic. \textbf{However, we are aiming for an aperiodic time-series dataset, which has very low, or even non-existent, periodicity}. This poses a huge challenge for \verb|NHITS|.
 
 \section{Optimization-based Meta-learning}
 \label{sec:ml}
@@ -151,4 +165,4 @@ As for the \verb|Meta-SGD| algorithm, study \cite{li2017meta} shows that using a
 
 The \cite{li2017meta} study also proposes a new approach that allows self-tuning and local hyperparameter optimization. Accordingly, in addition to optimizing prior knowledge ($\omega$), the algorithm also considers the inner learning rate $\alpha$ as an learnable parameter. By initializing $\alpha$ as a matrix of the same size as $\theta$, the algorithm aims to update both the direction and the learning rate for each weight element in $\theta$ by adjusting $\alpha$ at the outer optimization. Subsequently, tasks use $\alpha$ by multiplying (element-wise product) this quantity by the local error function derivative. Accordingly, \verb|Meta-SGD| not only makes learning models adapt quickly on local data sets, but also contributes greatly to personalizing the learning model for each task.
 
-One disadvantage of optimization-based ML method lies in solving equation \ref{eq:outer_opt} which requires massive overhead to compute and maintain a Hessian matrix. Even so, ML algorithms still achieve a high accuracy in handling many problem in which the quick adaptation or effective model synthesis are required.
+\textbf{One disadvantage of optimization-based ML method lies in solving equation \ref{eq:outer_opt} which requires massive overhead to compute and maintain a Hessian matrix. Even so, ML algorithms still achieve a high accuracy in handling many problem in which the quick adaptation or effective model synthesis are required}.
