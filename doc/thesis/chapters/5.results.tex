@@ -8,12 +8,39 @@
 \section{Main results}
 
 % vẽ, mô tả cái bảng
-% bẻ nhỏ từng attribute trong fx dataset --> thành 4 bảng, 1 bảng tổng hợp là 5
 % bảng tổng hợp vẽ ở đây
+\begin{table}[H]
+    \centering
+    \cprotect\caption{Classification results (\%) of \verb|Temporal-ML| and \verb|NHITS|. Best results per metrics are boldfaced.}
+    \label{tab:rs}
+    \resizebox{\columnwidth}{!}{\begin{tabular}{c|c|cccc}
+    \toprule
+    \multicolumn{1}{c}{}                &                        & $accuracy$              & $precision$             & $recall$                & $F1-score$                 \\
+    \hline
+    \multirow{3}{*}{\Verb|USD/JPY|}     & \Verb|NHITS|           & $58.46\pm9.60$          & $58.24\pm9.89$          & $57.65\pm10.08$         & $55.82\pm11.22$            \\
+                                        & Ours(\Verb|LSTM|)      & $\mathbf{70.33\pm1.69}$ & $\mathbf{70.73\pm1.82}$ & $\mathbf{70.26\pm1.93}$ & $\mathbf{69.28\pm2.50}$    \\
+                                        & Ours(\Verb|LSTM+CNN|)  & $68.75\pm1.78$          & $69.15\pm1.55$          & $68.73\pm1.77$          & $69.14\pm2.17$             \\
+    \hline
+    \multirow{3}{*}{\Verb|multi-fx|}    & \Verb|NHITS|           & $-$                 & $-$                 & $-$                 & $-$              \\
+                                        & Ours(\Verb|LSTM|)      & $\mathbf{66.26\pm7.45}$ & $\mathbf{67.08\pm8.97}$ & $\mathbf{65.76\pm7.79}$ & $\mathbf{64.06\pm10.00}$   \\
+                                        & Ours(\Verb|LSTM+CNN|)  & $66.08\pm8.19$          & $66.56\pm9.23$          & $65.41\pm8.66$          & $63.78\pm10.83$            \\
+    \hline
+    \multirow{3}{*}{\Verb|ETT-m2|}      & \Verb|NHITS|           & $\mathbf{71.88\pm14.06}$& $\mathbf{66.86\pm10.21}$& $\mathbf{62.49\pm10.40}$& $\mathbf{62.69\pm10.72}$   \\
+                                        & Ours(\Verb|LSTM|)      & $71.14\pm9.13$          & $62.21\pm7.51$          & $58.75\pm5.30$          & $57.61\pm6.74$             \\
+                                        & Ours(\Verb|LSTM+CNN|)  & $71.40\pm9.10$          & $63.25\pm8.82$          & $60.22\pm8.42$          & $59.43\pm9.24$             \\
+    \hline
+    \multirow{3}{*}{\Verb|WTH|}         & \Verb|NHITS|           & $74.18\pm8.11$          & $68.05\pm6.65$          & $65.04\pm7.67$          & $65.40\pm7.97$             \\
+                                        & Ours(\Verb|LSTM|)      & $\mathbf{74.97\pm2.63}$ & $\mathbf{69.13\pm3.44}$ & $\mathbf{65.98\pm3.96}$ & $\mathbf{66.00\pm3.80}$    \\
+                                        & Ours(\Verb|LSTM+CNN|)  & $74.41\pm2.71$          & $68.17\pm4.60$          & $65.50\pm4.82$          & $65.63\pm4.47$             \\
+    \bottomrule
+    \end{tabular}}
+\end{table}
+
 % chắc phải viết thêm cả CNN
 
 \section{Feature extraction ability}
 
+% bẻ nhỏ từng attribute trong fx dataset --> thành 4 bảng, 1 bảng tổng hợp là 5
 % 4 bảng phụ vẽ ở đây
 % kiểu: sử dụng mô hình để dự đoán từng attribute, ta có bảng kq sau
 % phân tích bảng kết quả
