@@ -5,11 +5,11 @@
 \chapter{Methodology}
 \label{chap:method}
 
-% Phương pháp của chúng tôi bao gồm hai phần chính hoạt động song song nhau: (1) - Feature extraction; (2) - Model synthesis. Tổng quan phương pháp được minh họa trong hình \ref{fig:flow}. Trong phần feature extraction, chúng tôi kết hợp hai loại đặc trưng từ mạng \verb|LSTM| và \verb|LSTM+CNN|. Trong phần Model synthesis, chúng tôi sử dụng \verb|MAML| để tổng hợp tham số của các mô hình. Với sự góp mặt của các đặc trưng từ các mạng học sâu, chúng tôi kỳ vọng sẽ rút trích được các đặc trưng ẩn trong dữ liệu aperiodic. Thông qua sự kết hợp giữa quá trình tổng hợp mô hình bằng thuật toán \verb|MAML| và quá trình rút trích đặc trưng bằng \verb|LSTM|/\verb|LSTM+CNN|, phương pháp đề xuất được kỳ vọng là một giải pháp thay thế hợp lý và hiệu quả cho các mô hình ensemble truyền thống trong việc tổng hợp hiệu quả external factors, giảm thiểu tác động của sự biến thiên phương sai, cũng như rút trích được các hidden long-term dependency trong quá khứ.
+% Phương pháp của chúng tôi bao gồm hai phần chính hoạt động song song nhau: (1) - Feature extraction; (2) - Model synthesis. Tổng quan phương pháp được minh họa trong hình \ref{fig:flow}. Trong phần feature extraction, chúng tôi kết hợp hai loại đặc trưng từ mạng \verb|BiLSTM| và \verb|LSTM+CNN|. Trong phần Model synthesis, chúng tôi sử dụng \verb|MAML| để tổng hợp tham số của các mô hình. Với sự góp mặt của các đặc trưng từ các mạng học sâu, chúng tôi kỳ vọng sẽ rút trích được các đặc trưng ẩn trong dữ liệu aperiodic. Thông qua sự kết hợp giữa quá trình tổng hợp mô hình bằng thuật toán \verb|MAML| và quá trình rút trích đặc trưng bằng \verb|BiLSTM|/\verb|LSTM+CNN|, phương pháp đề xuất được kỳ vọng là một giải pháp thay thế hợp lý và hiệu quả cho các mô hình ensemble truyền thống trong việc tổng hợp hiệu quả external factors, giảm thiểu tác động của sự biến thiên phương sai, cũng như rút trích được các hidden long-term dependency trong quá khứ.
 
-We propose \verb|Temporal-ML|, a ML-based method which consists of two main components that work in parallel: (1) - Temporal feature extraction; (2) - Models' parameter synthesis. The overview of the method is illustrated in figure \ref{fig:flow} and the detail is presented in algorithm \ref{alg:maml}. In the \textit{Temporal feature extraction} section, we propose to use two types of features from \verb|LSTM| and \verb|LSTM+CNN| networks. In the \textit{Effective synthesis of model's parameters} section, \verb|MAML| is utilized to synthesize the parameters of the models.
+We propose \verb|Temporal-ML|, a ML-based method which consists of two main components that work in parallel: (1) - Temporal feature extraction; (2) - Models' parameter synthesis. The overview of the method is illustrated in figure \ref{fig:flow} and the detail is presented in algorithm \ref{alg:maml}. In the \textit{Temporal feature extraction} section, we propose to use the features extracted from \verb|BiLSTM| network. In the \textit{Effective synthesis of model's parameters} section, \verb|MAML| is utilized to synthesize the parameters of the models.
 
-Due to the contribution of \verb|LSTM| and \verb|LSTM+CNN| features, we expect to effectively extract hidden features from aperiodic data. By using \verb|MAML| in the weight aggregation process, the proposed method is expected to be a reasonable and effective alternative to traditional ensemble models in effectively synthesizing external factors, minimizing the impact of variance variation, and efficiency capturing hidden long-term dependencies in the past.
+Due to the contribution of \verb|BiLSTM| features, we expect to effectively extract hidden temporal features from aperiodic data. By using \verb|MAML| in the weight aggregation process, the proposed method is expected to be a reasonable and effective alternative to traditional ensemble models in effectively synthesizing external factors, minimizing the impact of variance variation, and efficiency capturing hidden long-term dependencies in the past.
 
 \begin{figure}[H]
     \centering
@@ -29,12 +29,8 @@ Due to the contribution of \verb|LSTM| and \verb|LSTM+CNN| features, we expect t
                 \State Forward: For all data point $\mathbf{x}_{}$ in $\mathcal{D}_t^{support}$
                 \begin{align*}
                     \mathbf{x'} &= \mathbf{FullyConnected}\left( \mathbf{x} \right)\\
-                    \mathbf{h}_{LSTM} &= \mathbf{BidirectionalLSTM}\left( \mathbf{x'} \right)\\
-                    \mathbf{h}_{CNN} &= \mathbf{Convolution1D}\left( \mathbf{x'} \right)\\
-                    \hat{y} &= \begin{cases}
-                        \mathbf{FullyConnected}\left( \mathbf{h}_{LSTM} \right)\\
-                        \mathbf{FullyConnected}\left( \mathbf{Concatenate}\left( \mathbf{h}_{LSTM}, \mathbf{h}_{CNN} \right)\right)
-                    \end{cases}
+                    \mathbf{h}_{LSTM} &= \mathbf{BiLSTM}\left( \mathbf{x'} \right)\\
+                    \hat{y} &= \mathbf{FullyConnected}\left( \mathbf{h}_{LSTM} \right)
                 \end{align*}
 
                 \State Backward and aggregate meta loss:\Comment{Inner optimization}
@@ -66,43 +62,60 @@ A data sample consists of pairs of values $(\mathbf{x}_{t-L:t}, y)$. In which, $
 
 \section{Temporal feature extraction}
 
-% Quá trình rút trích đặc trưng được thực hiện bằng hai phương pháp khác nhau: thông qua \verb|LSTM| và \verb|LSTM+CNN|. Đối với phương pháp sử dụng \verb|LSTM|, từng phần tử trong ma trận $\mathbf{x}_{t-L:t}$ (viết gọn là $\mathbf{x}$) được đưa qua một lớp \verb|FullyConnected| có đầu ra lớn hơn số chiều của $\vec x_i, i\in[t-L, t]$ to present the input by a larger vector $\vec x'_i$ (equation \ref{eq:decompose}). Theo đó, các đặc trưng được thể hiện sâu sắc và rõ ràng hơn. Các đặc trưng này sau đó được truyền qua mạng \verb|LSTM| rút trích có chọn lọc các phụ thuộc thời gian dài hạn ($\mathbf{h}_{LSTM}$). Để có thể khai thác tối đa các ràng buộc thời gian dài hạn, chúng tôi sử dụng \verb|BidirectionalLSTM| để rút trích từ hai phía của của $\mathbf{x}$ (equation \ref{eq:feature_lstm})
+% Quá trình rút trích đặc trưng được thực hiện bằng hai phương pháp khác nhau: thông qua \verb|BiLSTM| và \verb|LSTM+CNN|. Đối với phương pháp sử dụng \verb|BiLSTM|, từng phần tử trong ma trận $\mathbf{x}_{t-L:t}$ (viết gọn là $\mathbf{x}$) được đưa qua một lớp \verb|FullyConnected| có đầu ra lớn hơn số chiều của $\vec x_i, i\in[t-L, t]$ to present the input by a larger vector $\vec x'_i$ (equation \ref{eq:decompose}). Theo đó, các đặc trưng được thể hiện sâu sắc và rõ ràng hơn. Các đặc trưng này sau đó được truyền qua mạng \verb|BiLSTM| rút trích có chọn lọc các phụ thuộc thời gian dài hạn ($\mathbf{h}_{LSTM}$). Để có thể khai thác tối đa các ràng buộc thời gian dài hạn, chúng tôi sử dụng \verb|BiLSTM| để rút trích từ hai phía của của $\mathbf{x}$ (equation \ref{eq:feature_lstm})
 
-Feature extraction is performed using two different methods: via \verb|LSTM| and \verb|LSTM+CNN|. For the method using \verb|LSTM|, each element in the matrix $\mathbf{x}_{t-L:t}$ (abbreviated as $\mathbf{x}$) is passed through a \verb|FullyConnected| layer whose output is larger than the dimension of $\vec x_i, i\in[t-L, t]$ to obtain vector $\vec x'_i$ (equation \ref{eq:decompose}). Accordingly, the data characteristics are expressed more deeply and clearly. These features are then passed through the \verb|LSTM| network to selectively extract long-term temporal dependencies ($\mathbf{h}_{LSTM}$). To fully exploit the long-term time constraints, we use \verb|BidirectionalLSTM| to extract from both sides of $\mathbf{x}$ (equation \ref{eq:feature_lstm})
+Feature extraction is performed using \verb|BiLSTM|. Specifically, each element in the matrix $\mathbf{x}_{t-L:t}$ (abbreviated as $\mathbf{x}$) is passed through a \verb|FullyConnected| layer whose output is larger than the dimension of $\vec x_i, i\in[t-L, t]$ to obtain vector $\vec x'_i$ (equation \ref{eq:decompose}). Accordingly, the data characteristics are expressed more deeply and clearly. These features are then passed through the \verb|BiLSTM| network (equation \ref{eq:feature_lstm}) to selectively extract long-term temporal dependencies ($\mathbf{h}_{BiLSTM}$). At the end, $\mathbf{h}_{BiLSTM}$ is passed through a classification head of the neural network (equation \ref{eq:clf}) to predict the label of $\mathbf{x}$.
 
 \begin{align}
     \mathbf{x'} &= \mathbf{FullyConnected}\left( \mathbf{x} \right) \label{eq:decompose}\\
-    \mathbf{h}_{LSTM} &= \mathbf{BidirectionalLSTM}\left( \mathbf{x'} \right) \label{eq:feature_lstm}
+    \mathbf{h}_{BiLSTM} &= \mathbf{BiLSTM}\left( \mathbf{x'} \right) \label{eq:feature_lstm}\\
+    \hat y &= \mathbf{FullyConnected}\left( \mathbf{h}_{BiLSTM} \right) \label{eq:clf}
 \end{align}
 
-% Lấy cảm hứng từ nghiên cứu \cite{vo2017multi}, chúng tôi đề xuất \verb|LSTM+CNN|, kết hợp các đặc trưng rút trích được từ mạng \verb|LSTM| và \verb|CNN|. Cụ thể, ngoài việc sử dụng \verb|LSTM|, $\mathbf{x'}$ còn được đưa vào \verb|CNN| để rút trích đặc trưng thời gian cục bộ ($\mathbf{h}_{CNN}$) (equation \ref{eq:feature_cnn}). Tiếp đến, $\mathbf{h}_{LSTM}$ và $\mathbf{h}_{CNN}$ được nối với nhau (equation \ref{eq:concat}) sau đó chuyển đến phần phân lớp của neural network (equation \ref{eq:clf}).
+% Lấy cảm hứng từ nghiên cứu \cite{vo2017multi}, chúng tôi đề xuất \verb|LSTM+CNN|, kết hợp các đặc trưng rút trích được từ mạng \verb|BiLSTM| và \verb|CNN|. Cụ thể, ngoài việc sử dụng \verb|BiLSTM|, $\mathbf{x'}$ còn được đưa vào \verb|CNN| để rút trích đặc trưng thời gian cục bộ ($\mathbf{h}_{CNN}$) (equation \ref{eq:feature_cnn}). Tiếp đến, $\mathbf{h}_{LSTM}$ và $\mathbf{h}_{CNN}$ được nối với nhau (equation \ref{eq:concat}) sau đó chuyển đến phần phân lớp của neural network (equation \ref{eq:clf}).
 
-Inspired by study \cite{vo2017multi}, we use \verb|LSTM+CNN| features, which combines the features extracted from \verb|LSTM| and \verb|CNN|. Specifically, in addition to using \verb|LSTM|, $\mathbf{x'}$ is also fed into \verb|CNN| to extract local temporal features $\mathbf{h}_{CNN}$ (equation \ref{eq:feature_cnn}). Next, $\mathbf{h}_{LSTM}$ and $\mathbf{h}_{CNN}$ are concatenated (equation \ref{eq:concat}) and then passed to the classification head of the neural network (equation \ref{eq:clf}).
+% Inspired by study \cite{vo2017multi}, we use \verb|LSTM+CNN| features, which combines the features extracted from \verb|BiLSTM| and \verb|CNN|. Specifically, in addition to using \verb|BiLSTM|, $\mathbf{x'}$ is also fed into \verb|CNN| to extract local temporal features $\mathbf{h}_{CNN}$ (equation \ref{eq:feature_cnn}). Next, $\mathbf{h}_{LSTM}$ and $\mathbf{h}_{CNN}$ are concatenated (equation \ref{eq:concat}) and then passed to the classification head of the neural network (equation \ref{eq:clf}).
 
-\begin{align}
-    \mathbf{h}_{CNN} &= \mathbf{Convolution1D}\left( \mathbf{x'} \right) \label{eq:feature_cnn}\\
-    \mathbf{h} &= \mathbf{Concatenate}\left( \mathbf{h}_{LSTM}, \mathbf{h}_{CNN} \right) \label{eq:concat} \\
-    \hat y &= \mathbf{FullyConnected}\left( \mathbf{h} \right) \label{eq:clf}
-\end{align}
+% \begin{align}
+%     \mathbf{h}_{CNN} &= \mathbf{Convolution1D}\left( \mathbf{x'} \right) \label{eq:feature_cnn}\\
+%     \mathbf{h} &= \mathbf{Concatenate}\left( \mathbf{h}_{LSTM}, \mathbf{h}_{CNN} \right) \label{eq:concat} \\
+%     \hat y &= \mathbf{FullyConnected}\left( \mathbf{h} \right) \label{eq:clf}
+% \end{align}
 
-% Mạng \verb|LSTM| duy trì giá trị cell-state nhằm lưu trữ có chọn lọc các phụ thuộc dài hạn. Điều này rất thích hợp trong việc giải quyết các bài toán time-series data. Mặt khác, giá trị tương lai thường phụ thuộc rất lớn vào các giá trị lịch sử gần nhất. Chúng tôi đề xuất sử dụng mạng \verb|CNN| để nhấn mạnh các đặc trưng cục bộ, từ đó hướng một phần sự chú ý của mô hình vào các thời điểm nhất định. Do đó, phương pháp đề xuất không chỉ nhớ được các đặc trưng long-term mà còn highlight được các đặc trưng short-term.
+% Mạng \verb|BiLSTM| duy trì giá trị cell-state nhằm lưu trữ có chọn lọc các phụ thuộc dài hạn. Điều này rất thích hợp trong việc giải quyết các bài toán time-series data. Mặt khác, giá trị tương lai thường phụ thuộc rất lớn vào các giá trị lịch sử gần nhất. Chúng tôi đề xuất sử dụng mạng \verb|CNN| để nhấn mạnh các đặc trưng cục bộ, từ đó hướng một phần sự chú ý của mô hình vào các thời điểm nhất định. Do đó, phương pháp đề xuất không chỉ nhớ được các đặc trưng long-term mà còn highlight được các đặc trưng short-term.
 
-The \verb|LSTM| network maintains cell-state values to selectively store long-term dependencies. This is very suitable for solving time-series data problems. On the other hand, future values often depend heavily on recent historical values. We propose to use the \verb|CNN| network to emphasize local features, thereby directing part of the model's attention to certain time points. \textbf{Therefore, the proposed method not only remembers long-term features but also highlights short-term features. In the ideal situation, hidden constraints in aperiodic time-series data can be extracted efficiently}.
+% The \verb|BiLSTM| network maintains cell-state values to selectively store long-term dependencies. Thus, this method is a suitable choice for solving time-series data problems. On the other hand, future values often depend heavily on recent historical values. We propose to use the \verb|CNN| network to emphasize local features, thereby directing part of the model's attention to certain time points. \textbf{Therefore, the proposed method not only remembers long-term features but also highlights short-term features. In the ideal situation, hidden constraints in aperiodic time-series data can be extracted efficiently}.
+
+% The \verb|BiLSTM| network maintains cell-state values to selectively store long-term dependencies. Thus, this method is a suitable choice for solving time-series data problems. \textbf{Therefore, the proposed method not only remembers long-term features but also highlights short-term features. In the ideal situation, hidden constraints in aperiodic time-series data can be extracted efficiently}.
+
+% Mạng \verb|LSTM| và \verb|BiLSTM| đều duy trì các giá trị cell-state để lưu trữ một cách chọn lọc các phụ thuộc thời gian, cũng như hạn chế vấn đề vanishing gradient trong quá trình huấn luyện. Vì vậy, các mạng này rất phù hợp trong việc giải quyết các vấn đề time-series data. Tuy nhiên, đối với các chuỗi input dài, \verb|LSTM| tỏ ra khó khăn trong việc tận dụng ngữ cảnh toàn cục (toàn bộ chuỗi đầu vào) và thường đối mặt với vấn đề mất mát thông tin cục bộ (input càng xa thì càng dễ bị quên). Hai vấn đề này được khắc phục hiệu quả bởi \verb|BiLSTM|. Với khả năng rút trích và tổng hợp thông tin từ hai phía của input sequence, \textbf{\Verb|BiLSTM| có thể nắm bắt toàn bộ ngữ cảnh với lượng mất mát thông tin tối thiểu đối với các input ở xa. Đặt trong ngữ cảnh bài toán movement prediction of aperiodic time-series data, \Verb|BiLSTM| được kỳ vọng sẽ nắm bắt thành công sự biến đổi giá trị liên tục cũng như không bỏ sót các thông tin quan trọng tại các input ở xa}. Do đó, đây là một lựa chọn hợp lý hơn trong việc rút trích các ràng buộc thời gian.
+
+\verb|LSTM| and \verb|BiLSTM| both maintain cell-state values to selectively store temporal dependencies, as well as to mitigate the vanishing gradient problem during training. Therefore, these networks are well suited for solving time-series data problems. However, for long input sequences, \verb|LSTM| has difficulty in exploiting global context (the entire input sequence) and often faces the problem of local information loss (the further the input, the easier it is to forget). These two problems are effectively solved by \verb|BiLSTM|. With the ability to extract and synthesize information from both sides of the input sequence, \textbf{\Verb|BiLSTM| can capture the entire context with minimal information loss for distant inputs. In the context of the movement prediction of aperiodic time-series data problem, \Verb|BiLSTM| is expected to successfully capture continuous value variation as well as not miss important information at distant inputs}. Therefore, it is a more reasonable choice in extracting temporal constraints.
+
+\clearpage
 
 % Next, $\mathbf{h}_{LSTM}$ and $\mathbf{h}_{CNN}$ are concatenated (equation \ref{eq:concat}) and then passed to the classification part of the neural network (equation \ref{eq:clf}).
 
-\section{Effective synthesis of models' parameters}
+\section{Effective aggregation of models' parameters}
 
 % Chúng tôi sử dụng \verb|MAML| như trình bày trong thuật toán \ref{alg:maml} để huấn luyện và tổng hợp trọng số của các mô hình tại các task. Như đã đề cập trong phần \ref{sec:ml}, tối ưu tham số theo cách tiếp cận của ML chính là đi giải hai phương trình \ref{eq:inner_opt} và \ref{eq:outer_opt} bằng các phương pháp tối ưu trên dữ liệu support và query. Cụ thể, quá trình tối ưu bao gồm nhiều bước toàn cục (outer optimization), thực hiện trên tất cả các tasks tham gia huấn luyện. Mỗi bước toàn cục bao gồm nhiều bước cục bộ (inner optimization) thực hiện trên từng task riêng lẻ. Tại bước toàn cục $r$, quá trình tối ưu cục bộ lần thứ $e$ tại tập support của task $t$ diễn ra như sau:
 
-We use \verb|MAML| as presented in the algorithm \ref{alg:maml} to train and aggregate the weights of the models at the tasks. As mentioned in section \ref{sec:ml}, parameter optimization in the ML approach is to solve the two equations \ref{eq:inner_opt} and \ref{eq:outer_opt} using optimization methods on the support set and query set. Specifically, the optimization process includes many global steps (outer optimization), performed on all tasks participating in training. Each global step includes many local steps (inner optimization) performed on each individual task. At global step $r$, the $e$th local optimization process on the support set of task $t$ proceeds as follows:
+We use \verb|MAML| as presented in the algorithm \ref{alg:maml} to train and aggregate the weights of the models of all tasks via the \verb|CrossEntropyLoss| (equation \ref{eq:loss}).
+
+\begin{align}
+    \label{eq:loss}
+    \mathcal{L}(\mathbf{y}, \hat{\mathbf{y}}) = \frac{1}{\dim(\mathbf{y})}\sum_{i=1}^{\dim(\mathbf{y})}{(\mathbf{y}_i\log{\hat{\mathbf{y}}_i}) + (1-\mathbf{y}_i)\log{(1-\hat{\mathbf{y}}_i)}}
+\end{align}
+
+As mentioned in section \ref{sec:ml}, parameter optimization in the ML approach is to solve the two equations \ref{eq:inner_opt} and \ref{eq:outer_opt} using optimization methods on the support set and query set. Specifically, the optimization process includes many global steps (outer optimization), performed on all tasks participating in training. Each global step includes many local steps (inner optimization) performed on each individual task. At global step $r$, the $e$th local optimization process on the support set of task $t$ proceeds as follows:
 
 \begin{align}
     \begin{cases}
         \theta_t^{(0)} &= \phi_{r-1} \\
         \theta_t^{(e)} &= \theta_t^{(e-1)} - \alpha \nabla_{\theta} \mathcal{L}^{task}_t\left( \theta_t^{(e-1)}, \mathcal{D}_t^{support} \right)
     \end{cases}
-\end{align} In which, $\phi_{r-1}$ is the result of the $r-1$ outer optimization process, $\alpha$ is the inner learning rate.
+    \label{eq:inner_sol}
+\end{align} In which, $\phi_{r-1}$ is the result of the $r-1$ outer optimization process, $\alpha$ is the inner learning rate, $\mathcal{L}_t^{task}$ evaluates the use of $\theta_t^{(e-1)}$ on $\mathcal{D}_t^{support}$.
 
 % Tiếp đó, quá trình outer optimization tại bước toàn cục được thực hiện bằng cách tổng hợp độ lỗi trên tập query của các task và tối ưu trên đó (equation \ref{eq:outer_sol}).
 
@@ -114,7 +127,7 @@ Next, the outer optimization process is performed by aggregating the losses on t
         \phi_r = \phi_{r-1} - \beta \nabla_{\phi} \sum_{t=1}^n{\mathcal{L}^{meta}_t \left( \theta_t^*(\phi), \mathcal{D}_t^{query} \right)}
     \end{cases}
     \label{eq:outer_sol}
-\end{align} Where, $\beta$ is the outer learning rate.
+\end{align} Where, $\beta$ is the outer learning rate, $\theta_t^*(\phi)$ is the local optimized weight obtained from equation \ref{eq:inner_sol}, $\mathcal{L}_t^{meta}$ evaluates the use of $\theta_t^*(\phi)$ on $\mathcal{D}_t^{query}$.
 
 % Giả sử thuật toán chạy $E$ steps trong inner optimization, lượng đạo hàm tại phương trình \ref{eq:outer_sol} được viết lại như sau (the notations of dataset are removed):
 
