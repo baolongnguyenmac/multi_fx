@@ -2,11 +2,23 @@
 % Chapter 6: Conclusion
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\chapter{Conclusion \& Future works}
+\chapter{Conclusions \& Future works}
 \label{chap:conclusion}
 
-\section{Conclusion}
+\section{Conclusions}
 
-% viết về contribution
+Các bài toán trên aperiodic time-series data đặt ra một thử thách lớn cho các mô hình học máy hiện nay vì dữ liệu này phụ thuộc vào cả lịch sử giao dịch lẫn các external factor như tình hình kinh tế, chính trị; variance của dữ liệu thay đổi liên tục; tính phi chu kỳ của dữ liệu thể hiện rất mạng. Trong khi các thách thức này trở nên rất đặc thù cho dữ liệu và yêu cầu một phương pháp được thiết kế riêng, các thuật toán hiện tại hầu như không tập trung giải quyết các thách thức này mà chỉ hướng đến time-series nói chung. Thật vậy, các phương pháp học sâu như \verb|LSTM|, \verb|CNN|, \verb|Transformer| được thiết kế để phân tích dữ liệu dạng chuỗi nói chung. Đối với dạng dữ liệu đặc thù như aperiodic time-series data, chúng trở nên kém hiệu quả do hạn chế trong việc lưu trữ các ràng buộc thời gian. Các phương pháp dựa trên phân rã tần số như \verb|NHITS| và \verb|bla_bla| hướng đến phân rã tín hiệu đầu vào thành các dải tần nhưng tính chu kỳ hoàn toàn không tồn tại trong aperiodic time-series data.
+
+Ý thức được các thách thức nêu trên cùng với việc tận dụng khả năng rút trích ràng buộc thời gian của \verb|BiLSTM| và khả năng tổng hợp tham số hiệu quả của \verb|MAML|, chúng tôi đề xuất thuật toán \verb|Temporal-ML| với khả năng rút trích thời gian đặc trưng ẩn cũng như tổng hợp thông tin từ dữ liệu đa nguồn. Dựa trên thực nghiệm, trong quá trình giải quyết bài toán dự đoán xu hướng tiếp theo, phương pháp đề xuất đạt hiệu quả cao trên hai tập dữ liệu phi chu kỳ (\verb|USD/JPY| và \verb|multi-fx|) và hiệu quả tương đương trên các tập dữ liệu có chu kỳ (\verb|ETT-m2| và \verb|WTH|) so với \verb|NHITS| (SOTA model in AAAI 2023). Ngoài ra, bằng việc thực hiện ablation study, chúng tôi chứng minh được sự hiệu quả của từng component trong \verb|Temporal-ML|. Cụ thể, khả năng rút trích hiệu quả các ràng buộc thời gian đến từ \verb|BiLSTM| và khả năng tổng hợp thông tin đa nguồn đến từ \verb|MAML|. Theo đó, thuật toán của chúng tôi đã giải quyết hiệu quả vấn đề dữ liệu phụ thuộc vào external factor, vấn đề variance bất định và vấn đề phi chu kỳ của dữ liệu.
+
+% Bằng việc kết hợp các đặc trưng cục bộ và các phụ thuộc dài hạn cũng như khai thác các phụ thuộc ẩn trong từng khoảng thời gian quá khứ, chúng tôi đã cải khả năng của mô hình học máy trên các classification metrics trong bài toán dự đoán xu hướng giá của ngày tiếp theo trên dữ liệu FX. Thuật toán đề xuất đã chứng minh được khả năng vượt trội của mình khi so sánh với mô hình \verb|NHITS|.
+
+% Aperiodic time-series data là một dạng dữ liệu phổ biến. Việc khai thác các insight trong loại dữ liệu này mang lại nhiều thông tin hữu ích. Tuy nhiên các phương pháp hiện tại gặp khó khăn rất lớn trong việc phân tích và dự đoán loại dữ liệu này. 
 
 \section{Future works}
+
+In the future, we propose two main directions of development related to the architecture and personalization of the model
+
+\textbf{Model architecture}. Phương pháp của chúng tôi được phát triển dưới dạng component với hai components chính hoạt động song song: Temporal feature extraction and Models' parameter synthesis. Điều này cung chấp cho phương pháp của chúng tôi một khả năng nâng cấp linh hoạt. Thí nghiệm của chúng tôi chỉ minh họa một trường hợp điển hình trong tổng hợp hiệu quả các đặc trưng. Bằng việc sử dụng các thuật toán ML khác nhau như \verb|Reptile|, \verb|Meta-SGD|, \verb|iMAML|, hoàn toàn có thể tạo ra mô hình mới với độ chính xác cao hơn.
+
+\textbf{Long-horizon problem}. Hoàn toàn có thể mở rộng phương pháp này để giải các bài toán về long-horizon prediction. Thật vậy, bằng việc thay đổi đầu ra và độ lỗi của mô hình, có thể tiến hành giải các bài toán này. Tuy nhiên, kiến trúc của các sub-model cần được nghiên cứu lại để phù hợp hơn với bài toán mới.
