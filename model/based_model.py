@@ -49,18 +49,19 @@ def transformer_encoder(inputs, head_size, num_heads, n_filters, dropout=0):
         key_dim=head_size, num_heads=num_heads, dropout=dropout
     )(inputs, inputs)
     x = layers.Dropout(dropout)(x)
-    x = layers.LayerNormalization(epsilon=1e-6)(x)
+    x = layers.LayerNormalization(epsilon=0.001)(x)
     res = x + inputs
 
     # Feed Forward Part
     x = layers.Conv1D(filters=n_filters, kernel_size=1, activation="relu")(res)
     x = layers.Dropout(dropout)(x)
     x = layers.Conv1D(filters=inputs.shape[-1], kernel_size=1)(x)
-    x = layers.LayerNormalization(epsilon=1e-6)(x)
+    x = layers.LayerNormalization(epsilon=0.001)(x)
     return x + res
 
 def _get_attention(input_layer, head_size=256, num_heads=3, n_filters=4, num_transformer_blocks=2, mlp_units=[64], dropout=0, mlp_dropout=0):
-    x = input_layer
+    # x = input_layer
+    x = layers.Permute((2,1))(input_layer)
     for _ in range(num_transformer_blocks):
         x = transformer_encoder(x, head_size, num_heads, n_filters, dropout)
 
