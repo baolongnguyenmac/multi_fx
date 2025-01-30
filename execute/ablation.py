@@ -11,16 +11,20 @@ import keras
 import argparse
 import json
 
+from neuralforecast import NeuralForecast
+from neuralforecast.models import NHITS
+from neuralforecast.losses.pytorch import DistributionLoss
+
 from model.based_model import get_model
 from data.dataloader import DataLoader
 from common.constants import *
 from common.common import compute_metrics
 
 class DataLoaderAblation(DataLoader):
-    def __init__(self, dataset, look_back = None, batch_size = -1, test_size = 0.2, mode = CLF, is_multi = False):
+    def __init__(self, dataset, look_back = None, batch_size = -1, test_size = 0.4, mode = CLF, is_multi = False):
         super().__init__(dataset, look_back, batch_size, test_size, mode, is_multi)
 
-    def get_ablation_data(self, label:int=-1):
+    def get_ablation_data(self, label:int=-1, nhits:bool=False):
         data_dir = self.data_dir if self.is_multi else os.path.join(self.data_dir, 'all')
         data_dict = {}
 
@@ -31,18 +35,29 @@ class DataLoaderAblation(DataLoader):
                 df = pd.read_csv(os.path.join(data_dir, file_name)).to_numpy()[:,1:]
 
                 # normalize data
-                transformed_df, mean_, std_ = self._normalize_data(df=df, label=label, test_size=0.2)
+                transformed_df, mean_, std_ = self._normalize_data(df=df, label=label, test_size=0.4)
 
-                # create dataset with lookback window
-                X, y = self._create_dataset(df=transformed_df, label=label)
+                if nhits:
+                    # create label
+                    y = self._create_label(transformed_df, label)
 
-                # add to data_dict
-                tmp_dict = self.split_support_query(X, y, mean_, std_)
-                num_train = tmp_dict['support_X'].shape[0]
-                # only use 60% data for training
-                tmp_dict['support_X'] = tmp_dict['support_X'][:int(num_train*0.75)]
-                tmp_dict['support_y'] = tmp_dict['support_y'][:int(num_train*0.75)]
-                data_dict[cid] = tmp_dict
+                    # concat transformed_df, y
+                    transformed_df = np.concatenate([transformed_df, y.reshape(-1,1)], axis=1)
+                    transformed_df = pd.DataFrame(transformed_df, columns=self.columns+['y'])
+                    transformed_df['unique_id'] = 0
+                    transformed_df['ds'] = pd.date_range(start='2000-01-01', periods=len(transformed_df), freq='h') # re-index all data
+                    data_dict[cid] = transformed_df
+                else:
+                    # create dataset with lookback window
+                    X, y = self._create_dataset(df=transformed_df, label=label)
+
+                    # add to data_dict
+                    tmp_dict = self.split_support_query(X, y, mean_, std_)
+                    num_train = tmp_dict['support_X'].shape[0]
+                    # only use 60% data for training
+                    tmp_dict['support_X'] = tmp_dict['support_X'][:int(num_train*0.75)]
+                    tmp_dict['support_y'] = tmp_dict['support_y'][:int(num_train*0.75)]
+                    data_dict[cid] = tmp_dict
 
         return data_dict
 
@@ -56,7 +71,8 @@ class Ablation:
             loss='sparse_categorical_crossentropy',
             metrics=['accuracy'])
 
-        history = model.fit(X_train, y_train, epochs=n_epochs, batch_size=batch_size, validation_data=(X_test, y_test), callbacks=[callback])
+        # history = model.fit(X_train, y_train, epochs=n_epochs, batch_size=batch_size, validation_data=(X_test, y_test), callbacks=[callback])
+        history = model.fit(X_train, y_train, epochs=n_epochs, batch_size=batch_size, validation_data=(X_test, y_test))
         return model, history
 
     def _run_model(self, param_dict:dict):
@@ -91,6 +107,58 @@ class Ablation:
         filename = os.path.join(filename)
         with open(filename, 'w') as fo:
             json.dump(log, fo)
+
+    def run_nhits(self, dataset:str, model_dir:str):
+        dataloader = DataLoaderAblation(dataset=dataset, is_multi=True)
+        log = {}
+        for label in dataloader.columns:
+            log[label] = {}
+            data_dict = dataloader.get_ablation_data(label, nhits=True)
+
+            # init metrics
+            list_metrics = {}
+            for m in ["acc", "precision", "recall", "f1"]:
+                list_metrics[m] = []
+
+            for task in data_dict.keys():
+                # create model
+                model = NHITS(
+                    # const
+                    h=1, loss=DistributionLoss('Bernoulli'), valid_loss=DistributionLoss('Bernoulli'), max_steps=100, hist_exog_list=dataloader.columns, val_check_steps=5,
+                    # early_stop_patience_steps=5,
+
+                    # finetune
+                    n_pool_kernel_size = [8,4,1], n_freq_downsample = [168,24,1], learning_rate = 0.001, input_size = 30,
+
+                    # semi-fixed: minor modification can be done on these params to change the structure of network
+                    stack_types = 3 * ["identity"], n_blocks = 3 * [1], mlp_units = 3 * [[512, 512]], interpolation_mode = 'linear', batch_size = 256,
+                )
+
+                # train
+                nf = NeuralForecast(models=[model], freq='h')
+                rs_frame = nf.cross_validation(df=data_dict[task], n_windows=None, val_size=len(data_dict[task])//5, test_size=len(data_dict[task])//5)
+
+                # compute metrics
+                rs_frame['NHITS'] = (rs_frame['NHITS'] > 0.5) * 1
+                acc, precision, recall, f1 = compute_metrics(rs_frame['NHITS'], rs_frame['y'])
+                metric_dict = {
+                    "acc": acc,
+                    "precision": precision,
+                    "recall": recall,
+                    "f1": f1,
+                }
+
+                # add metric of a task
+                for key in metric_dict.keys():
+                    list_metrics[key].append(metric_dict[key])
+
+            # aggregate metrics
+            for m in ["acc", "precision", "recall", "f1"]:
+                log[label][m] = f"{np.mean(list_metrics[m]):.5f}±{np.std(list_metrics[m]):.5f}"
+
+        # save log for all label
+        filename = os.path.join(model_dir, "summary.json")
+        self.save_log(log, filename)
 
     def run_model(self, dataset:str, model_name:str, model_dir:str, look_back:int=30, n_epochs:int=100, lr:float=0.001, batch_size:int=32):
         dataloader = DataLoaderAblation(dataset=dataset, look_back=look_back, mode=CLF, is_multi='multi' in dataset)
@@ -170,25 +238,28 @@ if __name__ == '__main__':
     if not os.path.exists(dataset_dir):
         os.mkdir(dataset_dir)
 
-    for model_name in [LSTM, LSTM_CNN, ATT]:
-        # init an Ablation object
-        ab = Ablation()
+    # fixed hyper-param
+    look_back = 30
+    n_epochs = 100
+    batch_size = 32
 
-        # config hyper-param
-        look_back = 30
-        n_epochs = 101
-        lr = 0.001
-        batch_size = 32
+    # init an Ablation object
+    ab = Ablation()
 
-        # create a folder of each model
-        model_dir = os.path.join(dataset_dir, f"{model_name}_{look_back}_{n_epochs}_{lr}_{batch_size}")
-        if not os.path.exists(model_dir):
-            os.mkdir(model_dir)
+    # # run nhits on multi_fx
+    # ab.run_nhits(dataset, dataset_dir)
 
-        # run model
-        ab.run_model(dataset, model_name, model_dir, look_back, n_epochs, lr, batch_size)
+    # run ablation
+    for model_name in [LSTM, LSTM_CNN]:
+        for lr in [0.001]:
 
-# bỏ callback và phân tích bằng tay
+            # create a folder of each model
+            model_dir = os.path.join(dataset_dir, f"{model_name}_{look_back}_{n_epochs}_{lr}_{batch_size}")
+            if not os.path.exists(model_dir):
+                os.mkdir(model_dir)
+
+            # run model
+            ab.run_model(dataset, model_name, model_dir, look_back, n_epochs, lr, batch_size)
 
 # python -m execute.ablation -dataset multi_fx
 # python -m execute.ablation -dataset USD_JPY
