@@ -2,6 +2,7 @@
 
 ## A note on pre-processing
 
+- Please refer to `./doc/thesis/main.pdf` for more information
 - NHITS's data:
     - Perform `z-score` normalization on `80%` of data.
     - It should be like: Fit on `60% (training data)`, transform on `20% (val data)` and `20% (test data)`.
@@ -9,9 +10,11 @@
 
 - Meta's data: Fit on `60% (training data)`, transform on `20% (val data)` and `20% (test data)` since val part and test part do not belong to 1 dataset.
 
-## Next thing to do`
+## Next thing to do
 
-[-] The construction of `multi-fx` is changed. It now satisfies the time constrain. But I have to re-run it (Meta method and `NHITS`)
+[-] The construction of `multi-fx` is changed. It now satisfies the time constrain. But I have to re-run
+    - `NHITS`, `LSTM`, `LSTM+CNN`
+    - `Temporal-ML(LSTM+CNN)` on all dataset
 [x] I am re-analyzing metrics obtained from `multi-fx` and other datasets in `./pretrained/analyze.ipynb`
 [x] I also have to implement `DistillBERT`
 
