@@ -1,0 +1,35 @@
+\documentclass[12pt,a4paper]{article}
+\begin{document}
+\begin{center}
+    \large\bfseries Meta-learning in movement prediction problem\\of aperiodic time-series data
+\end{center}
+
+\begin{flushright}
+2210434~~NGUYEN, Bao Long
+\end{flushright}
+
+% context
+% Phân tích và dự báo trên time-series data từ lâu đã nhận được sự quan tâm rất lớn của cả cộng đồng nghiên cứu và doanh nghiệp bởi sự phổ biến cũng như nguồn lợi lớn mà nó mang lại về mặt kinh tế lẫn học thuật. Tuy nhiên, trong khi các nghiên cứu trên periodic time-series data được mở rộng và đạt được nhiều kết quả tích cực, aperiodic time-series data như foreign exchange, stock price chưa được nghiên cứu sâu. So với periodic time-series data, dạng dữ liệu này có nhiều tính chất phức tạp hơn, tạo ra những khó khăn riêng và cần được giải quyết bằng các phương pháp được thiết kế riêng.
+
+Analysis and forecasting on time-series data have received great attention from both the research community and businesses due to its popularity and the great benefits it brings in terms of economics and academia. However, while research on periodic time-series data has been expanded and achieved many positive results, aperiodic time-series data such as foreign exchange, stock price has not been studied in depth. Compared to periodic time-series data, this type of data has more complex properties, creating its own difficulties and needs to be solved by specially designed methods.
+
+% proposed method
+% Công trình này đề xuất \verb|Temporal-ML|, một hướng tiếp cận mới, kết hợp giữa thuật toán Model-Agnostic Meta-Learning (\verb|MAML|) và Bidirectional Long Shot-Term Memory (\verb|BiLSTM|), trong việc giải quyết bài toán dự đoán xu hướng (tăng, giảm) của aperiodic time-series data. Mục tiêu của thuật toán là kết hợp khả năng rút trích có chọn lọc các ràng buộc thời gian của \verb|BiLSTM| và khả năng tổng hợp mô hình với tính tổng quát hóa cao của \verb|MAML|. \verb|Temporal-ML| theo đó không chỉ rút trích hiệu quả các ràng buộc thời gian mà còn có thể rút trích được mối tương quan giữa các tập dữ liệu khác nhau trong ngữ cảnh dữ liệu đa nguồn.
+
+This paper proposes \verb|Temporal-ML|, a new approach that combines Model-Agnostic Meta-Learning (\verb|MAML|) and Bidirectional Long Shot-Term Memory (\verb|BiLSTM|) to solve the problem of movement prediction (upward, downward) of aperiodic time-series data. The goal of the algorithm is to combine the ability to selectively extract temporal dependencies of \verb|BiLSTM| and the ability to synthesize models with high generalization of \verb|MAML|. Accordingly, \verb|Temporal-ML| not only efficiently extracts temporal dependencies but also extract correlations between different datasets in the context of multi-source data.
+
+% compare to nhits
+% Trong qua quá trình thực nghiệm, chúng tôi so sánh \verb|Temporal-ML| và \verb|NHITS| (state-of-the-art (SOTA) model in 2023) trên hai tập dữ liệu phi chu kỳ \verb|USD/JPY| (foreign exchange rate giữa US dollar và Japanese yen, được sample theo giờ từ năm 2000 đến năm 2024) và \verb|multi-fx| (foreign exchange rate của 60 cặp tiền tệ giữa 18 quốc gia, được sample theo ngày từ năm 2014 đến 2024). Kết quả trên hai tập dữ liệu phi chu kỳ cho thấy sự vượt trội của thuật toán đề xuất so với \verb|NHITS| trên tất cả các metrics phân lớp. Trên dữ liệu có chu kỳ, \verb|Temporal-ML| đạt kết quả tương đương mô hình baseline. Điều này chứng tỏ khả năng vượt trội của thuật toán đề xuất trên dữ liệu phi chu kỳ cũng như khả năng tương đương mô hình SOTA trên dữ liệu có chu kỳ.
+
+In our experiments, we compare \verb|Temporal-ML| and \verb|NHITS| (state-of-the-art (SOTA) model in 2023) on two aperiodic time-series datasets \verb|USD/JPY| (foreign exchange rate between US dollar and Japanese yen, sampled hourly from 2000 to 2024) and \verb|multi-fx| (foreign exchange rate of 60 currency pairs between 18 countries, sampled daily from 2014 to 2024). The results on the two aperiodic datasets show the superiority of the proposed algorithm over \verb|NHITS| on all classification metrics. On the periodic data, \verb|Temporal-ML| achieves results equivalent to the baseline model. These results demonstrate the superiority of the proposed algorithm on aperiodic data as well as the equivalence of the SOTA model on periodic data.
+
+% ablation study
+% Ngoài ra, công trình này thực hiện ablation study để phân tích sâu sự ảnh hưởng của từng component trong \verb|Temporal-ML|. Dựa trên kết quả thu được, khóa luận chứng minh được vai trò của từng component cũng như sự hợp lý trong việc lựa chọn các thuật toán trong quá trình kết hợp.
+
+Additionally, this work conducts an ablation study to deeply analyze the influence of each component in \verb|Temporal-ML|. Based on the obtained results, the thesis proves the role of each component as well as the rationality in choosing algorithms in the combination process.
+
+% Tóm lại, công trình này nhấn mạnh tầm quan trọng của việc thiết kế một phương pháp riêng cho aperiodic time-series data. Các khám phá trong khóa luận không chỉ giúp tháo gỡ các khó khăn trong quá trình phân tích và dự đoán aperiodic time-series data, mà còn trực tiếp thúc đẩy cộng đồng nghiên cứu trong việc tìm ra các giải pháp hiệu quả trên dạng dữ liệu này. Từ đó các nghiên cứu không chỉ hướng đến dự đoán xu hướng mà còn dự đoán được giá trị cụ thể.
+
+In summary, this work emphasizes the importance of designing a specific method for aperiodic time-series data. The discoveries in this thesis not only help to solve the difficulties in the process of analyzing and predicting aperiodic time-series data, but also directly promote the research community in finding effective solutions on this type of data. Consequently, the research can move from movement prediction to value-specified prediction.
+
+\end{document}

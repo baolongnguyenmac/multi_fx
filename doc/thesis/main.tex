@@ -1,0 +1,92 @@
+\documentclass[12pt]{report}
+
+\input{lib.tex}
+
+% MetaData
+% \hypersetup{
+%     pdfauthor={NGUYEN, Bao Long},
+%     pdftitle={JAIST Master Dissertation},
+%     % pdfsubject={},
+%     pdfproducer={LaTeX},
+%     pdfcreator={pdflatex}
+% }
+
+% img path
+\graphicspath{{./figures}}
+
+
+% Define Theorem
+\long\def\comment#1{}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\newtheorem{lemma}{Lemma}
+\newtheorem{definition}{Definition}
+\def\qed{\hfill $\Box$}
+\newcommand\Tstrut{\rule{0pt}{3pt}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+% \setlength{\abovedisplayskip}{0pt}
+% \setlength{\belowdisplayskip}{12pt}
+% \setlength{\abovedisplayshortskip}{0pt}
+% \setlength{\belowdisplayshortskip}{12pt}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\input{title/title.tex}
+
+% \maketitle
+
+\phantomsection
+\pagenumbering{roman}  % Show page number in ROMAN 
+\setcounter{page}{1}
+
+% abstract
+\input{./pre_info/abstract}
+\addcontentsline{toc}{section}{Abstract}
+
+% ack
+\input{./pre_info/acknowledge}
+\addcontentsline{toc}{section}{Acknowledgements}
+
+% table of contents
+\tableofcontents
+\addcontentsline{toc}{section}{Contents}
+
+% list of figures
+\listoffigures
+\addcontentsline{toc}{section}{List of Figures}
+
+% list of tables
+\listoftables
+\addcontentsline{toc}{section}{List of Tables}
+
+% đánh số trang 1,2,3,... sẽ có hiệu lực từ page tiếp theo
+\newpage
+
+% Spacing for chapter text
+\setlength{\parskip}{6pt}   % Space between paragraphs
+%\setlength{\parindent}{0pt}
+
+% start numbering from 1 in arabic
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+% content
+\input{./chapters/1.intro.tex}
+\input{./chapters/2.related_works.tex}
+\input{./chapters/3.method.tex}
+\input{./chapters/4.experiment.tex}
+\input{./chapters/5.results.tex}
+\input{./chapters/6.conclusion.tex}
+
+% ref
+\bibliographystyle{ieeetr}
+\bibliography{references}
+\clearpage
+
+% % publication
+% \setlength{\parskip}{1pt}
+% \include{bio}
+
+\end{document}
