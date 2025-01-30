@@ -140,75 +140,176 @@ During training, \verb|CNN| attempts to learn a reasonable influence level to ef
 
 \subsection{Recurrent Neural Network}
 
-Thay vì hoạt động trên một lướt pixel như \verb|CNN|, Recurrent neural network (\verb|RNN|) \cite{rumelhart1986learning} hoạt động trên một chuỗi các giá trị $\mathbf{x}^{(1)},\dots,\mathbf{x}^{(\tau)}$. So với mạng mạng \verb|FullyConnected|, \verb|RNN| có thể mở rộng số lượng datapoint trong một chuỗi đến vô hạn mà không cần tăng kích thước của mạng. Nói cách khác, \verb|RNN| có khả năng làm việc trên các chuỗi dài hiệu quả hơn nhiều so với mạng neural truyền thống.
+% Thay vì hoạt động trên một lưới pixel như \verb|CNN|, Recurrent neural network (\verb|RNN|) \cite{rumelhart1986learning} hoạt động trên một chuỗi các giá trị $\mathbf{x}^{(1)},\dots,\mathbf{x}^{(\tau)}$. So với mạng mạng \verb|FullyConnected|, \verb|RNN| có thể hoạt động trên chuỗi có độ dài bất kỳ mà không cần tăng kích thước của mạng. Nói cách khác, \verb|RNN| có khả năng làm việc trên các chuỗi dài hiệu quả hơn nhiều so với mạng neural truyền thống.
 
-Tương tự như \verb|CNN|, \verb|RNN| cũng sử dụng một kiến trúc mạng cho phép chia sẻ tham số. Tuy nhiên, \verb|CNN| chia sẻ tham số trong nội bộ của một mẫu dữ liệu (cùng một kernel hoạt động trên các vùng cục bộ của một mẫu dữ liệu). \verb|RNN| chia sẻ tham số bằng cách sử dụng cùng một bộ tham số cho các mẫu dữ liệu khác nhau. Do đó, khi input một mẫu dữ liệu vào mô hình, output của mô hình chứa các thông tin của mẫu dữ liệu này và toàn bộ các mẫu dữ liệu trước đó. Điều này khiến cho việc mở rộng mô hình và apply mô hình lên các mẫu dữ liệu có độ dài khác nhau trở nên khả thi và hiệu quả hơn.
+Instead of operating on a pixel grid like \verb|CNN|, Recurrent neural network (\verb|RNN|) \cite{rumelhart1986learning} operates on a sequence of values $\mathbf{x}^{(1)},\dots,\mathbf{x}^{(\tau)}$. Compared to \verb|FullyConnected|, \verb|RNN| can operate on sequences of any length without increasing the size of the network. In other words, \verb|RNN| is able to work on long sequences much more efficiently than traditional neural networks.
 
-Cụ thể, gọi hàm $f$ là mạng \verb|RNN|. Hàm $f$ sử dụng bộ tham số $\theta$ để rút trích thông tin từ trạng thái $\mathbf{s}^{(t-1)}$ để tạo ra trạng thái $\mathbf{s}^{(t)}$:
+% Tương tự như \verb|CNN|, \verb|RNN| cũng sử dụng một kiến trúc mạng cho phép chia sẻ tham số. Tuy nhiên, \verb|CNN| chia sẻ tham số trong nội bộ của một mẫu dữ liệu (cùng một kernel hoạt động trên các vùng cục bộ của một mẫu dữ liệu). \verb|RNN| chia sẻ tham số bằng cách sử dụng cùng một bộ tham số cho các mẫu dữ liệu khác nhau. Do đó, khi input một mẫu dữ liệu vào mô hình, output của mô hình chứa các thông tin của mẫu dữ liệu này và toàn bộ các mẫu dữ liệu trước đó. Điều này khiến cho việc mở rộng mô hình và apply mô hình lên các mẫu dữ liệu có độ dài khác nhau trở nên khả thi và hiệu quả hơn.
+
+Similar to \verb|CNN|, \verb|RNN| also uses a network architecture that allows parameter sharing. However, \verb|CNN| shares parameters within a data sample (the same kernel operates on local regions of a data sample). \verb|RNN| shares parameters by using the same set of parameters for different data samples. Therefore, when a data sample is input to the model, the model output contains information about this data sample and all previous data samples. This makes it possible and efficient to extend the model and apply it to data samples of different lengths.
+
+% Cụ thể, gọi hàm $f$ là mạng \verb|RNN|. Hàm $f$ sử dụng bộ tham số $\theta$ để rút trích thông tin từ trạng thái $\mathbf{s}^{(t-1)}$ để tạo ra trạng thái $\mathbf{s}^{(t)}$:
+
+Specifically, let the function $f$ be the \verb|RNN| network. The function $f$ uses the parameter set $\theta$ to extract information from state $\mathbf{s}^{(t-1)}$ to generate state $\mathbf{s}^{(t)}$ as follows:
 
 \begin{align}
     \mathbf{s}^{(t)} = f\left( \mathbf{s}^{(t-1)}; \theta \right)
     \label{eq:recurrent}
 \end{align}
 
-Lưu ý rằng, $\mathbf{s}^{(t)}$ là một abstract variable, ám chỉ thông tin hiện tại phụ thuộc vào các thông tin trong quá khứ. Đối với chuỗi có độ dài $\tau$ bất kỳ, equation \ref{eq:recurrent} có thể được triển khai $\tau-1$ lần để nén các thông tin trong chuỗi vào các trạng thái $\mathbf{s}^{(t)}$.
+% Lưu ý rằng, $\mathbf{s}^{(t)}$ là một abstract variable, ám chỉ thông tin hiện tại phụ thuộc vào các thông tin trong quá khứ. Đối với chuỗi có độ dài $\tau$ bất kỳ, equation \ref{eq:recurrent} có thể được triển khai $\tau-1$ lần để nén các thông tin trong chuỗi vào các trạng thái $\mathbf{s}^{(t)}$.
 
-Trong các mạng \verb|RNN| thông thường, biến trạng thái $\mathbf{s}$ được thể hiện bằng thông tin rút trích được từ mạng $\mathbf{h}$ và dữ liệu $\mathbf{x}$. Cụ thể, trạng thái hiện tại $\mathbf{h}^{(t)}$ được rút trích dựa trên trạng thái trước đó $\mathbf{h}^{(t-1)}$ (chứa thông tin về toàn bộ chuỗi trước đó) và mẫu dữ liệu hiện tại $\mathbf{x}^{(t)}$:
+Note that, $\mathbf{s}^{(t)}$ is an abstract variable, implying that current information depends on past information. For any sequence of length $\tau$, the equation \ref{eq:recurrent} can be implemented $\tau-1$ times to compress the information in the sequence into $\mathbf{s}^{(t)}$ states.
+
+% Trong các mạng \verb|RNN| thông thường, biến trạng thái $\mathbf{s}$ được thể hiện bằng thông tin rút trích được từ mạng $\mathbf{h}$ và dữ liệu $\mathbf{x}$. Cụ thể, trạng thái hiện tại $\mathbf{h}^{(t)}$ được rút trích dựa trên trạng thái trước đó $\mathbf{h}^{(t-1)}$ (chứa thông tin về toàn bộ chuỗi trước đó) và mẫu dữ liệu hiện tại $\mathbf{x}^{(t)}$:
+
+In typical \verb|RNNs|, the state variable $\mathbf{s}$ is represented by information extracted from the network $\mathbf{h}$ and the data $\mathbf{x}$. Specifically, the current state $\mathbf{h}^{(t)}$ is extracted based on the previous state $\mathbf{h}^{(t-1)}$ (which contains information about the entire previous sequence) and the current data sample $\mathbf{x}^{(t)}$:
 
 \begin{align}
     \mathbf{h}^{(t)} = f\left( \mathbf{h}^{(t-1)}, \mathbf{x}^{(t)}; \theta \right)
     \label{eq:rnn}
 \end{align}
 
-Phương trình \ref{eq:rnn} có thể được viết lại dưới dạng mô hình $g^{(t)}$ như sau:
+% Phương trình \ref{eq:rnn} có thể được viết lại dưới dạng mô hình $g^{(t)}$ như sau:
+
+The equation \ref{eq:rnn} can be rewritten in the form of the $g^{(t)}$ model as follows:
 
 \begin{align}
     \mathbf{h}^{(t)} = g^{(t)}\left( \mathbf{x}^{(t)}, \mathbf{x}^{(t-1)},\dots,\mathbf{x}^{(2)},\mathbf{x}^{(1)}; \theta \right)
     \label{eq:rnn_g}
 \end{align}
 
-Từ đây, có thể thấy rằng, mô hình $g$ không cần phải cập nhật tham số khi học từng mẫu $x^{(t)}$ như mạng neural truyền thống. Thay vào đó, nó có thể sử dụng thông tin từ một chuỗi $\mathbf{x}^{(1)},\dots,\mathbf{x}^{(\tau)}$ để cập nhật tham số thông qua mô hình $f$. Ngoài ra, việc sử dụng mô hình $f$ còn cải thiện khả năng tổng quát hóa của mô hình đối với những chuỗi có độ dài bất kỳ.
+% Từ đây, có thể thấy rằng, mô hình $g$ không cần phải cập nhật tham số khi học từng mẫu $x^{(t)}$ như mạng neural truyền thống. Thay vào đó, nó có thể sử dụng thông tin từ một chuỗi $\mathbf{x}^{(1)},\dots,\mathbf{x}^{(\tau)}$ để cập nhật tham số thông qua mô hình $f$. Do đó, việc sử dụng mô hình $f$ còn cải thiện khả năng tổng quát hóa của mô hình đối với những chuỗi có độ dài bất kỳ.
+
+As a result, it can be seen that the model $g$ does not need to update its parameters when learning each sample $x^{(t)}$ like a traditional neural network. Instead, it can use information from a sequence $\mathbf{x}^{(1)},\dots,\mathbf{x}^{(\tau)}$ to update its parameters through the model $f$. Thus, using the model $f$ also improves the model's generalization ability to sequences of any length.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\linewidth]{rnn.png}
-    \cprotect\caption{The computational graph of \verb|RNN| in next-word prediction problem \cite{goodfellow2016deep}.}
+    \cprotect\caption{An example of computational graph of \verb|RNN| \cite{goodfellow2016deep}.}
     \label{fig:rnn}
 \end{figure}
 
-Dựa vào ý tưởng của recurrent function $f$ trình bày ở trên, chúng ta có thể thiết kế rất nhiều kiến trúc mạng \verb|RNN|. Tại đây, chúng tôi trình bày về một thiết kế đơn giản có đồ thị tính toán như hình \ref{fig:rnn}. Theo đó, mạng nhận vào một chuỗi các giá trị $\mathbf{x}$ với mục tiêu ánh xạ các giá trị này vào các đầu ra $\mathbf{o}$ khớp với $\mathbf{y}$. Để thực hiện điều này, mạng sử dụng ba bộ tham số chính: $\mathbf{U}$ để ánh xạ $\mathbf{x}$ vào không gian đặc trưng ẩn; $\mathbf{W}$ để ánh xạ đặc trưng ẩn của timestamp trước vào không gian đặc trưng ẩn của timestamp sau; $\mathbf{V}$ để ánh xạ đặc trưng ẩn vào không gian chứa các giá trị đầu ra chưa chuẩn hóa ($\mathbf{o}$). Giá trị dự đoán $\hat{y}$ sau đó được tính từ $\mathbf{o}$. Cả quá trình được thể hiện như sau:
+% Dựa vào ý tưởng của recurrent function $f$ trình bày ở trên, chúng ta có thể thiết kế rất nhiều kiến trúc mạng \verb|RNN|. Tại đây, chúng tôi trình bày về một thiết kế đơn giản có đồ thị tính toán như hình \ref{fig:rnn}. Theo đó, mạng nhận vào một chuỗi các giá trị $\mathbf{x}$ với mục tiêu ánh xạ các giá trị này vào các đầu ra $o$ khớp với $\mathbf{y}$. Để thực hiện điều này, mạng sử dụng ba bộ tham số chính: $U$ để ánh xạ $\mathbf{x}$ vào không gian đặc trưng ẩn; $W$ để ánh xạ đặc trưng ẩn của timestamp trước vào không gian đặc trưng ẩn của timestamp sau; $V$ để ánh xạ đặc trưng ẩn vào không gian chứa các giá trị đầu ra chưa chuẩn hóa. Giá trị dự đoán $o$ thu được sau quá trình chuẩn hóa. Cả quá trình được thể hiện như sau:
+
+Based on the idea of recurrent function $f$ presented above, we can design many \verb|RNN| network architectures. Here, we present a simple design with a computational graph as shown in \ref{fig:rnn}. Accordingly, the network takes in a sequence of values $\mathbf{x}$ with the goal of mapping these values to outputs $o$ matching $\mathbf{y}$. To do this, the network uses three main sets of parameters: $U$ to map $\mathbf{x}$ to the hidden feature space; $W$ to map the hidden feature of the previous timestamp to the hidden feature space of the current timestamp; $V$ to map the hidden feature to the space containing unnormalized output values. The predicted value $o$ is obtained after the normalization process. The whole process is shown as follows:
 
 \begin{align}
-    \mathbf{a}^{(t)} &= \mathbf{b} + \mathbf{W}\mathbf{h}^{(t-1)} + \mathbf{U}\mathbf{x}^{(t)}\quad \text{($\mathbf{b}$ is bias vector)}\\
+    \mathbf{a}^{(t)} &= \mathbf{b} + W\mathbf{h}^{(t-1)} + U\mathbf{x}^{(t)} \quad \text{($\mathbf{b}$ is bias vector)}\\
     \mathbf{h}^{(t)} &= \tanh\left( \mathbf{a}^{(t)} \right)\\
-    \mathbf{o}^{(t)} &= \mathbf{c} + \mathbf{V}\mathbf{h}^{(t)}\quad \text{($\mathbf{c}$ is bias vector)}\\
-    \hat{y}^{(t)} &= \text{softmax}\left( \mathbf{o}^{(t)} \right)
+    o^{(t)} &= \text{softmax}\left( \mathbf{c} + V\mathbf{h}^{(t)} \right) \quad \text{($\mathbf{c}$ is bias vector)}
 \end{align}
 
-Độ lỗi của mô hình được tính bằng hàm \verb|CrossEntropyLoss| (equation \ref{eq:loss_rnn}). Hàm lỗi này được sử dụng để cập nhật các tham số của hàm $f$ thông qua kỹ thuật back-propagation through time.
+% Độ lỗi của mô hình được tính bằng hàm \verb|CrossEntropyLoss| (equation \ref{eq:loss_rnn}). Hàm lỗi này được sử dụng để cập nhật các tham số của hàm $f$ thông qua kỹ thuật back-propagation through time (BPTT).
+
+The model loss is calculated using the \verb|CrossEntropyLoss| function (equation \ref{eq:loss_rnn}). This error function is used to update the parameters of the function $f$ via back-propagation through time (BPTT).
 
 \begin{align}
-    L\left( \left\{ \hat{y}^{(t)} \right\}_{t=1}^\tau, \left\{ y^{(t)} \right\}_{t=1}^\tau \right) = \sum_{t=1}^\tau{L^{(t)}\left( \hat{y}^{(t)}, y^{(t)} \right)}
+    L\left( \left\{ o^{(t)} \right\}_{t=1}^\tau, \left\{ y^{(t)} \right\}_{t=1}^\tau \right) = \sum_{t=1}^\tau{L^{(t)}\left( o^{(t)}, y^{(t)} \right)}
     \label{eq:loss_rnn}
 \end{align}
 
-Trong quá trình forward và backward, các bước tính toán được thực hiện tuần tự vì phải tuân theo trình tự thời gian. Do đó, time complexity của \verb|RNN| là $\mathcal{O}(\tau)$. Vì phải lưu trữ các giá trị đạo hàm sau để tính toán các giá trị đạo hàm trước đó (theo Chain rule), space complexity của thuật toán cũng là $\mathcal{O}(\tau)$. Do đó, đối với các chuỗi dài, chi phí tính toán có thể sẽ rất lớn.
+% Kỹ thuật BPTT được thực hiện bằng cách lấy đạo hàm của $L$ theo các trọng số xuyên suốt các timestamp từ $t=\tau$ đến $t=1$. Để thuận tiện trong việc trình bày, chúng tôi viết lại quá trình forward như sau:
+
+The BPTT technique is implemented by taking the derivative of $L$ with respect to the weights across timestamps from $t=\tau$ to $t=1$. For convenience in presentation, we rewrite the forward process as follows:
+
+\begin{align}
+    \mathbf{h}^{(t)} &= f\left( \mathbf{x}^{(t)}, \mathbf{h}^{(t-1)}, W_h \right)\\
+    o^{(t)} &= g\left( \mathbf{h}^{(t)}, W_o \right)
+\end{align}
+
+% Theo đó, đạo hàm của hàm lỗi với $W_o$ và $W_h$ được tính như sau:
+Accordingly, the derivative of the loss function with respect to $W_o$ and $W_h$ is calculated as follows:
+
+\begin{align}
+    \frac{\partial L}{\partial W_o} &= \sum_{t=1}^\tau{\frac{\partial L}{\partial L^{(t)}} \frac{\partial L^{(t)}}{\partial o^{(t)}} \frac{\partial o^{(t)}}{\partial W_o}}\\
+    &= \sum_{t=1}^\tau{\frac{\partial L^{(t)}}{\partial o^{(t)}} \frac{\partial o^{(t)}}{\partial W_o}}
+    \label{eq:grad_wo}
+\end{align}
+
+\begin{align}
+    \frac{\partial L}{\partial W_h} &= \sum_{t=1}^\tau{\frac{\partial L^{(t)}}{\partial W_h}}\\
+    &= \sum_{t=1}^\tau{\frac{\partial L^{(t)}}{\partial o^{(t)}} \frac{\partial o^{(t)}}{\partial \mathbf{h}^{(t)}} \frac{\partial \mathbf{h}^{(t)}}{\partial W_h}}
+\end{align} In which,
+
+\begin{align}
+    \frac{\partial \mathbf{h}^{(t)}}{\partial W_h} &= \frac{\partial f\left( \mathbf{x}^{(t)}, \mathbf{h}^{(t-1)}, W_h \right)}{\partial W_h} + \frac{\partial f\left( \mathbf{x}^{(t)}, \mathbf{h}^{(t-1)}, W_h \right)}{\partial \mathbf{h}^{(t-1)}} \frac{\partial \mathbf{h}^{(t-1)}}{\partial W_h}\\
+    &= \frac{\partial f\left( \mathbf{x}^{(t)}, \mathbf{h}^{(t-1)}, W_h \right)}{\partial W_h} + \sum_{i=1}^{t-1}\left( \prod_{j=i+1}^t {\frac{\partial f\left( \mathbf{x}^{(j)}, \mathbf{h}^{(j-1)}, W_h \right)}{\partial \mathbf{h}^{(j-1)}}} \right) \frac{\partial f\left( \mathbf{x}^{(i)}, \mathbf{h}^{(i-1)}, W_h \right)}{\partial W_h}
+    \label{eq:grad_wh}
+\end{align}
+
+% Sau khi thu được các đạo hàm như phương trình \ref{eq:grad_wo} và \ref{eq:grad_wh}, chúng ta có thể sử dụng các gradient-based optimization strategies để cập nhật tham số trong mạng.
+
+Once we obtain the derivatives as in equation \ref{eq:grad_wo} and \ref{eq:grad_wh}, we can use gradient-based optimization strategies to update the parameters in the network.
+
+% Trong quá trình forward và backward, các bước tính toán được thực hiện tuần tự vì phải tuân theo trình tự thời gian. Do đó, time complexity của \verb|RNN| là $\mathcal{O}(\tau)$. Vì phải lưu trữ các giá trị đạo hàm sau để tính toán các giá trị đạo hàm trước đó (theo Chain rule), space complexity của thuật toán cũng là $\mathcal{O}(\tau)$. Do đó, đối với các chuỗi dài, chi phí tính toán có thể sẽ rất lớn.
+
+In the forward and backward processes, the computation steps are performed sequentially because they must follow the input order. Therefore, the time complexity of \verb|RNN| is $\mathcal{O}(\tau)$. Since the later derivative values must be stored to compute the previous derivative values (according to the Chain rule), the space complexity of the algorithm is also $\mathcal{O}(\tau)$. Therefore, for long sequences, the computation can be extremely expensive.
 
 \subsection{Long Short-Term Memory}
 
-Khi làm việc trên các chuỗi dài, \verb|RNN| rất dễ mắc phải vấn đề \textit{vanishing gradient} hoặc \textit{exploding gradient}. Thật vậy, quá trình huấn luyện của \verb|RNN| đòi hỏi việc sử dụng Chain rule cho tất cả các trạng thái từ $t=\tau$ đến $t=1$. Quá trình này bao gồm rất nhiều phép nhân ma trận và vector. Do đó, nếu các phần tử trong ma trận hoặc vector đó nhỏ hơn 1, đạo hàm theo thời gian sẽ hội tụ về 0. Ngược lại, nếu các phần tử đó lớn hơn 1, theo thời gian, đạo hàm sẽ tiến đến vô cùng.
+% Giả sử các dữ liệu thuộc không gian $\mathbb{R}$ và hàm $f$ trong equation \ref{eq:grad_wh} có dạng $\sigma(w(h+x))$. Lúc này, the product có dạng:
 
-% viết 1 chút về bidirectional lstm
+Suppose the data are in 1-dimensional space $\mathbb{R}$ and the function $f$ in equation \ref{eq:grad_wh} is of the form $\sigma(w(h+x))$. Then, the product becomes:
+
+\begin{align}
+    \prod_{j=i+1}^t {\frac{\partial \sigma(w(h+x))}{\partial h}} &= \prod_{j=i+1}^t {w \sigma'(w(h+x))}\\
+    &= w^{t-i} \prod_{j=i+1}^t {\sigma'(w(h+x))}
+    \label{eq:vanish}
+\end{align}
+
+% Trong trường hợp $t$ lớn và $w \ne 1$, this product sẽ giảm về 0 hoặc tăng đến vô cùng theo hàm số mũ. Do đó, khi làm việc trên các chuỗi dài, \verb|RNN| rất dễ mắc phải vấn đề \textit{vanishing gradient} hoặc \textit{exploding gradient}. Thật vậy, quá trình huấn luyện của \verb|RNN| đòi hỏi việc sử dụng Chain rule cho tất cả các trạng thái từ $t=\tau$ đến $t=1$. Quá trình này bao gồm rất nhiều phép nhân ma trận và vector. Do đó, nếu các phần tử trong ma trận hoặc vector đó nhỏ hơn 1, đạo hàm theo thời gian sẽ hội tụ về 0. Ngược lại, nếu các phần tử đó lớn hơn 1, theo thời gian, đạo hàm sẽ tiến đến vô cùng.
+
+In the case of large $t$ and $w \ne 1$, this product will either decrease to 0 or increase to infinity exponentially. Therefore, when working on long sequences, \verb|RNN| is susceptible to the \textit{vanishing gradient} or \textit{exploding gradient} problem. Indeed, the training process of \verb|RNN| requires the application of the Chain rule for all states from $t=\tau$ to $t=1$. This process involves a lot of matrix and vector multiplication as illustrated in equation \ref{eq:vanish}. Therefore, if the elements in that matrix or vector are less than 1, the derivative with respect to time will converge to 0. Conversely, if the elements are greater than 1, the derivative will approach infinity over time.
+
+% Để giải quyết vấn đề trên, nghiên cứu \cite{hochreiter1997long} đề xuất mạng Long Short-Term Memory (\verb|LSTM|), một biến thể của \verb|RNN|. \verb|LSTM| được phát triển dựa trên ba ý tưởng chính: Sử dụng cell state cho mỗi timestamp; Sử dụng các cổng để điều chỉnh dòng thông tin; Kỹ thuật dòng đạo hàm không gián đoạn.
+
+To solve the above problem, \cite{hochreiter1997long} proposed Long Short-Term Memory (\verb|LSTM|). \verb|LSTM| is developed based on three main ideas: Using cell state for each timestamp; Using gates to regulate information flow; Uninterrupted derivative flow technique.
+
+% Thứ nhất, mỗi cell của mạng duy trì một trạng thái riêng biệt $\mathbf{c}^{(t)}$. Trạng thái này chủ động tổng hợp các thông tin thu được từ đầu vào $\mathbf{x}^{(t)}$ và thông tin từ các trạng thái trước đó. Quá trình này lưu lại những thông tin quan trọng và loại bỏ các thông tin không quan trọng. Từ đó, mạng \verb|LSTM| có thể nén được nhiều thông tin có giá trị khi học qua một chuỗi thay vì cố gắng ghi nhớ tất cả các thông tin như \verb|RNN| truyền thống.
+
+First, each cell of the network maintains a separate state $\mathbf{c}^{(t)}$. This cell state actively synthesizes information obtained from the input $\mathbf{x}^{(t)}$ and information from previous states. This process retains important information and discards unimportant information. As a result, the \verb|LSTM| network can compress more valuable information when learning through a sequence instead of trying to remember all the information like traditional \verb|RNN|.
+
+% Thứ hai, \verb|LSTM| sử dụng ba cổng forget, input và output gate và giá trị input node để điều chỉnh các luồng thông tin. Tại timestamp $t$, các toán tử này nhận vào một vector nối dài bao gồm hidden state của trạng thái trước đó $\mathbf{h}^{(t-1)}$ và đầu vào hiện tại $\mathbf{x}^{(t)}$. Cụ thể, chúng hoạt động như sau:
+
+Second, \verb|LSTM| uses three forget gates, input and output gates, and input node values to regulate the information flow. At timestamp $t$, these operators take in an extended vector consisting of the hidden state of the previous state $\mathbf{h}^{(t-1)}$ and the current input $\mathbf{x}^{(t)}$. Specifically, they work as follows:
+
+\begin{align}
+    \mathbf{f}^{(t)} &= \sigma\left(W_f \left[ \mathbf{x}^{(t)}, \mathbf{h}^{(t-1)} \right]\right)\\
+    \mathbf{i}^{(t)} &= \sigma\left(W_i \left[ \mathbf{x}^{(t)}, \mathbf{h}^{(t-1)} \right]\right)\\
+    \hat{\mathbf{c}}^{(t)} &= \tanh\left(W_c \left[ \mathbf{x}^{(t)}, \mathbf{h}^{(t-1)} \right]\right)\\
+    \mathbf{o}^{(t)} &= \sigma\left(W_o \left[ \mathbf{x}^{(t)}, \mathbf{h}^{(t-1)} \right]\right)
+\end{align}
+
+% Dễ thấy, giá trị của ba cổng này đều nằm trong đoạn $[0,1]$. Do đó, chúng có tác dụng gia giảm mức độ thông tin trong trạng thái bộ nhớ. Cụ thể, $\mathbf{f}^{(t)}$ chọn lọc và làm suy yếu các thông tin kém hiệu quả của cell state trước đó $\mathbf{c}^{(t-1)}$ bằng cách thực hiện element wise multiplication. $\mathbf{i}^{(t)}$ chọn lọc các thông tin đầu vào hiện tại $\hat{\mathbf{c}}^{(t)}$ theo cách tương tự sau đó cập nhật vào cell state hiện tại $\mathbf{c}^{(t)}$ bằng các thực hiện element wise addition với $\mathbf{c}^{(t-1)}$ sau khi đã loại bỏ bớt thông tin dư thừa. Quá trình này diễn ra trong phương trình sau:
+
+It is easy to see that the values of these three gates are all in the range $[0,1]$. Therefore, they have the effect of decreasing or maintaining the level of information in the memory state. Specifically, $\mathbf{f}^{(t)}$ selects and weakens the ineffective information of the previous cell state $\mathbf{c}^{(t-1)}$ by performing element wise multiplication. $\mathbf{i}^{(t)}$ selects the current input information $\hat{\mathbf{c}}^{(t)}$ in a similar way and then updates the current cell state $\mathbf{c}^{(t)}$ by performing element wise addition with $\mathbf{c}^{(t-1)}$ (after removing redundant information). This process takes place in the following equation:
+
+\begin{align}
+    \mathbf{c}^{(t)} = \mathbf{f}^{(t)} \otimes \mathbf{c}^{(t-1)} + \mathbf{i}^{(t)} \otimes \hat{\mathbf{c}}^{(t)}
+\end{align}
+
+% Quá trình dự đoán sử dụng hidden state $\mathbf{h}^{(t)}$. $\mathbf{h}^{(t)}$ được tạo ra bằng cách điều chỉnh giá trị cell state hiện tại $\mathbf{c}^{(t)}$ bằng giá trị của output gate:
+
+The prediction process uses the hidden state $\mathbf{h}^{(t)}$. $\mathbf{h}^{(t)}$ is generated by adjusting the current cell state value $\mathbf{c}^{(t)}$ based on the value of the output gate:
+
+\begin{align}
+    \mathbf{h}^{(t)} = \mathbf{o}^{(t)} \otimes \tanh\left(\mathbf{c}^{(t-1)}\right)
+\end{align}
+
+% Thứ ba, trong quá trình BPTT, thay vì theo các timestamp thông qua $\mathbf{h}$ như \verb|RNN|, \verb|LSTM| đạo hàm thông qua $\mathbf{c}$. Các phép toán thực hiện trên $\mathbf{c}$ không có sự tham gia của bất kỳ trọng số nào. Do đó, chúng không bị dư một lượng trọng số như phương trình \ref{eq:vanish}. Bằng cách này, \verb|LSTM| đã hạn chế thành công vấn đề vanishing gradient của \verb|RNN|.
+
+Third, in the BPTT process, instead of following the timestamps through $\mathbf{h}$ like \verb|RNN|, \verb|LSTM| derives the derivatives through $\mathbf{c}$. The operations performed on $\mathbf{c}$ do not involve any weights. Therefore, they do not have a residual amount of weights like the \ref{eq:vanish} equation. In this way, \textbf{\Verb|LSTM| successfully mitigates the vanishing gradient problem of \Verb|RNN|}.
 
 \section{Frequency decomposition approach}
 
 % không có cơ chế tổng hợp multiple source
 
-\subsection{A transformer-based method}
+% \subsection{A transformer-based method}
 
 % require massive overhead
 
-\subsection{NHITS}
+% \subsection{NHITS}
 
 % Neural Hierarchical Interpolation for Time Series Forecasting (\verb|NHITS|) \cite{challu2023nhits} được thiết kế để hướng đến việc dự đoán một long-horizon time-series data bằng cách phân rã tín hiệu đầu vào thành các dải tần số riêng biệt. Cấu trúc của \verb|NHITS| bao gồm $S$ stack, mỗi stack bao gồm $B$ block nối tiếp nhau. Tại mỗi block, một Multi-layer perceptron (\verb|MLP|) sử dụng dữ liệu lịch sử để dự đoán chính nó và dữ liệu tương lai (see figure \ref{fig:nhits}).
 
@@ -299,11 +400,11 @@ The ML approach is to try to learn a good prior knowledge $\phi$. This is achiev
     \min_{\phi} \mathop{\mathbb{E}}_{t\sim \mathcal{T}} \mathcal{L}(\mathcal{D}_t, \phi)
 \end{equation}
 
-\subsection{Model-Agnostic Meta-Learning (MAML)}
+\subsection{Model-Agnostic Meta-Learning}
 
 % Đối với hướng tiếp cận dựa trên tối ưu, một thuật toán ML cơ bản, điển hình là \verb|MAML|, sẽ được học trên nhiều tác vụ $t$ rút ra từ cùng một phân phối tác vụ $\mathcal{T}$ \cite{hospedales2021meta}. Dữ liệu của mỗi tác vụ được chia thành tập support $\mathcal{D}_t^{support}$ (thường có kích thước nhỏ, khoảng 20\%) và tập query $\mathcal{D}_t^{query}$. Trong qua trình học, inner và outer optimization được perform đan xen. Trong đó, mục tiêu của inner optimization là cố gắng giải quyết task $t$ bằng cách tìm ra một bộ tham số tối ưu $\theta_t^*$ trên tập support thông qua $\phi$:
 
-For the optimization-based approach, a basic ML algorithm, typically \verb|MAML|, is learned on multiple tasks $t$ drawn from the same task distribution $\mathcal{T}$ \cite{hospedales2021meta}. The data for each task is divided into a support set $\mathcal{D}_t^{support}$ (usually small, around 20\%) and a query set $\mathcal{D}_t^{query}$. During the learning process, inner and outer optimization are performed alternately. The goal of inner optimization is to attempt to solve task $t$ by finding an optimal set of parameters $\theta_t^*$ on the support set via $\phi$:
+For the optimization-based approach, a basic ML algorithm, typically Model-Agnostic Meta-Learning (\verb|MAML|), is learned on multiple tasks $t$ drawn from the same task distribution $\mathcal{T}$ \cite{hospedales2021meta}. The data for each task is divided into a support set $\mathcal{D}_t^{support}$ (usually small, around 20\%) and a query set $\mathcal{D}_t^{query}$. During the learning process, inner and outer optimization are performed alternately. The goal of inner optimization is to attempt to solve task $t$ by finding an optimal set of parameters $\theta_t^*$ on the support set via $\phi$:
 
 \begin{equation}
     \theta_t^* = \theta_t(\phi) = \arg\min_{\theta}{\mathcal{L}^{task}_t\left( \phi, \mathcal{D}_t^{support} \right)}
