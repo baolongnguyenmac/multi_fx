@@ -5,6 +5,7 @@
 ~$*
 
 # latex
+*.abs
 *.aux
 *.blg
 *.bbl
