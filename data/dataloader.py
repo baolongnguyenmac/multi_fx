@@ -64,7 +64,7 @@ class DataLoader:
             pass
         return label_col
 
-    # normalize: fit on 80% data and transform on 20% for nhits, 60% and 40% for meta
+    # normalize: fit on 60% data and transform on 40%
     def _normalize_data(self, df:np.ndarray, label:int=-1, test_size:float=0.4):
         train_, test_ = train_test_split(df, test_size=test_size, shuffle=False)
         scaler = StandardScaler()
@@ -80,7 +80,7 @@ class DataLoader:
         y = y[self.look_back:]
         return X, y.reshape(-1,1)
 
-    def get_multi_data(self, label:int=-1) -> dict[str, dict]:
+    def get_multi_data(self, label:int) -> dict[str, dict]:
         """
             read data from files and return a dict whose each value contains data from a file
             this function is used for ML algorithm only
@@ -88,6 +88,8 @@ class DataLoader:
             label (int, optional): The label to be predict the movement. Defaults to -1 (the final feature).
         """
         data_dict:dict[str, dict[str, pd.DataFrame]] = {}
+        data_dict['dataset'] = self.dataset
+        data_dict['label'] = label
         list_file = os.listdir(self.data_dir)
         for cid, file_name in enumerate(list_file):
             if file_name.endswith('.csv'):

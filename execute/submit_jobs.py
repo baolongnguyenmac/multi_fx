@@ -57,39 +57,38 @@ def generate_script(device:str, name_job:str, command:str):
 
 '''
 function finetune_meta_model tunes all of meta-model (LSTM, LSTM+CNN) on all dataset
-    - multi-fx
+    [-] multi-fx
         - inner: [0.001, 0.005, 0.01, 0.05]
         - outer: [0.001, 0.0015, 0.005, 0.0055]
     [-] USD/JPY
         - inner: [0.001, 0.005, 0.01, 0.05]
         - outer: [0.005, 0.0055, 0.001, 0.0015]
-    - ETT  ---> need to run them again (after analyzing)
+    [-] ETT
         - inner: [0.001, 0.005, 0.01, 0.05]
         - outer: [0.001, 0.0015, 0.005, 0.0055]
-    - WTH
+    [-] WTH
         - inner: [0.001, 0.005, 0.01, 0.05]
         - outer: [0.001, 0.0015, 0.005, 0.0055]
     [x] ECL
 '''
 def finetune_meta_model():
+    datasets = [MULTI_FX, USD_JPY, ETT, WTH]
     windows = [20, 30]
-    models = [ATT, LSTM]
-    inner_lrs = [0.001, 0.005, 0.01, 0.05]
-    outer_lrs = [0.005, 0.0055, 0.001, 0.0015]
-    old_limit = 0
-    limit = 40
+    models = [ATT]
+    inner_lrs = [0.001, 0.0025, 0.005]
+    outer_lrs = [0.005, 0.0055, 0.006, 0.0065]
+    old_limit = 78
+    limit = 100
 
-    for idx, (window, model, inner_lr, outer_lr) in enumerate(itertools.product(windows, models, inner_lrs, outer_lrs)):
+    for idx, (dataset, window, model, inner_lr, outer_lr) in enumerate(itertools.product(datasets, windows, models, inner_lrs, outer_lrs)):
         if idx < old_limit:
             continue
         if idx < limit:
-            dataset = USD_JPY
             device = 'cpu'
             ncores_limit = 64 if device=='cpu' else 26 if device=='gpu' else 0
-            rounds = 100 if model==LSTM else 150 if model==ATT else 0
-            command = f'python -m execute.main -dataset {dataset} -window {window} -model {model} -mode {CLF} -out_shape 2 -inner_lr {inner_lr} -outer_lr {outer_lr} -bt_size 5 -rounds {rounds} -epochs 3 -ncpus {ncores_limit}'
+            command = f'python -m execute.main -dataset {dataset} -window {window} -model {model} -mode {CLF} -out_shape {2} -inner_lr {inner_lr} -outer_lr {outer_lr} -bt_size {5} -rounds {100} -epochs {9} -ncpus {ncores_limit}'
 
-            generate_script(device=device, name_job=f'{idx}.{model}', command=command)
+            generate_script(device=device, name_job=f'{idx}.{dataset}_{model}', command=command)
             subprocess.run(["qsub", os.path.join(EXE_DIR, 'tmp.sh')])
             time.sleep(1)
 

@@ -1,5 +1,5 @@
 import tensorflow as tf
-from keras import optimizers, models, metrics
+from keras import optimizers, models, metrics, saving
 import numpy as np
 
 from copy import deepcopy
@@ -34,7 +34,11 @@ class MAML:
         self.data_dict:dict[str, dict[str, np.ndarray]] = data_dict
 
         # init model stuff
-        self.meta_model:models.Model = get_model(based_model, data_dict[0]['support_X'][0].shape[1:], output_shape, mode)
+        # tại đây thay vì init model thì load model từ pre-trained lên và train tiếp
+        # có thể đoạn init cái list task sẽ bị vấn đề load nhầm task cũ đã train để làm test (cần check lại)
+        # self.meta_model:models.Model = get_model(based_model, data_dict[0]['support_X'][0].shape[1:], output_shape, mode)
+        self.meta_model:models.Model = self.load_pretrained_model(based_model, data_dict[0]['support_X'][0].shape[1:2], inner_lr, outer_lr)
+        print('load thanh cong model')
         self.outer_opt:optimizers.Optimizer = optimizers.Adam(learning_rate=outer_lr)
         self.inner_lr:float = inner_lr
 
@@ -57,6 +61,11 @@ class MAML:
             self.info['val_acc'] = []
             self.info['val_std_acc'] = []
             self.loss_fn = metrics.sparse_categorical_crossentropy
+
+    def load_pretrained_model(self, model_name:str, lookback:int, inner_lr:float, outer_lr:float) -> models.Model:
+        model_name += f"_{lookback}_{inner_lr}_{outer_lr}"
+        pretrained_path = os.path.join(PRETRAINED_DIR, self.data_dict['dataset'], model_name, f"{self.data_dict['label']}.keras")
+        return saving.load_model(pretrained_path)
 
     def inner_training_step(self, model:models.Model, X:list[np.ndarray], y:list[np.ndarray], num_epochs:int=2):
         """fast adapt on support set (inner step)
