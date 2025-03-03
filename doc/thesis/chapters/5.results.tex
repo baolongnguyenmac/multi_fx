@@ -78,21 +78,22 @@ In table \ref{tab:mine_nhits}, the results are aggregated as the average of all 
 
 \begin{table}[h]
     \centering
-    \cprotect\caption{Accuracy (\%) of \verb|Temporal-ML| and \verb|NHITS| on each attribute of \verb|USD/JPY| and \verb|multi-fx|. Best results per metrics are boldfaced. (\mbox{*}): Our method.}
+    \cprotect\caption{Accuracy (\%) of \verb|NHITS| on each attribute of \verb|USD/JPY| and \verb|multi-fx| dataset.}
     \label{tab:mine_nhits_att}
-    \resizebox{\columnwidth}{!}{\begin{tabular}{c|c|cccc}
-    \toprule
-    \multicolumn{1}{c}{}                &                                & $Open$                  & $High$                  & $Low$                   & $Close$                     \\
-    \hline
-    \multirow{3}{*}{\Verb|USD/JPY|}     & Random                         & $49.91$                 & $49.91$                 & $50.33$                 & $50.66$                     \\
-                                        & \Verb|NHITS|                   & $75.03$                 & $53.74$                 & $51.57$                 & $53.50$                     \\
-                                        & \Verb|Temporal-ML|\mbox{*}     & $\mathbf{93.06\pm1.36}$ & $\mathbf{68.87\pm1.53}$ & $\mathbf{51.01\pm1.58}$ & $\mathbf{68.37\pm2.16}$     \\
-    \hline
-    \multirow{3}{*}{\Verb|multi-fx|}    & Random                         & $49.92\pm2.19$          & $49.93\pm2.22$          & $49.94\pm2.17$          & $49.85\pm2.13$              \\
-                                        & \Verb|NHITS|                   & $58.36\pm7.13$          & $50.66\pm4.28$          & $51.17\pm3.21$          & $53.84\pm4.60$              \\
-                                        & \Verb|Temporal-ML|\mbox{*}     & $\mathbf{78.13\pm6.33}$ & $\mathbf{62.74\pm3.30}$ & $\mathbf{58.28\pm3.86}$ & $\mathbf{65.88\pm12.49}$    \\
-    \bottomrule
-    \end{tabular}}
+    % \resizebox{\columnwidth}{!}{}
+    \begin{tabular}{c|c|cccc}
+        \toprule
+        \multicolumn{1}{c}{}                &                                & $Open$                  & $High$                  & $Low$                   & $Close$                     \\
+        \hline
+        \multirow{2}{*}{\Verb|USD/JPY|}     & Random                         & $49.91$                 & $49.91$                 & $50.33$                 & $50.66$                     \\
+                                            & \Verb|NHITS|                   & $75.03$                 & $53.74$                 & $51.57$                 & $53.50$                     \\
+                                            % & \Verb|Temporal-ML|\mbox{*}     & $\mathbf{93.06\pm1.36}$ & $\mathbf{68.87\pm1.53}$ & $\mathbf{51.01\pm1.58}$ & $\mathbf{68.37\pm2.16}$     \\
+        \hline
+        \multirow{2}{*}{\Verb|multi-fx|}    & Random                         & $49.92\pm2.19$          & $49.93\pm2.22$          & $49.94\pm2.17$          & $49.85\pm2.13$              \\
+                                            & \Verb|NHITS|                   & $58.36\pm7.13$          & $50.66\pm4.28$          & $51.17\pm3.21$          & $53.84\pm4.60$              \\
+                                            % & \Verb|Temporal-ML|\mbox{*}     & $\mathbf{78.13\pm6.33}$ & $\mathbf{62.74\pm3.30}$ & $\mathbf{58.28\pm3.86}$ & $\mathbf{65.88\pm12.49}$    \\
+        \bottomrule
+        \end{tabular}
 \end{table}
 
 % Mặt khác, \verb|Temporal-ML| chỉ thất bại trong việc dự đoán \textit{low price} của \verb|USD/JPY| (độ chính xác tiệm cận mức dự đoán ngẫu nhiên). Tất cả các thuộc tính còn lại của cả hai tập dữ liệu đều đạt mức hội tụ cao và cao hơn \verb|NHITS| khá nhiều. Điều này chứng tỏ khả năng vượt trội của thuật toán đề xuất trên dữ liệu phi chu kỳ.
@@ -121,7 +122,7 @@ To better understand the capabilities of \verb|BiLSTM|, we performed an ablation
 
 \begin{table}[h]
     \centering
-    \cprotect\caption{Classification results (\%) of \verb|Temporal-ML| and models without \verb|BiLSTM|. Best results per metrics are boldfaced. (\mbox{*}): Our method.}
+    \cprotect\caption{Classification results (\%) of \verb|Temporal-ML| and models with \verb|BiLSTM| replaced. Best results per metrics are boldfaced. (\mbox{*}): Our method.}
     \label{tab:ab_lstm}
     \resizebox{\columnwidth}{!}{\begin{tabular}{c|c|cccc} 
     \toprule
